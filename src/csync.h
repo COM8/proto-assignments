@@ -16,5 +16,6 @@ struct arg {
 };
 
 struct arg* parseParameter(int argc, char* argv[]);
-
+void launchServer(unsigned int port);
+void launchClient(unsigned int port, string host, string dir);
 int main(int argc, char* argv[]);

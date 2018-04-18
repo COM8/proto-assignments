@@ -34,7 +34,21 @@ struct arg* parseParameter(int argc, char* argv[]){
     return temp;
 }
 
+void launchServer(unsigned int port){
+    //todo
+}
+
+void launchClient(unsigned int port, string host, string dir) {
+    //todo
+}
+
 int main(int argc, char* argv[]) {
-    parseParameter(argc, argv);
+    struct arg* t = parseParameter(argc, argv);
+    if(t->type == server) {
+        launchServer(t->port);
+    }else{
+        launchClient(t->port, t->host, t->dir);
+    }
+    free(t);
     return 0;
 }
