@@ -1,10 +1,9 @@
 compile:
-	g++ csync.cpp -o csync
+	g++ src/csync.cpp -o build/csync
 
 clean:
-	-rm a.out
-	-rm csync
+	-rm build/*
 
 test:
-	g++ csync.cpp -o csync -std=c++17
+	g++ src/csync.cpp -o build/csync -std=c++17
 	./csync -f .vscode/ -h myhost -p 4500  
