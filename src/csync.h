@@ -7,7 +7,7 @@ using namespace std;
 
 enum mode {server, client, None};
 
-const string helpstring = "t";
+const string helpString = "Client:\tcsync [-h <hostname|ip-addr>] [-p <port>] [-f <directory-path>]\nServer:\tcsyc [-s] [-p <port>]\n";
 
 struct arg {
     mode type = None;

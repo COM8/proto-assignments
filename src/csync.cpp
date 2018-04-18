@@ -22,13 +22,13 @@ struct arg* parseParameter(int argc, char* argv[]){
     }   
     if(temp->type == client) {
         if((temp->host) == ""){
-            cerr << "No hostname or ip-addr given "<< endl << helpstring;
+            cerr << "No hostname or ip-addr given "<< endl << helpString;
             exit(-1);
         }else if((temp->dir) == ""){
             cerr << "No sync folder given using current folder" <<endl;;
         }
     }else if(!temp->type == server){
-        cerr << "No mode given please specify it next time" << endl << helpstring;
+        cerr << "No mode given please specify it next time" << endl << helpString;
         exit(-1);
     }
     return temp;
