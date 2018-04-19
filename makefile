@@ -1,3 +1,12 @@
+client:
+	make default
+	./build/csync -h localhost -p 1234 -f
+server:
+	make default
+	./build/csync -s -p 1234
+default:
+	make clean
+	make compile
 compile:
 	g++ src/csync.cpp -Isrc/ -o build/csync
 

@@ -12,7 +12,7 @@ const string helpString = "Client:\tcsync [-h <hostname|ip-addr>] [-p <port>] [-
 struct arg {
     mode type = None;
     unsigned int port = 0;
-    string host, dir = "";
+    string host = "", dir = "";
 };
 
 struct arg* parseParameter(int argc, char* argv[]);

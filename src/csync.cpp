@@ -5,15 +5,23 @@ struct arg* parseParameter(int argc, char* argv[]){
     for(int i = 1; i<argc; i++) {
         if(strcmp(argv[i],"-h") == 0){
             temp->type = client;
-            temp->host = string(argv[++i]);
+            if(argc > ++i) {
+                temp->host = string(argv[++i]);
+            }
         }else if(strcmp(argv[i],"-p") == 0){
-            temp->port = atoi(argv[++i]);
+            if(argc > ++i) {
+                temp->port = atoi(argv[++i]);
+            }
         }else if(strcmp(argv[i],"-f") == 0){
-            temp->dir = string(argv[++i]);
+            if(argc > ++i) {
+                temp->dir = string(argv[i]);
+            }
         }else if(strcmp(argv[i],"-s") == 0){
             temp->type = server;
         }else if(strcmp(argv[i],"-p") == 0){
-            temp->port = atoi(argv[++i]);
+            if(argc > ++i) {
+              temp->port = atoi(argv[++i]);
+            }
         }
     }
     if(temp->port == 0) {
@@ -26,6 +34,7 @@ struct arg* parseParameter(int argc, char* argv[]){
             exit(-1);
         }else if((temp->dir) == ""){
             cerr << "No sync folder given using current folder" <<endl;;
+            temp->dir = "./";
         }
     }else if(!temp->type == server){
         cerr << "No mode given please specify it next time" << endl << helpString;
@@ -41,6 +50,7 @@ void launchServer(unsigned int port){
 void launchClient(unsigned int port, string host, string dir) {
     //todo
 }
+
 
 int main(int argc, char* argv[]) {
     struct arg* t = parseParameter(argc, argv);
