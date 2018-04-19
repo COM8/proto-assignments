@@ -1,5 +1,5 @@
 
-G++_COMPILER=g++-7 #In mac I need to change this to g++-7 , so I made it a variable.
+G++_COMPILER=g++ #In mac I need to change this to g++-7 , so I made it a variable.
 
 client:
 	make default
