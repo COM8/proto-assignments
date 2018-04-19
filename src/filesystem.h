@@ -1,7 +1,7 @@
 #include <experimental/filesystem>
 #include <iostream>
 #include <string>
-#include <map>
+#include <unordered_map>
 
 namespace fs = std::experimental::filesystem;
 using namespace std;
@@ -14,7 +14,7 @@ struct file {
 class filesystem {
     private:
         string path;
-        map <string, file*> files; 
+        unordered_map <string, file*> files; 
 
     public:
         filesystem(string p){
