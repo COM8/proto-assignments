@@ -52,6 +52,9 @@ void launchServer(unsigned int port){
 
 void launchClient(unsigned int port, string host, string dir) {
     //todo
+    filesystem fi = filesystem(dir);
+    fi.genMap();
+    cout << fi.toString();
 }
 
 
