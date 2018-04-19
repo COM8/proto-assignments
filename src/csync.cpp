@@ -33,8 +33,11 @@ struct arg* parseParameter(int argc, char* argv[]){
             cerr << "No hostname or ip-addr given "<< endl << helpString;
             exit(-1);
         }else if((temp->dir) == ""){
-            cerr << "No sync folder given using current folder" <<endl;;
+            cerr << "No sync folder given using current folder" <<endl;
             temp->dir = "./";
+        }if (!filesystem::exists(temp->dir)){
+            cerr << "given path doesn't exist terminating" << endl;
+            exit(-1);
         }
     }else if(!temp->type == server){
         cerr << "No mode given please specify it next time" << endl << helpString;
