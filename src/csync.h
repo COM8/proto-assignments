@@ -6,13 +6,14 @@
 
 using namespace std;
 
+const int DEFAULT_PORT=1234;
 enum mode {server, client, None};
 
 const string helpString = "Client:\tcsync [-h <hostname|ip-addr>] [-p <port>] [-f <directory-path>]\nServer:\tcsyc [-s] [-p <port>]\n";
 
 struct arg {
     mode type = None;
-    unsigned int port = 0;
+    unsigned int port = DEFAULT_PORT;
     string host = "", dir = "";
 };
 

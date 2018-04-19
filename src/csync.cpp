@@ -2,31 +2,28 @@
 
 struct arg* parseParameter(int argc, char* argv[]){
     struct arg* temp = new arg();
+     temp->type = client; //assume it is client at first
     for(int i = 1; i<argc; i++) {
         if(strcmp(argv[i],"-h") == 0){
-            temp->type = client;
-            if(argc > ++i) {
-                temp->host = string(argv[++i]);
+           
+            if(argc > i+1) {
+                temp->host = string(argv[i+1]);
             }
         }else if(strcmp(argv[i],"-p") == 0){
-            if(argc > ++i) {
-                temp->port = atoi(argv[++i]);
+            if(argc > i+1) {
+                temp->port = atoi(argv[i+1]);
             }
         }else if(strcmp(argv[i],"-f") == 0){
-            if(argc > ++i) {
-                temp->dir = string(argv[i]);
+            if(argc > i+1) {
+                temp->dir = string(argv[i+1]);
             }
         }else if(strcmp(argv[i],"-s") == 0){
             temp->type = server;
-        }else if(strcmp(argv[i],"-p") == 0){
-            if(argc > ++i) {
-              temp->port = atoi(argv[++i]);
-            }
         }
     }
-    if(temp->port == 0) {
-            cerr << "Please specify port useing 1234 instead" << endl;
-            temp->port = 1234;
+    if(temp->port == DEFAULT_PORT) {
+            cout<<"Using default port: "<<temp->port<<endl;
+            
     }   
     if(temp->type == client) {
         if((temp->host) == ""){
@@ -57,9 +54,17 @@ void launchClient(unsigned int port, string host, string dir) {
 
 int main(int argc, char* argv[]) {
     struct arg* t = parseParameter(argc, argv);
+
+    
     if(t->type == server) {
+        cout<<"Running in Server mode"<<endl
+            <<"using port: "<<t->port<<endl;
         launchServer(t->port);
     }else{
+        cout<<"Running in Client mode"<<endl
+            <<"connecting to: "<<t->host<<endl
+            <<"using port: "<<t->port<<endl
+            <<"folder path: "<<t->dir<<endl;
         launchClient(t->port, t->host, t->dir);
     }
     return 0;
