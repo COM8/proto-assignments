@@ -59,6 +59,5 @@ int main(int argc, char* argv[]) {
     }else{
         launchClient(t->port, t->host, t->dir);
     }
-    free(t);
     return 0;
 }
