@@ -1,3 +1,6 @@
+
+G++_COMPILER=g++-7 #In mac I need to change this to g++-7 , so I made it a variable.
+
 client:
 	make default
 	./build/csync -h localhost -p 1234 -f
@@ -8,11 +11,11 @@ default:
 	make clean
 	make compile
 compile:
-	g++ src/csync.cpp -Isrc/ -o build/csync -lstdc++fs -std=c++17
+	${G++_COMPILER} src/csync.cpp -I src/ -o build/csync -lstdc++fs -std=c++17
 
 clean:
-	-rm build/*
+	-rm -r build/*
 
 test:
-	g++ src/csync.cpp -Isrc/ -o build/csync -std=c++17 -lstdc++fs
-	./csync -f .vscode/ -h myhost -p 4500  
+	${G++_COMPILER} src/csync.cpp -I src/ -o build/csync -std=c++17 -lstdc++fs
+	./build/csync -f .vscode/ -h myhost -p 4500
