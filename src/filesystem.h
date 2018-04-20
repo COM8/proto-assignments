@@ -2,6 +2,7 @@
 #include <iostream>
 #include <string>
 #include <unordered_map>
+#include <list>
 
 namespace fs = std::experimental::filesystem;
 using namespace std;
@@ -14,7 +15,8 @@ struct file {
 class filesystem {
     private:
         string path;
-        unordered_map <string, file*> files; 
+        unordered_map <string, file*> files;
+        list<string> folders;
 
     public:
         filesystem(string p){
