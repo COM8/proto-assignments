@@ -120,10 +120,12 @@ ACK Sequence Number [like Sequence Number]:<br/>
 	The acknowledged sequence number
 
 ### Transfer-Ended:
+```
 0      4       8           56         72
 +------+-------+-----------+----------+
 | Type | Flags | Client ID | Checksum |
 +------+-------+-----------+----------+
+```
 
 Flags [4 Bit]:
 ```
