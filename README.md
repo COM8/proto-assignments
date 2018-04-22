@@ -137,6 +137,7 @@ Flags [4 Bit]:
 
 ## Process example:
 
+```
 Client1							     Server
 	|	Client-Hello-Handshake			|
 	| --------------------------------> | The clients starts the connection on the default port
@@ -173,3 +174,4 @@ Client1							     Server
 	|									|
 	|	Transfer-Ended					|
 	| --------------------------------> | The client tells the server that the transfer finished
+```
