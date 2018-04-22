@@ -138,40 +138,40 @@ Flags [4 Bit]:
 ## Process example:
 
 ```
-Client1							     Server
-	|	Client-Hello-Handshake			|
+      Client				  Server
+	|	Client-Hello-Handshake	    |
 	| --------------------------------> | The clients starts the connection on the default port
-	|									| and tells the server the port on which he listens for answers
-	|	Server-Hello-Handshake  		|
+	|				    | and tells the server the port on which he listens for answers
+	|	Server-Hello-Handshake      |
 	| <-------------------------------- | The server responds with a client ID and a port where the
-	|									| server is listening for incomming transfer messages
-	|	File-Creation					|
+	|				    | server is listening for incomming transfer messages
+	|	File-Creation		    |
 	| --------------------------------> | The client sends this message to inform the server about
-	|									| the new file that will be transfered
-	|	Server-ACK  					|
+	|				    | the new file that will be transfered
+	|	Server-ACK  		    |
 	| <-------------------------------- |
-	|									|
-	|	File-Transfer					|
+	|				    |
+	|	File-Transfer		    |
 	| --------------------------------> | The client starts sending the file
-	|									|
-	|	File-Transfer					|
+	|				    |
+	|	File-Transfer		    |
 	| --------------------------------> |
-	|									|
-	|	File-Transfer					|
+	|				    |
+	|	File-Transfer		    |
 	| --------------------------------> |
-	|									|
-	|	File-Transfer					|
+	|				    |
+	|	File-Transfer		    |
 	| --------------------------------> |
-	|									|
-	|	Server-ACK  					|
+	|				    |
+	|	Server-ACK  		    |
 	| <-------------------------------- | The server sends an ACK message for each message
-	|									| it received from the client
-	|	Server-ACK  					|
+	|				    | it received from the client
+	|	Server-ACK  		    |
 	| <-------------------------------- |
-	|									|
-	|	Server-ACK  					|
+	|				    |
+	|	Server-ACK  		    |
 	| <-------------------------------- |
-	|									|
-	|	Transfer-Ended					|
+	|				    |
+	|	Transfer-Ended		    |
 	| --------------------------------> | The client tells the server that the transfer finished
 ```
