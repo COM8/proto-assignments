@@ -1,6 +1,7 @@
 #include "CSync.h"
 
 using namespace std;
+using namespace net;
 
 struct arg* parseParameter(int argc, char* argv[]) {
 	struct arg* temp = new arg();
@@ -52,7 +53,8 @@ struct arg* parseParameter(int argc, char* argv[]) {
 }
 
 void launchServer(unsigned int port) {
-	//todo
+	Server server = Server(port);
+	server.start();
 }
 
 void launchClient(unsigned int port, string host, string dir) {

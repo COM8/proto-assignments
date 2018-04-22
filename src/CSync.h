@@ -4,6 +4,7 @@
 #include <cstring>
 #include "Helpers.h"
 #include "Filesystem.h"
+#include "net/Server.h"
 
 const int DEFAULT_PORT = 1234;
 enum mode { server, client, none };
