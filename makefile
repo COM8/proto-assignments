@@ -1,21 +1,28 @@
-
-G++_COMPILER=g++ #In mac I need to change this to g++-7 , so I made it a variable.
+G++_COMPILER=g++ # In mac I need to change this to g++-7 , so I made it a variable.
+BUILD_DIR=build
 
 client:
 	make default
-	./build/csync -h localhost -p 1234 -f
+	./$(BUILD_DIR)/csync -h localhost -p 1234 -f
+
 server:
 	make default
-	./build/csync -s -p 1234
+	./$(BUILD_DIR)/csync -s -p 1234
+
 default:
 	make clean
 	make compile
+
 compile:
-	${G++_COMPILER} src/csync.cpp -I src/ -o build/csync -lstdc++fs -std=c++17
+	# Create the build directory if it does not allready exist:
+	mkdir -p $(BUILD_DIR)
+
+	${G++_COMPILER} src/csync.cpp -I src/ -o $(BUILD_DIR)/csync -lstdc++fs -std=c++17
 
 clean:
-	-rm -r build/*
+	# Only remove the build folder if it exists:
+	if [ -d $(BUILD_DIR) ]; then rm -rf $(BUILD_DIR); fi
 
 test:
-	${G++_COMPILER} src/csync.cpp -I src/ -o build/csync -std=c++17 -lstdc++fs
-	./build/csync -f .vscode/ -h myhost -p 4500
+	make compile
+	./$(BUILD_DIR)/csync -f .vscode/ -h myhost -p 4500
