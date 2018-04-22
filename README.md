@@ -117,5 +117,5 @@ Content [defined in "Content Length" in Bit] **Don't forget about the MTU**
 +------+-----------+---------------------+
 ```
 
-ACK Sequence Number [like Sequence Number]:
+ACK Sequence Number [like Sequence Number]:<br/>
 	The acknowledged sequence number
