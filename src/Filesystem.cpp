@@ -1,18 +1,26 @@
-#include<filesystem.h>
+#include "Filesystem.h"
 
-bool filesystem::exists(string path) {
+namespace fs = std::experimental::filesystem;
+
+using namespace std;
+
+Filesystem::Filesystem(std::string p) {
+	path = p;
+}
+
+bool Filesystem::exists(string path) {
 	return fs::exists(path);
 }
 
-int filesystem::genMap() {
-	if (filesystem::exists(path)) {
+int Filesystem::genMap() {
+	if (Filesystem::exists(path)) {
 		for (auto const &p : fs::directory_iterator(path)) {
 			if (fs::is_directory(p)) {
 				this->folders.push_back(p.path().string());
 			}
 			else {
 				string temp = p.path().string();
-				file *t = new file();
+				File *t = new File();
 				t->name = temp;
 				this->files[temp] = t;
 			}
@@ -22,7 +30,7 @@ int filesystem::genMap() {
 	return 0;
 }
 
-string filesystem::toString() {
+string Filesystem::toString() {
 	string temp = "";
 	for (auto const &ent1 : this->files) {
 		temp = temp + ent1.first + "\n";

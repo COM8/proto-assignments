@@ -1,4 +1,6 @@
-#include "csync.h"
+#include "CSync.h"
+
+using namespace std;
 
 struct arg* parseParameter(int argc, char* argv[]) {
 	struct arg* temp = new arg();
@@ -36,7 +38,7 @@ struct arg* parseParameter(int argc, char* argv[]) {
 		else if ((temp->dir) == "") {
 			cerr << "No sync folder given using current folder" << endl;
 			temp->dir = "./";
-		}if (!filesystem::exists(temp->dir)) {
+		}if (!Filesystem::exists(temp->dir)) {
 			cerr << "given path doesn't exist terminating" << endl;
 			exit(-1);
 		}
@@ -45,6 +47,7 @@ struct arg* parseParameter(int argc, char* argv[]) {
 		cerr << "No mode given please specify it next time" << endl << helpString;
 		exit(-1);
 	}
+
 	return temp;
 }
 
@@ -54,7 +57,7 @@ void launchServer(unsigned int port) {
 
 void launchClient(unsigned int port, string host, string dir) {
 	//todo
-	filesystem fi = filesystem(dir);
+	Filesystem fi = Filesystem(dir);
 	fi.genMap();
 }
 
@@ -74,5 +77,10 @@ int main(int argc, char* argv[]) {
 			<< "folder path: " << t->dir << endl;
 		launchClient(t->port, t->host, t->dir);
 	}
+
+
+	int x;
+	cin >> x;
+
 	return 0;
 }

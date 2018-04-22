@@ -1,3 +1,4 @@
+#pragma once
 #include <iostream>
 #include <sstream>
 #include <fstream>
@@ -7,7 +8,5 @@
 #include <dirent.h>
 #include <stdio.h>
 
-using namespace std;
-
-string hashfile(string filename);
-void listFiles(string folderpath);
+std::string hashfile(std::string filename);
+void listFiles(std::string folderpath);

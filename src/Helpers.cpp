@@ -1,4 +1,6 @@
-#include "helpers.h"
+#include "Helpers.h"
+
+using namespace std;
 
 //needs fix
 string hashfile(string filename) {
