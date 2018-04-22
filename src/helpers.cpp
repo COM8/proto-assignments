@@ -27,7 +27,7 @@ void listFiles(string folderpath)
    if (dirp){
        while ((directory = readdir(dirp)) != NULL)
         {
-            cout<<directory->d_name<<" --> "<<hashfile(folderpath+"/"+directory->d_name)<<endl;   
+            cout << directory->d_name << " --> " << hashfile(folderpath+"/"+directory->d_name) << endl;   
         }
         closedir(dirp);
    }

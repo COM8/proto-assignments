@@ -57,16 +57,15 @@ void launchClient(unsigned int port, string host, string dir) {
 int main(int argc, char* argv[]) {
     struct arg* t = parseParameter(argc, argv);
 
-    
     if(t->type == server) {
-        cout<<"Running in Server mode"<<endl
-            <<"using port: "<<t->port<<endl;
+        cout << "Running in Server mode" << endl
+             << "using port: " << t->port << endl;
         launchServer(t->port);
     }else{
-        cout<<"Running in Client mode"<<endl
-            <<"connecting to: "<<t->host<<endl
-            <<"using port: "<<t->port<<endl
-            <<"folder path: "<<t->dir<<endl;
+        cout << "Running in Client mode" << endl
+             << "connecting to: " << t->host << endl
+             << "using port: " << t->port << endl
+             << "folder path: " << t->dir << endl;
         launchClient(t->port, t->host, t->dir);
     }
     return 0;
