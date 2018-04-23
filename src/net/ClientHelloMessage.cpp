@@ -2,7 +2,7 @@
 
 using namespace net;
 
-ClientHelloMessage::ClientHelloMessage() : AbstractMessage('a') {
+ClientHelloMessage::ClientHelloMessage() : AbstractMessage(1) {
 
 }
 

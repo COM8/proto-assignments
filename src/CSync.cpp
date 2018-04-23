@@ -55,6 +55,23 @@ struct arg* parseParameter(int argc, char* argv[]) {
 void launchServer(unsigned int port) {
 	Server server = Server(port);
 	server.start();
+
+	string s;
+	cout << "Server console type \"stop\" to stop the server." << endl;
+	while(true) {
+		cout << "SERVER: ";
+		cin >> s;
+
+		if(!s.compare("stop")) {
+			cout << "Stopping server..." << endl;
+			server.stop();
+			cout << "Stopped server!" << endl;
+			break;
+		}
+		else {
+			cout << "Unknown command: \"" << s << "\"" << endl;
+		}
+	}
 }
 
 void launchClient(unsigned int port, string host, string dir) {
@@ -79,10 +96,6 @@ int main(int argc, char* argv[]) {
 			<< "folder path: " << t->dir << endl;
 		launchClient(t->port, t->host, t->dir);
 	}
-
-
-	int x;
-	cin >> x;
 
 	return 0;
 }

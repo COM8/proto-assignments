@@ -5,6 +5,8 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
+#include <thread>
+#include <sys/time.h>
 
 #define BUFSIZE 2048
 
@@ -26,8 +28,11 @@ namespace net {
     	unsigned int port;
     	State state;
     	struct sockaddr_in myAddr;
+    	std::thread* serverThread;
+    	bool shouldRun;
 
     	void setState(State state);
     	void contReadStart();
+    	void startTask();
 	};	
 }

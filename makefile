@@ -17,7 +17,7 @@ compile:
 	# Create the build directory if it does not allready exist:
 	mkdir -p $(BUILD_DIR)
 
-	${G++_COMPILER} src/*.cpp src/net/*.cpp -I src/ -I src/net/ -o $(BUILD_DIR)/csync -lstdc++fs -std=c++17
+	${G++_COMPILER} src/*.cpp src/net/*.cpp -I src/ -I src/net/ -o $(BUILD_DIR)/csync -lstdc++fs -std=c++17 -pthread
 
 clean:
 	# Only remove the build folder if it exists:
