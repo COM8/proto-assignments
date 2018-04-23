@@ -8,7 +8,8 @@
 #include <thread>
 #include <sys/time.h>
 
-#define BUFSIZE 2048
+#define BUF_SIZE 2048
+#define MAX_CLIENT_COUNT = 1;
 
 // Based on: https://www.cs.rutgers.edu/~pxk/417/notes/sockets/udp.html
 namespace net {

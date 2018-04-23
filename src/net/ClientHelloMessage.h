@@ -4,7 +4,10 @@
 namespace net {
 	class ClientHelloMessage : public AbstractMessage {
 	public:
-		ClientHelloMessage();
-		void toByteArray();
+		ClientHelloMessage(unsigned int port);
+		void createBuffer(struct Message* msg);
+
+	private:
+		unsigned int port;
 	};
 }

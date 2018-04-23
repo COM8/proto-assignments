@@ -32,14 +32,17 @@ Sequence Number [32 bit]:<br/>
 
 ### Client-Hello-Handshake:
 ```
-0      4      20         36
-+------+------+----------+
-| Type | Port | Checksum |
-+------+------+----------+
+0      4      20         36       40
++------+------+----------+--------+
+| Type | Port | Checksum | UNUSED |
++------+------+----------+--------+
 ```
 
 Port [16 Bit]:<br/>
 	The port on which the client listens to server messages
+
+UNUSED [4 Bit]:<br/>
+	To ensure the package has mod 8 = 0 size
 
 ### Server-Hello-Handshake:
 ```

@@ -24,7 +24,7 @@ State Server::getState() {
 void Server::stop() {
 	setState(stopping);
 	shouldRun = false;
-	if(serverThread) {
+	if(serverThread && serverThread->joinable()) {
 		serverThread->join();
 	}
 	setState(stopped);
@@ -86,12 +86,12 @@ void Server::startTask() {
 
 void Server::contReadStart() {
 	int recvlen = -1;
-	unsigned char buf[BUFSIZE];
+	unsigned char buf[BUF_SIZE];
 	struct sockaddr_in remAddr;
 	socklen_t addrLen = sizeof(remAddr);
 
 	while(shouldRun) {
-		recvlen = recvfrom(sockFD, buf, BUFSIZE, 0, (struct sockaddr *)&remAddr, &addrLen);
+		recvlen = recvfrom(sockFD, buf, BUF_SIZE, 0, (struct sockaddr *)&remAddr, &addrLen);
 		
 		if (recvlen > 0) {
 			printf("received %d bytes\n", recvlen);
@@ -102,5 +102,4 @@ void Server::contReadStart() {
 }
 
 bool Server::send() {
-
 }

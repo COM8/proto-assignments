@@ -9,3 +9,7 @@ AbstractMessage::AbstractMessage(char type) {
 char AbstractMessage::getType() {
 	return type;
 }
+
+void calcChecksum(char& buffer, int& bufferLength, unsigned int startIndex) {
+	// ToDo: Calc checksum and add it
+}
