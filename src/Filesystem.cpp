@@ -12,11 +12,16 @@ bool Filesystem::exists(string path) {
 	return fs::exists(path);
 }
 
-int Filesystem::genMap() {
+int Filesystem::genMap(){
+return genMap(this->path);
+}
+
+int Filesystem::genMap(string path) {
 	if (Filesystem::exists(path)) {
 		for (auto const &p : fs::directory_iterator(path)) {
 			if (fs::is_directory(p)) {
 				this->folders.push_back(p.path().string());
+				genMap(p.path().string());
 			}
 			else {
 				string temp = p.path().string();

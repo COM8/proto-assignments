@@ -1,9 +1,10 @@
 #include <experimental/filesystem>
 #include <iostream>
 #include <string>
-#pragma once
 #include <unordered_map>
 #include <list>
+
+#pragma once
 
 // At the moment the struct item is useless. Can later get used to save important information:
 struct File {
@@ -20,5 +21,6 @@ public:
 	Filesystem(std::string p);
 	static bool exists(std::string path);
 	int genMap();
+    int genMap(std::string path);
 	std::string toString();
 };
