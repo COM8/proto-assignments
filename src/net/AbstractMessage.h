@@ -16,7 +16,7 @@ namespace net {
 		char getType();
 		void calcChecksum(char* buffer, int& bufferLength, unsigned int startIndex);
 
-	private:
+	protected:
 		char type;
 	};
 }
