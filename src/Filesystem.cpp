@@ -45,7 +45,8 @@ int Filesystem::genMap(string path) {
 string Filesystem::toString() {
 	string temp = "";
 	for (auto const &ent1 : this->files) {
-		temp = temp + ent1.first + "\n";
+		File *t = ent1.second;
+		temp = temp + ent1.first + ": " + to_string(t->size) + " Bytes" + "\n";
 	}
 	return temp;
 }
