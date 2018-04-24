@@ -100,6 +100,3 @@ void Server::contReadStart() {
 		}
 	}
 }
-
-bool Server::send() {
-}

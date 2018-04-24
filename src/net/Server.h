@@ -20,7 +20,6 @@ namespace net {
 		Server() = default;
 		void start();
 		void stop();
-		bool send();
 		net::State getState();
 
 	private:
