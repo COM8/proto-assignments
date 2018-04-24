@@ -1,4 +1,6 @@
 #pragma once
+#include <iostream>
+#include <bitset>
 
 namespace net {
 
@@ -14,9 +16,15 @@ namespace net {
 
 		AbstractMessage(char type);
 		char getType();
-		void calcChecksum(char* buffer, int& bufferLength, unsigned int startIndex);
+		void addChecksum(struct Message* msg, unsigned int startIndex);
 
 	protected:
 		char type;
+
+		void setBufferValue(struct Message* msg, char* value, int valueLength, int bitOffset);
+		void printMessage(struct Message* msg);
+
+	private:
+		void setByteWithOffset(struct Message* msg, char value, int bitOffset);
 	};
 }

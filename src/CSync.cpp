@@ -53,6 +53,8 @@ struct arg* parseParameter(int argc, char* argv[]) {
 }
 
 void launchServer(unsigned int port) {
+	//net::ClientHelloMessage msg = ClientHelloMessage(port);
+
 	Server server = Server(port);
 	server.start();
 

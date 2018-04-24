@@ -10,4 +10,6 @@ void ClientHelloMessage::createBuffer(struct Message* msg) {
 	msg->buffer = new char[5];
 	msg->buffer[0] |= type;
 	msg->bufferLength = 5;
+
+	printMessage(msg);
 }
