@@ -53,12 +53,11 @@ struct arg* parseParameter(int argc, char* argv[]) {
 }
 
 void launchServer(unsigned int port) {
-	ClientHelloMessage msg = ClientHelloMessage(port);
+	/*ClientHelloMessage msg = ClientHelloMessage(port);
 
 	struct Message m = {};
 
-	msg.createBuffer(&m);
-
+	msg.createBuffer(&m);*/
 	Server server = Server(port);
 	server.start();
 
@@ -84,6 +83,8 @@ void launchClient(unsigned int port, string host, string dir) {
 	//todo
 	Filesystem fi = Filesystem(dir);
 	fi.genMap();
+
+	Client client = Client(host, port);
 }
 
 
