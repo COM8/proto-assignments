@@ -11,7 +11,7 @@ char AbstractMessage::getType() {
 	return type;
 }
 
-void AbstractMessage::addChecksum(struct Message* msg, unsigned int startIndex) {
+void AbstractMessage::addChecksum(struct Message* msg, int bitOffset) {
 	// ToDo: Calc checksum and add it
 }
 
@@ -31,17 +31,25 @@ void AbstractMessage::setByteWithOffset(struct Message* msg, char value, int bit
 		msg->buffer[byteIndex] = value;
 	}
 	else {
-		char first = value >> (bitOffset % 8);
-		char second = value << (bitOffset % 8);
+		char first = (unsigned char)value >> (bitOffset % 8);
+		char second = (unsigned char)value << (bitOffset % 8);
 		msg->buffer[byteIndex++] |= first;
 		msg->buffer[byteIndex] |= second;
 	}
 }
 
 void AbstractMessage::printMessage(struct Message* msg) {
-	for (int i = 0; i < msg->bufferLength; ++i)
+	printByteArray(msg->buffer, msg->bufferLength);
+}
+
+void AbstractMessage::printByteArray(const char* c, int length) {
+	for (int i = 0; i < length; ++i)
 	{
-		cout << bitset<8>(msg->buffer[i]);
+		printByte(c[i]);
 	}
 	cout << endl;
+}
+
+void AbstractMessage::printByte(char c) {
+	cout << bitset<8>(c) << ' ';
 }

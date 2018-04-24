@@ -16,13 +16,15 @@ namespace net {
 
 		AbstractMessage(char type);
 		char getType();
-		void addChecksum(struct Message* msg, unsigned int startIndex);
+		void addChecksum(struct Message* msg, int bitOffset);
+		void printMessage(struct Message* msg);
 
 	protected:
 		char type;
 
 		void setBufferValue(struct Message* msg, char* value, int valueLength, int bitOffset);
-		void printMessage(struct Message* msg);
+		void printByteArray(const char* c, int length);
+		void printByte(char c);
 
 	private:
 		void setByteWithOffset(struct Message* msg, char value, int bitOffset);
