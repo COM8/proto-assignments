@@ -58,7 +58,7 @@ void launchServer(unsigned int port) {
 	struct Message m = {};
 
 	msg.createBuffer(&m);*/
-	Server server = Server(port);
+	Server server = Server((unsigned short)port);
 	server.start();
 
 	string s;
@@ -84,7 +84,8 @@ void launchClient(unsigned int port, string host, string dir) {
 	Filesystem fi = Filesystem(dir);
 	fi.genMap();
 
-	Client client = Client(host, port);
+	FileClient fC = FileClient(&host, (unsigned short)port, &fi);
+	fC.startSendingFS();
 }
 
 

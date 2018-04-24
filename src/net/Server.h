@@ -1,7 +1,6 @@
 #pragma once
 #include <iostream>
 #include <string>
-#include <string.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
@@ -17,7 +16,8 @@ namespace net {
 
 	class Server {
 	public:
-		Server(unsigned int port);
+		Server(unsigned short port);
+		Server() = default;
 		void start();
 		void stop();
 		bool send();
@@ -25,7 +25,7 @@ namespace net {
 
 	private:
 		int sockFD;
-    	unsigned int port;
+    	unsigned short port;
     	net::State state;
     	struct sockaddr_in myAddr;
     	std::thread* serverThread;

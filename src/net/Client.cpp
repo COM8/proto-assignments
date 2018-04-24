@@ -3,7 +3,7 @@
 using namespace std;
 using namespace net;
 
-Client::Client(string hostAddr, unsigned int port) {
+Client::Client(string hostAddr, unsigned short port) {
 	this->hostAddr = hostAddr;
 	this->port = port;
 	this->sockFD = -1;
@@ -57,9 +57,9 @@ void Client::startTask() {
 	else {
 		setState(starting);
 
-		struct sockaddr_in servaddr = {};
-		servaddr.sin_family = AF_INET;
-		servaddr.sin_port = htons(port);
+		serverAddressStruct = {};
+		serverAddressStruct.sin_family = AF_INET;
+		serverAddressStruct.sin_port = htons(port);
 
 		// Look up the address of the server given its name:
 		struct hostent* hp = {};
@@ -70,12 +70,16 @@ void Client::startTask() {
 		}
 		else {
 			// Add host address to the address structure:
-			memcpy((void *)&servaddr.sin_addr, hp->h_addr_list[0], hp->h_length);
+			memcpy((void *)&serverAddressStruct.sin_addr, hp->h_addr_list[0], hp->h_length);
 			setState(running);
 		}
 	}
 }
 
 bool Client::send(AbstractMessage* msg) {
-
+	struct Message msgStruct = {};
+	msg->createBuffer(&msgStruct);
+	if (sendto(sockFD, msgStruct.buffer, msgStruct.bufferLength, 0, (struct sockaddr *)&serverAddressStruct, sizeof(serverAddressStruct)) < 0) {
+		cerr << "UDP client failed to send message!" << endl;
+	}
 }

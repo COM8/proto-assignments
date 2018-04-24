@@ -3,7 +3,7 @@
 using namespace std;
 using namespace net;
 
-Server::Server(unsigned int port) {
+Server::Server(unsigned short port) {
 	this->port = port;
 	this->sockFD = -1;
 	this->state = stopped;
@@ -57,7 +57,7 @@ void Server::startTask() {
 		setState(starting);
 
 		// Fill memory block with 0: 
-		memset((char *)&myAddr, 0, sizeof(myAddr));
+		myAddr = {};
 
 		myAddr.sin_family = AF_INET;
 		myAddr.sin_addr.s_addr = htonl(INADDR_ANY);

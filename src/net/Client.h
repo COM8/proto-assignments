@@ -16,7 +16,8 @@
 namespace net {
 	class Client {
 	public:
-		Client(std::string hostAddr, unsigned int port);
+		Client(std::string hostAddr, unsigned short port);
+		Client() = default;
 		void start();
 		void stop();
 		bool send(net::AbstractMessage* msg);
@@ -24,9 +25,10 @@ namespace net {
 
 	private:
 		int sockFD;
-    	unsigned int port;
+    	unsigned short port;
     	std::string hostAddr;
     	net::State state;
+    	struct sockaddr_in serverAddressStruct;
     	std::thread* clientThread;
     	bool shouldRun;
 

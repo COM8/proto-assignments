@@ -5,7 +5,7 @@
 #include "Helpers.h"
 #include "Filesystem.h"
 #include "net/Server.h"
-#include "net/Client.h"
+#include "FileClient.h"
 #include "net/ClientHelloMessage.h"
 
 const int DEFAULT_PORT = 1234;
