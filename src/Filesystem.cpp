@@ -16,6 +16,12 @@ int Filesystem::genMap(){
 return genMap(this->path);
 }
 
+long unsigned int Filesystem::filesize(const string filename)
+{
+    ifstream in(filename, ifstream::ate | ifstream::binary);
+    return in.tellg(); 
+}
+
 int Filesystem::genMap(string path) {
 	if (Filesystem::exists(path)) {
 		for (auto const &p : fs::directory_iterator(path)) {
@@ -27,6 +33,7 @@ int Filesystem::genMap(string path) {
 				string temp = p.path().string();
 				File *t = new File();
 				t->name = temp;
+				t->size = filesize(temp);
 				this->files[temp] = t;
 			}
 		}
@@ -38,7 +45,8 @@ int Filesystem::genMap(string path) {
 string Filesystem::toString() {
 	string temp = "";
 	for (auto const &ent1 : this->files) {
-		temp = temp + ent1.first + "\n";
+		File *t = ent1.second;
+		temp = temp + ent1.first + ": " + to_string(t->size) + " Bytes" + "\n";
 	}
 	return temp;
 }

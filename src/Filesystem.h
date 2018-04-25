@@ -3,12 +3,15 @@
 #include <string>
 #include <unordered_map>
 #include <list>
+#include <fstream>
 
 #pragma once
 
 // At the moment the struct item is useless. Can later get used to save important information:
 struct File {
 	std::string name;
+    long unsigned int size = 0;
+
 };
 
 class Filesystem {
@@ -22,5 +25,6 @@ public:
 	static bool exists(std::string path);
 	int genMap();
     int genMap(std::string path);
+    long unsigned int filesize(const std::string filename);
 	std::string toString();
 };
