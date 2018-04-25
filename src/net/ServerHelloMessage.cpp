@@ -10,7 +10,7 @@ ServerHelloMessage::ServerHelloMessage(unsigned short port, unsigned int clientI
 }
 
 void ServerHelloMessage::createBuffer(struct Message* msg) {
-	msg->buffer = new char[9];
+	msg->buffer = new char[9]{};
 	msg->bufferLength = 9;
 	
 	// Add type:

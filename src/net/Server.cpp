@@ -86,17 +86,42 @@ void Server::startTask() {
 
 void Server::contReadStart() {
 	int recvlen = -1;
-	unsigned char buf[BUF_SIZE];
+	char buf[BUF_SIZE];
 	struct sockaddr_in remAddr;
 	socklen_t addrLen = sizeof(remAddr);
 
 	while(shouldRun) {
-		recvlen = recvfrom(sockFD, buf, BUF_SIZE, 0, (struct sockaddr *)&remAddr, &addrLen);
+		/*recvlen = recvfrom(sockFD, buf, BUF_SIZE, 0, (struct sockaddr *)&remAddr, &addrLen);
 		
+		// Print message:
+		printByteArray(buf, recvlen);
+
 		if (recvlen > 0) {
 			printf("received %d bytes\n", recvlen);
 			buf[recvlen] = 0;
 			printf("received message: %s\n", buf);
+		}*/
+		readNextMessage();
+	}
+}
+
+void Server::readNextMessage() {
+	int recvlen = -1;
+	unsigned char buf[BUF_SIZE];
+	struct sockaddr_in remAddr;
+	socklen_t addrLen = sizeof(remAddr);
+
+	// Read first byte that contains the message type:
+	while (recvlen <= 0) {
+		if(!shouldRun) {
+			return;
 		}
+		recvlen = recvfrom(sockFD, buf, 1, 0, (struct sockaddr *)&remAddr, &addrLen);	
+	}
+
+	AbstractMessage* msg;
+	parseMessage(buf[0], sockFD, msg);
+	if(!msg) {
+		// Add to msg queue
 	}
 }
