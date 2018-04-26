@@ -3,9 +3,7 @@
 using namespace net;
 using namespace std;
 
-FileServer::FileServer(unsigned short port) {
-	this->port = port;
-	this->state = stopped;
+FileServer::FileServer(unsigned short port) : port(port), state(stopped), cpQueue() {
 }
 
 void FileServer::start() {
@@ -14,7 +12,7 @@ void FileServer::start() {
 	}
 	else {
 		state = starting;
-		server = Server(port);
+		server = Server(port, cpQueue);
 		server.start();
 		state = running;
 	}

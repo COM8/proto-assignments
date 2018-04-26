@@ -3,8 +3,9 @@
 using namespace std;
 using namespace net;
 
-Server::Server(unsigned short port) {
+Server::Server(unsigned short port, Queue<AbstractMessage>* cpQueue) {
 	this->port = port;
+	this->cpQueue = cpQueue;
 	this->sockFD = -1;
 	this->state = stopped;
 	this->serverThread = NULL;

@@ -5,6 +5,7 @@
 #include "net/Client.h"
 #include "net/Server.h"
 #include "net/ClientHelloMessage.h"
+#include "Queue.h"
 
 enum TransferState
 {
