@@ -86,10 +86,10 @@ void Server::startTask() {
 }
 
 void Server::contReadStart() {
-	int recvlen = -1;
+	/*int recvlen = -1;
 	char buf[BUF_SIZE];
 	struct sockaddr_in remAddr;
-	socklen_t addrLen = sizeof(remAddr);
+	socklen_t addrLen = sizeof(remAddr);*/
 
 	while(shouldRun) {
 		/*recvlen = recvfrom(sockFD, buf, BUF_SIZE, 0, (struct sockaddr *)&remAddr, &addrLen);
@@ -122,7 +122,8 @@ void Server::readNextMessage() {
 
 	AbstractMessage* msg;
 	parseMessage(buf[0], sockFD, msg);
-	if(!msg) {
-		// Add to msg queue
+	if(!msg && !cpQueue) {
+		cout << "1111" << endl;
+		cpQueue->push(msg);
 	}
 }

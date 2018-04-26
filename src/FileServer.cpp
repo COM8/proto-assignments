@@ -3,7 +3,7 @@
 using namespace net;
 using namespace std;
 
-FileServer::FileServer(unsigned short port) : port(port), state(stopped), cpQueue() {
+FileServer::FileServer(unsigned short port) : port(port), state(stopped), cpQueue(), shouldConsumerRun(false) {
 }
 
 void FileServer::start() {
@@ -18,6 +18,25 @@ void FileServer::start() {
 	}
 }
 
-void FileServer::stop() {
+void FileServer::startConsumerThread() {
+	shouldConsumerRun = true;
+	consumerThread = new thread(&FileServer::consumerTask, this);
+}
 
+void FileServer::stopConsumerThread() {
+	shouldConsumerRun = false;
+	if(consumerThread && consumerThread->joinable()) {
+		consumerThread->join();
+	}
+}
+
+void FileServer::consumerTask() {
+	while(shouldConsumerRun) {
+		cpQueue->pop();
+		cout << "POP" << endl;
+	}
+}
+
+void FileServer::stop() {
+	stopConsumerThread();
 }

@@ -1,7 +1,9 @@
 #pragma once
+
+#include <iostream>
+#include <thread>
 #include "net/State.h"
 #include "net/Server.h"
-#include <iostream>
 #include "Queue.h"
 
 class FileServer
@@ -16,4 +18,10 @@ private:
 	net::Server server;
 	net::State state;
 	Queue<net::AbstractMessage>* cpQueue;
+	bool shouldConsumerRun;
+	std::thread* consumerThread;
+
+	void startConsumerThread();
+	void stopConsumerThread();
+	void consumerTask();
 };

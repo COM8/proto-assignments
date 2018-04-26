@@ -58,7 +58,7 @@ void launchServer(unsigned int port) {
 	struct Message m = {};
 
 	msg.createBuffer(&m);*/
-	Server server = Server((unsigned short)port, NULL);
+	FileServer server = FileServer((unsigned short)port);
 	server.start();
 
 	string s;

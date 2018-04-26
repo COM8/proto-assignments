@@ -32,10 +32,18 @@ public:
 	    item = queue.front();
 	    queue.pop();
 	}
+
+	/*void push(T&& item)
+  	{
+    	std::unique_lock<std::mutex> mlock(mutex);
+    	queue.push(std::move(item));
+    	mlock.unlock();
+    	condVar.notify_one();
+  	}*/
 	
-	void push(T& item) {
+	void push(T* item) {
 		std::unique_lock<std::mutex> mlock(mutex);
-	    queue.push(item);
+	    queue.push(*item);
 	    mlock.unlock();
 	    condVar.notify_one();
 	}
