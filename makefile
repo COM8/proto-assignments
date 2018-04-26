@@ -1,6 +1,10 @@
 G++_COMPILER=g++ # In mac I need to change this to g++-7 , so I made it a variable.
 BUILD_DIR=build
 
+init:
+	git submodule init
+	git submodule update
+
 client:
 	make default
 	./$(BUILD_DIR)/csync -h localhost -p 1234 -f
