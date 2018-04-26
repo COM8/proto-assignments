@@ -10,6 +10,7 @@
 #include "net/State.h"
 #include "Helpers.h"
 #include "net/MessageParser.h"
+#include "Queue.h"
 
 #define BUF_SIZE 2048
 #define MAX_CLIENT_COUNT = 1;
@@ -19,7 +20,7 @@ namespace net {
 
 	class Server {
 	public:
-		Server(unsigned short port);
+		Server(unsigned short port, Queue<net::AbstractMessage>* cpQueue);
 		Server() = default;
 		void start();
 		void stop();
@@ -32,6 +33,7 @@ namespace net {
     	struct sockaddr_in myAddr;
     	std::thread* serverThread;
     	bool shouldRun;
+    	Queue<AbstractMessage>* cpQueue;
 
     	void setState(net::State state);
     	void contReadStart();

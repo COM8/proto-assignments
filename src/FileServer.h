@@ -2,6 +2,7 @@
 #include "net/State.h"
 #include "net/Server.h"
 #include <iostream>
+#include "Queue.h"
 
 class FileServer
 {
@@ -14,5 +15,5 @@ private:
 	unsigned short port;
 	net::Server server;
 	net::State state;
-	
+	Queue<net::AbstractMessage>* cpQueue;
 };

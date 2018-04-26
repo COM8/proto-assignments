@@ -1,6 +1,10 @@
 G++_COMPILER=g++ # In mac I need to change this to g++-7 , so I made it a variable.
 BUILD_DIR=build
 
+default:
+	make clean
+	make compile
+
 init:
 	git submodule init
 	git submodule update
@@ -12,10 +16,6 @@ client:
 server:
 	make default
 	./$(BUILD_DIR)/csync -s -p 1234
-
-default:
-	make clean
-	make compile
 
 compile:
 	# Create the build directory if it does not allready exist:
