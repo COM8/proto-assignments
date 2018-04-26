@@ -1,6 +1,7 @@
 #include "FileClient.h"
 
 using namespace net;
+using namespace std;
 
 FileClient::FileClient(std::string* serverAddress, unsigned short serverPort, Filesystem* fs) {
 	this->serverPort = serverPort;
@@ -16,7 +17,7 @@ void FileClient::startSendingFS() {
 	unsigned short listenPort = 1235;
 
 	while(state == disconnected) {
-		usleep(1000); // Sleep for 1s
+		sleep(1); // Sleep for 1s
 		sendClientHelloMessage(listenPort);
 	}
 }

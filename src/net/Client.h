@@ -9,6 +9,7 @@
 #include <sys/time.h>
 #include "net/AbstractMessage.h"
 #include "net/State.h"
+#include "Helpers.h"
 
 #define BUF_SIZE 2048
 

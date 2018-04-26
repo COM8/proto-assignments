@@ -1,36 +1,20 @@
 #include "Helpers.h"
 
 using namespace std;
+using namespace net;
 
-//needs fix
-string hashfile(string filename) {
-	ifstream fp(filename.c_str());
-	stringstream ss;
-	// Unable to hash file, return an empty hash.
-	if (!fp.is_open()) {
-		return "";
-	}
-	// Hashing
-	uint32_t magic = 5381;
-	char c;
-	while (fp.get(c)) {
-		magic = ((magic << 5) + magic) + c; // magic * 33 + c
-	}
-	ss << hex << setw(8) << setfill('0') << magic;
-	return ss.str();
+void printMessage(struct Message* msg) {
+	printByteArray(msg->buffer, msg->bufferLength);
 }
 
-
-void listFiles(string folderpath)
-{
-	DIR *dirp;
-	dirp = opendir(folderpath.c_str());
-	struct dirent *directory;
-	if (dirp) {
-		while ((directory = readdir(dirp)) != NULL)
-		{
-			cout << directory->d_name << " --> " << hashfile(folderpath + "/" + directory->d_name) << endl;
-		}
-		closedir(dirp);
+void printByteArray(const char* c, int length) {
+	for (int i = 0; i < length; ++i)
+	{
+		printByte(c[i]);
 	}
+	cout << endl;
+}
+
+void printByte(char c) {
+	cout << bitset<8>(c) << ' ';
 }

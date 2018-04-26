@@ -22,8 +22,6 @@ void AbstractMessage::setBufferValue(struct Message* msg, char* value, int value
 	}
 }
 
-// 11111111
-// 00011111 11100000
 void AbstractMessage::setByteWithOffset(struct Message* msg, char value, int bitOffset) {
 	int byteIndex = bitOffset/8;
 
@@ -36,20 +34,4 @@ void AbstractMessage::setByteWithOffset(struct Message* msg, char value, int bit
 		msg->buffer[byteIndex++] |= first;
 		msg->buffer[byteIndex] |= second;
 	}
-}
-
-void AbstractMessage::printMessage(struct Message* msg) {
-	printByteArray(msg->buffer, msg->bufferLength);
-}
-
-void AbstractMessage::printByteArray(const char* c, int length) {
-	for (int i = 0; i < length; ++i)
-	{
-		printByte(c[i]);
-	}
-	cout << endl;
-}
-
-void AbstractMessage::printByte(char c) {
-	cout << bitset<8>(c) << ' ';
 }

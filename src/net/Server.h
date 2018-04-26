@@ -6,7 +6,10 @@
 #include <netdb.h>
 #include <thread>
 #include <sys/time.h>
+#include <bitset>
 #include "net/State.h"
+#include "Helpers.h"
+#include "net/MessageParser.h"
 
 #define BUF_SIZE 2048
 #define MAX_CLIENT_COUNT = 1;
@@ -20,7 +23,6 @@ namespace net {
 		Server() = default;
 		void start();
 		void stop();
-		bool send();
 		net::State getState();
 
 	private:
@@ -34,5 +36,6 @@ namespace net {
     	void setState(net::State state);
     	void contReadStart();
     	void startTask();
+    	void readNextMessage();
 	};	
 }
