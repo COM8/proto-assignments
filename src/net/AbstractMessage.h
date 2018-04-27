@@ -15,6 +15,7 @@ namespace net {
 		virtual void createBuffer(struct Message* msg) { msg->bufferLength = -1; };
 
 		AbstractMessage(char type);
+		AbstractMessage() = default;
 		char getType();
 		void addChecksum(struct Message* msg, int bitOffset);
 

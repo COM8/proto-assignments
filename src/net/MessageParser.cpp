@@ -3,7 +3,7 @@
 using namespace std;
 using namespace net;
 
-void parseMessage(unsigned char readByte, int socketFD, AbstractMessage* result) {
+AbstractMessage* parseMessage(unsigned char readByte, int socketFD) {
 
 	// Get message type:
 	unsigned char msgType = readByte >> 4;
@@ -11,12 +11,10 @@ void parseMessage(unsigned char readByte, int socketFD, AbstractMessage* result)
 	switch(msgType) {
 		case 1:
 			cout << "Received ClientHelloMessage." << endl;
-			result = new ClientHelloMessage(0);
-			break;
+			return new ClientHelloMessage(0);
 
 		default:
 			cout << "Received unknown message type: " << msgType << endl;
-			result = NULL;
-			break;
+			return NULL;
 	}
 }

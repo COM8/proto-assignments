@@ -4,4 +4,4 @@
 #include "net/AbstractMessage.h"
 #include "net/ClientHelloMessage.h"
 
-void parseMessage(unsigned char readByte, int socketFD, net::AbstractMessage* result);
+net::AbstractMessage* parseMessage(unsigned char readByte, int socketFD);

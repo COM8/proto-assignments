@@ -120,10 +120,8 @@ void Server::readNextMessage() {
 		recvlen = recvfrom(sockFD, buf, 1, 0, (struct sockaddr *)&remAddr, &addrLen);	
 	}
 
-	AbstractMessage* msg;
-	parseMessage(buf[0], sockFD, msg);
-	if(!msg && !cpQueue) {
-		cout << "1111" << endl;
-		cpQueue->push(msg);
+	AbstractMessage* msg = parseMessage(buf[0], sockFD);
+	if(cpQueue && msg) {
+		cpQueue->push(*msg);
 	}
 }

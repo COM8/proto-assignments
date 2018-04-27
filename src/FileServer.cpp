@@ -3,7 +3,8 @@
 using namespace net;
 using namespace std;
 
-FileServer::FileServer(unsigned short port) : port(port), state(stopped), cpQueue(), shouldConsumerRun(false) {
+FileServer::FileServer(unsigned short port) : port(port), state(stopped), shouldConsumerRun(false) {
+	cpQueue = new Queue<net::AbstractMessage>();
 }
 
 void FileServer::start() {
@@ -14,6 +15,7 @@ void FileServer::start() {
 		state = starting;
 		server = Server(port, cpQueue);
 		server.start();
+		startConsumerThread();
 		state = running;
 	}
 }
@@ -33,7 +35,6 @@ void FileServer::stopConsumerThread() {
 void FileServer::consumerTask() {
 	while(shouldConsumerRun) {
 		cpQueue->pop();
-		cout << "POP" << endl;
 	}
 }
 

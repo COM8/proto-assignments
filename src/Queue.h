@@ -9,14 +9,18 @@
 template <class T> class Queue
 {
 public:
-	Queue();
+	Queue() {
+		queueMutex = new std::mutex();
+		condVar = new std::condition_variable();
+	}
+
 	~Queue();
 
 	T pop() {
-		std::unique_lock<std::mutex> mlock(mutex);
+		std::unique_lock<std::mutex> mlock(*queueMutex);
 	    while (queue.empty())
 	    {
-	      condVar.wait(mlock);
+	      condVar->wait(mlock);
 	    }
 	    auto item = queue.front();
 	    queue.pop();
@@ -24,10 +28,10 @@ public:
 	}
 
 	void pop(T& item) {
-		std::unique_lock<std::mutex> mlock(mutex);
+		std::unique_lock<std::mutex> mlock(*queueMutex);
 	    while (queue.empty())
 	    {
-	      condVar.wait(mlock);
+	      condVar->wait(mlock);
 	    }
 	    item = queue.front();
 	    queue.pop();
@@ -41,18 +45,18 @@ public:
     	condVar.notify_one();
   	}*/
 	
-	void push(T* item) {
-		std::unique_lock<std::mutex> mlock(mutex);
-	    queue.push(*item);
+	void push(T& item) {
+		std::unique_lock<std::mutex> mlock(*queueMutex);
+	    queue.push(item);
 	    mlock.unlock();
-	    condVar.notify_one();
+	    condVar->notify_one();
 	}
 
 	void clear() {}
 
 private:
 	std::queue<T> queue;
-	std::mutex mutex;
-	std::condition_variable condVar;
+	std::mutex* queueMutex;
+	std::condition_variable* condVar;
 	
 };
