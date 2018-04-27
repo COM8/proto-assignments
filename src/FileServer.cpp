@@ -4,7 +4,7 @@ using namespace net;
 using namespace std;
 
 FileServer::FileServer(unsigned short port) : port(port), state(stopped), shouldConsumerRun(false) {
-	cpQueue = new Queue<net::AbstractMessage>();
+	cpQueue = new Queue<ReadMessage>();
 }
 
 void FileServer::start() {
@@ -34,7 +34,7 @@ void FileServer::stopConsumerThread() {
 
 void FileServer::consumerTask() {
 	while(shouldConsumerRun) {
-		cpQueue->pop();
+		ReadMessage msg = cpQueue->pop();
 	}
 }
 

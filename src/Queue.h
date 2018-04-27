@@ -4,9 +4,10 @@
 #include <thread>
 #include <mutex>
 #include <condition_variable>
+#include <iostream>
 
 // Based on: https://juanchopanzacpp.wordpress.com/2013/02/26/concurrent-queue-c11/
-template <class T> class Queue
+template <typename T> class Queue
 {
 public:
 	Queue() {

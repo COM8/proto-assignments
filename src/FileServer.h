@@ -17,7 +17,7 @@ private:
 	unsigned short port;
 	net::Server server;
 	net::State state;
-	Queue<net::AbstractMessage>* cpQueue;
+	Queue<net::ReadMessage>* cpQueue;
 	bool shouldConsumerRun;
 	std::thread* consumerThread;
 

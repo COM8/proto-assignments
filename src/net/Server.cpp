@@ -3,7 +3,7 @@
 using namespace std;
 using namespace net;
 
-Server::Server(unsigned short port, Queue<AbstractMessage>* cpQueue) {
+Server::Server(unsigned short port, Queue<ReadMessage>* cpQueue) {
 	this->port = port;
 	this->cpQueue = cpQueue;
 	this->sockFD = -1;
@@ -73,14 +73,16 @@ void Server::startTask() {
 			struct timeval tv;
 			tv.tv_sec = 2;
 			tv.tv_usec = 0;
-			if (setsockopt(sockFD, SOL_SOCKET, SO_RCVTIMEO,&tv,sizeof(tv)) < 0) {
+			/*if (setsockopt(sockFD, SOL_SOCKET, SO_RCVTIMEO,&tv,sizeof(tv)) < 0) {
     			cerr << "UDP server setting read timeout failed!" << endl;
 				setState(error);
 			}
 			else {
 				setState(running);
 				contReadStart();
-			}
+			}*/
+			setState(running);
+			contReadStart();
 		}
 	}
 }
@@ -112,16 +114,17 @@ void Server::readNextMessage() {
 	struct sockaddr_in remAddr;
 	socklen_t addrLen = sizeof(remAddr);
 
-	// Read first byte that contains the message type:
-	while (recvlen <= 0) {
-		if(!shouldRun) {
-			return;
-		}
-		recvlen = recvfrom(sockFD, buf, 1, 0, (struct sockaddr *)&remAddr, &addrLen);	
-	}
+  	while (recvlen <= 0 && shouldRun) {
+  		recvlen = recvfrom(sockFD, buf, BUF_SIZE, 0, (struct sockaddr *)&remAddr, &addrLen);
+  	}
 
-	AbstractMessage* msg = parseMessage(buf[0], sockFD);
-	if(cpQueue && msg) {
-		cpQueue->push(*msg);
-	}
+  	if (recvlen > 0) {
+		  struct ReadMessage msg = {};
+		  msg.bufferLength = recvlen;
+		  msg.buffer = buf;
+		  msg.msgType = buf[0] >> 4;
+
+		  // Insert in consumer producer queue:
+		  cpQueue->push(msg);
+  	}
 }
