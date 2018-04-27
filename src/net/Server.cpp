@@ -73,16 +73,14 @@ void Server::startTask() {
 			struct timeval tv;
 			tv.tv_sec = 2;
 			tv.tv_usec = 0;
-			/*if (setsockopt(sockFD, SOL_SOCKET, SO_RCVTIMEO,&tv,sizeof(tv)) < 0) {
+			if (setsockopt(sockFD, SOL_SOCKET, SO_RCVTIMEO,&tv,sizeof(tv)) < 0) {
     			cerr << "UDP server setting read timeout failed!" << endl;
 				setState(error);
 			}
 			else {
 				setState(running);
 				contReadStart();
-			}*/
-			setState(running);
-			contReadStart();
+			}
 		}
 	}
 }
@@ -119,12 +117,14 @@ void Server::readNextMessage() {
   	}
 
   	if (recvlen > 0) {
-		  struct ReadMessage msg = {};
-		  msg.bufferLength = recvlen;
-		  msg.buffer = buf;
-		  msg.msgType = buf[0] >> 4;
+		struct ReadMessage msg = {};
+		msg.bufferLength = recvlen;
+		msg.buffer = buf;
+		msg.msgType = buf[0] >> 4;
+		// Get sender IP:
+		inet_ntop(AF_INET, &(remAddr.sin_addr), msg.senderIp, INET_ADDRSTRLEN);
 
-		  // Insert in consumer producer queue:
-		  cpQueue->push(msg);
+		// Insert in consumer producer queue:
+		cpQueue->push(msg);
   	}
 }

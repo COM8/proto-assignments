@@ -3,6 +3,8 @@
 #include <string>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
 #include <netdb.h>
 #include <thread>
 #include <sys/time.h>
@@ -23,6 +25,7 @@ namespace net {
 		unsigned short msgType;
 		unsigned char* buffer;
 		unsigned int bufferLength;
+		char senderIp[INET_ADDRSTRLEN];
 	};
 
 	class Server {
