@@ -28,7 +28,14 @@ private:
 	TransferState state;
 	net::Client client;
 	net::Server server;
+	Queue<net::ReadMessage>* cpQueue;
+	bool shouldConsumerRun;
+	std::thread* consumerThread;
 
 	void sendClientHelloMessage(unsigned short listeningPort);
-	
+	void startConsumerThread();
+	void stopConsumerThread();
+	void consumerTask();
+	void onServerHelloMessage(net::ReadMessage& msg);
+	void transferFiles();
 };

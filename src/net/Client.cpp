@@ -27,7 +27,7 @@ void Client::init() {
 		}
 		else {
 			// Add host address to the address structure:
-			memcpy((void *)&serverAddressStruct.sin_addr, hp->h_addr_list[0], hp->h_length);
+			memcpy((void*)&serverAddressStruct.sin_addr, hp->h_addr_list[0], hp->h_length);
 		}
 	}
 }
@@ -37,7 +37,7 @@ bool Client::send(AbstractMessage* msg) {
 	msg->createBuffer(&msgStruct);
 
 	// Print message:
-	printMessage(&msgStruct);
+	//printMessage(&msgStruct);
 	
 	if (sendto(sockFD, msgStruct.buffer, msgStruct.bufferLength, 0, (struct sockaddr *)&serverAddressStruct, sizeof(serverAddressStruct)) < 0) {
 		cerr << "UDP client failed to send message!" << endl;

@@ -53,18 +53,18 @@ struct arg* parseParameter(int argc, char* argv[]) {
 }
 
 void launchServer(unsigned int port) {
-	FileServer server = FileServer((unsigned short)port);
-	server.start();
+	FileServer fS = FileServer((unsigned short)port);
+	fS.start();
 
-	string s;
 	cout << "Server console type \"stop\" to stop the server." << endl;
+	string s;
 	while(true) {
 		cout << "SERVER: ";
 		cin >> s;
 
 		if(!s.compare("stop")) {
 			cout << "Stopping server..." << endl;
-			server.stop();
+			fS.stop();
 			cout << "Stopped server!" << endl;
 			break;
 		}
@@ -81,6 +81,23 @@ void launchClient(unsigned int port, string host, string dir) {
 
 	FileClient fC = FileClient(&host, (unsigned short)port, &fi);
 	fC.startSendingFS();
+
+	cout << "Client console type \"stop\" to stop the server." << endl;
+	string s;
+	while(true) {
+		cout << "CLIENT: ";
+		cin >> s;
+
+		if(!s.compare("stop")) {
+			cout << "Stopping client..." << endl;
+			fC.stopSendingFS();
+			cout << "Stopped client!" << endl;
+			break;
+		}
+		else {
+			cout << "Unknown command: \"" << s << "\"" << endl;
+		}
+	}
 }
 
 

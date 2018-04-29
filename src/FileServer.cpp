@@ -8,7 +8,7 @@ FileServer::FileServer(unsigned short port) : port(port),
 											  state(stopped),
 											  shouldConsumerRun(false),
 											  client(NULL) {
-	cpQueue = new Queue<ReadMessage>();
+	this->cpQueue = new Queue<ReadMessage>();
 }
 
 void FileServer::start() {
@@ -58,7 +58,7 @@ void FileServer::onClientHelloMessage(ReadMessage &msg) {
 		client->state = c_clientHello;
 		client->portRemote = ClientHelloMessage::getPortFromMessage(msg.buffer);
 		client->remoteIp = msg.senderIp;
-		client->portLocal = 1235; // ToDo: Get random one
+		client->portLocal = 1236; // ToDo: Get random one
 		client->cpQueue = new Queue<ReadMessage>();
 		client->udpClient = new Client(client->remoteIp, client->portRemote);
 		client->udpServer = new Server(client->portLocal, client->cpQueue);
