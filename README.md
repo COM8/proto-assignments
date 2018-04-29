@@ -2,18 +2,20 @@
 
 ### ToDo:
 * Add a way to indicate for which file the package is in the  ```File-Creation``` and ```File-Transfer``` message
+* Add a way to continue after the server has received 90% of all packages
 
 ### Important:
 * UDP MTU
+* Don't create packages with a size of (bitsize mod 8) != 0. It makes it hard on the receiver side to interpret those!
 
 ### Changelog:
-* 26.04.2018 [Kilian] added Convention, added CRC and Hash,added ability to delete Files and Folders, minor optimisations
+* 29.04.2018 [Fabian] Added message description and ```Ping``` message
+* 26.04.2018 [Kilian] Added Convention, added CRC and Hash,added ability to delete Files and Folders, minor optimisations
 * 20.04.2018 [Fabian] Initial commit
 * 22.04.2018 [Fabian] Protocol
 
 ## Convention:
 * FID := Relative Path with File name (folder/file.txt)
-* Client ID := Identification each client can choose
 
 ## Protocol:
 
@@ -23,7 +25,7 @@ Type [4 Bit]:<br/>
 	0001 => Server-Hello-Handshake<br/>
 	0010 => File-Creation<br/>
 	0011 => File-Transfer<br/>
-	0100 => Server-ACK<br/>
+	0100 => ACK<br/>
 	0101 => Ping<br/>
 
 Client ID [32 Bit]:<br/>
@@ -37,6 +39,7 @@ Sequence Number [32 bit]:<br/>
 	Like TCP
 
 ### Client-Hello-Handshake:
+The initial connection message that gets send by the client.
 ```
 0      4      20         52       56
 +------+------+----------+--------+
@@ -51,6 +54,7 @@ UNUSED [4 Bit]:<br/>
 	To ensure the package has mod 8 = 0 size
 
 ### Server-Hello-Handshake:
+Once the server received a ```Client-Hello-Handshake``` message he should reply with this message.
 ```
 0      4       8           40            56         88
 +------+-------+-----------+-------------+----------+
@@ -71,6 +75,7 @@ Flags [4 Bit]:
 ```
 
 ### File-Creation:
+Marks the start of a file transfer. Tells the server to create the given file with the given path.
 ```
 0      4           36                68          70					
 +------+-----------+-----------------+-----------+------------------+-----------+----------+----------+
@@ -92,6 +97,7 @@ FID [defined in "File Name Length" in Bit]:
 
 
 ### File-Transfer:
+The actual file transfer message containing the file content.
 ```
 0      4           36                68      72
 +------+-----------+-----------------+-------+----------------+---------+----------+
@@ -113,7 +119,8 @@ Content Length [x Bit] **Don't forget about the MTU**
 
 Content [defined in "Content Length" in Bit] **Don't forget about the MTU**
 
-### Server-ACK:
+### ACK:
+For acknowledging ```Ping```, ```File-Creation``` and ```File-Transfer``` messages.
 ```
 0      4           36                    68
 +------+-----------+---------------------+
@@ -125,6 +132,7 @@ ACK Sequence Number [like Sequence Number]:<br/>
 	The acknowledged ```Sequence Number``` or ```Ping Sequence Number```
 
 ### Transfer-Ended:
+Gets send by the client once he wants to end the transfer.
 ```
 0      4       8           40         72
 +------+-------+-----------+----------+
@@ -143,6 +151,8 @@ Flags [4 Bit]:
 ```
 
 ### Ping:
+This message is used for ensuring the oponent is still there. The oponent should acknowledge each received ```Ping``` message with an ```Server-ACK```.Should get send by each side if there was no message exchange for more than 5 seconds.<br/>
+It also can be used for package loss and throughput tests with a modified ```Payload Length```.
 ```
 0      4                      36               64
 +------+----------------------+----------------+---------+
@@ -158,8 +168,6 @@ Payload Length [28 Bit]:<br/>
 
 Payload [X Byte]:<br/>
 	Defined via the ```Payload Length```
-
-### Pong:
 
 ## Process example:
 
