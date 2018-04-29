@@ -28,9 +28,9 @@ void ServerHelloMessage::createBuffer(struct Message* msg) {
 	setBufferValue(msg, clientId32, 2, 40);
 
 	// Add port:
-	char port16[2]; //65535
-	port16[0] = (65535 >> 8) & 0xFF;
-	port16[1] = 65535 & 0xFF;
+	char port16[2];
+	port16[0] = (port >> 8) & 0xFF;
+	port16[1] = port & 0xFF;
 	setBufferValue(msg, port16, 2, 40);
 
 	// Add checksum:

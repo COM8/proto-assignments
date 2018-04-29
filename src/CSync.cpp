@@ -53,11 +53,6 @@ struct arg* parseParameter(int argc, char* argv[]) {
 }
 
 void launchServer(unsigned int port) {
-	/*ClientHelloMessage msg = ClientHelloMessage(port);
-
-	struct Message m = {};
-
-	msg.createBuffer(&m);*/
 	FileServer server = FileServer((unsigned short)port);
 	server.start();
 

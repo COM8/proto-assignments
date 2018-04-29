@@ -35,3 +35,27 @@ void AbstractMessage::setByteWithOffset(struct Message* msg, char value, int bit
 		msg->buffer[byteIndex] |= second;
 	}
 }
+
+char* AbstractMessage::getBytesWithOffset(unsigned char* buffer, int bitOffset, int bitLength) {
+	int lengthBytes = bitLength/8;
+	char* result = new char[lengthBytes];
+	for(int i = 0; i < lengthBytes; i++) {
+		result[i] = getByteWithOffset(buffer, bitOffset + i*8);
+	}
+
+	int lengthMod = bitLength % 8;
+	if(lengthMod != 0) {
+		result[lengthBytes-1] &= ((char)-1) >> (lengthMod -1); 
+	}
+}
+
+char AbstractMessage::getByteWithOffset(unsigned char* buffer, int bitOffset) {
+	int bitOffsetMod = bitOffset % 8;
+	int byteOffset = bitOffset/8;
+	if(bitOffsetMod == 0) {
+		return buffer[byteOffset];
+	}
+	else {
+		return (buffer[byteOffset] << bitOffsetMod) | (unsigned char)(buffer[byteOffset+1] >> bitOffsetMod);
+	}
+}

@@ -4,10 +4,10 @@ using namespace net;
 using namespace std;
 
 FileServer::FileServer(unsigned short port) : port(port),
-												clientId(0),
-												state(stopped),
-												shouldConsumerRun(false),
-												client(NULL) {
+											  clientId(0),
+											  state(stopped),
+											  shouldConsumerRun(false),
+											  client(NULL) {
 	cpQueue = new Queue<ReadMessage>();
 }
 
@@ -53,15 +53,27 @@ void FileServer::consumerTask() {
 
 void FileServer::onClientHelloMessage(ReadMessage &msg) {
 	if(!client) {
-		cout << "New client accepted!" << endl;
-
 		client = new FileClientConnection {};
 		client->clientId = clientId++;
 		client->state = c_clientHello;
-		client->portRemote = 1235; // Get from received message
-		//client->remoteIp = msg.senderIp;
-		client->portLocal = 1235; // Get random one
+		client->portRemote = ClientHelloMessage::getPortFromMessage(msg.buffer);
+		client->remoteIp = msg.senderIp;
+		client->portLocal = 1235; // ToDo: Get random one
+		client->cpQueue = new Queue<ReadMessage>();
+		client->udpClient = new Client(client->remoteIp, client->portRemote);
+		client->udpServer = new Server(client->portLocal, client->cpQueue);
+		client->udpServer->start();
+
+		sendServerHelloMessage(*client);
+		client->state = c_serverHello;
+
+		cout << "New client accepted on port: " << client->portRemote << endl;
 	}
+}
+
+void FileServer::sendServerHelloMessage(const FileClientConnection& client) {
+	ServerHelloMessage msg(client.portLocal, client.clientId, 1 << 4);
+	client.udpClient->send(&msg);
 }
 
 void FileServer::stop() {

@@ -23,3 +23,8 @@ void ClientHelloMessage::createBuffer(struct Message* msg) {
 	// Add checksum:
 	addChecksum(msg, 20);
 }
+
+unsigned short ClientHelloMessage::getPortFromMessage(unsigned char* buffer) {
+	char* portArray = AbstractMessage::getBytesWithOffset(buffer, 4, 16);
+	return portArray[0] << 8 | portArray[1];
+}

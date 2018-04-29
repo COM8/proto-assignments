@@ -11,7 +11,6 @@
 #include <bitset>
 #include "net/State.h"
 #include "Helpers.h"
-#include "net/MessageParser.h"
 #include "Queue.h"
 
 #define BUF_SIZE 2048

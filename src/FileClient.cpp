@@ -12,7 +12,6 @@ FileClient::FileClient(std::string* serverAddress, unsigned short serverPort, Fi
 
 void FileClient::startSendingFS() {
 	client = Client(*serverAddress, serverPort);
-	client.start();
 
 	unsigned short listenPort = 1235;
 

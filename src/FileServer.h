@@ -4,7 +4,10 @@
 #include <thread>
 #include "net/State.h"
 #include "net/Server.h"
+#include "net/Client.h"
 #include "Queue.h"
+#include "net/ServerHelloMessage.h"
+#include "net/ClientHelloMessage.h"
 
 enum FileClientConnectionState {
 	c_disconnected,
@@ -18,7 +21,10 @@ struct FileClientConnection {
 	unsigned int clientId;
 	unsigned short portLocal;
 	unsigned short portRemote;
-	char remoteIp[INET_ADDRSTRLEN];
+	char* remoteIp;
+	net::Client* udpClient;
+	net::Server* udpServer;
+	Queue<net::ReadMessage>* cpQueue;
 	FileClientConnectionState state = c_disconnected;
 };
 
@@ -43,4 +49,5 @@ private:
 	void stopConsumerThread();
 	void consumerTask();
 	void onClientHelloMessage(net::ReadMessage& msg);
+	void sendServerHelloMessage(const FileClientConnection& client);
 };
