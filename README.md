@@ -84,18 +84,22 @@ Flags [4 Bit]:
 Marks the start of a file transfer. Tells the server to create the given file with the given path.
 Replaces existing files.
 ```
-0      4           36                68          70              326          390
-+------+-----------+-----------------+-----------+---------------+------------+-----+----------+
-| Type | Client ID | Sequence Number | File Type | File SHA3 256 | FID Length | FID | Checksum |
-+------+-----------+-----------------+-----------+---------------+------------+-----+----------+
+0      4           36                68          72              328        360          424
++------+-----------+-----------------+-----------+---------------+----------+------------+-----+
+| Type | Client ID | Sequence Number | File Type | File SHA3 256 | Checksum | FID Length | FID |
++------+-----------+-----------------+-----------+---------------+----------+------------+-----+
 
 ```
 
-File Type [2 Bit]:<br/>
-	00 => Folder<br/>
-	01 => File<br/>
-	10 => Delete File<br/>
-	11 => Delete Folder<br/> 
+File Type [4 Bit]:<br/>
+```
+0000
+||||
+|||+-> Folder
+||+--> Delete folder
+|+---> File
++----> Delete file
+```
 
 File SHA3 256 [256 Bit]:<br/>
 	The file SHA3 256 hash to check if the file was transmitted correctly. Unused for folders. [Wiki Link](https://en.wikipedia.org/wiki/SHA-3)
@@ -104,10 +108,10 @@ File SHA3 256 [256 Bit]:<br/>
 ### File-Transfer:
 The actual file transfer message containing the file content.
 ```
-0      4           36                68      72             328
-+------+-----------+-----------------+-------+--------------+----------------+---------+----------+
-| Type | Client ID | Sequence Number | Flags | FID SHA3 256 | Content Length | Content | Checksum |
-+------+-----------+-----------------+-------+--------------+----------------+---------+----------+
+0      4           36                68      72             328        360
++------+-----------+-----------------+-------+--------------+----------+----------------+---------+
+| Type | Client ID | Sequence Number | Flags | FID SHA3 256 | Checksum | Content Length | Content |
++------+-----------+-----------------+-------+--------------+----------+----------------+---------+
 ```
 
 Flags [4 Bit]:
@@ -132,10 +136,10 @@ Content [defined in "Content Length" in Bit]:**Size not final. Don't forget abou
 ### File-Status:
 Used for requesting and responding the current file status e.g. after a connection disconnect.
 ```
-0      4        8                      40           104
-+------+--------+----------------------+------------+-----+----------+
-| Type |  Flags | Last Sequence Number | FID Length | FID | Checksum |
-+------+--------+----------------------+------------+-----+----------+
+0      4        8                      40         72          134
++------+--------+----------------------+----------+-----------+-----+
+| Type |  Flags | Last Sequence Number | Checksum |FID Length | FID | 
++------+--------+----------------------+----------+-----------+-----+
 ```
 
 Flags [4 Bit]:
@@ -155,10 +159,10 @@ Last Sequence Number [32 Bit]:
 ### ACK:
 For acknowledging ```Ping```, ```File-Creation``` and ```File-Transfer``` messages.
 ```
-0      4           36                    68
-+------+-----------+---------------------+
-| Type | Client ID | ACK Sequence Number |
-+------+-----------+---------------------+
+0      4           36                    68         100      104
++------+-----------+---------------------+----------+--------+
+| Type | Client ID | ACK Sequence Number | Checksum | UNUSED |
++------+-----------+---------------------+----------+--------+
 ```
 
 ACK Sequence Number [32 Bit]:<br/>
