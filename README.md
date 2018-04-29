@@ -1,7 +1,7 @@
 # protocol-assignment-1
 
 ### ToDo:
-* Add length for last Sequence and FID Length
+
 
 ### Important:
 * UDP MTU
