@@ -25,6 +25,6 @@ void ClientHelloMessage::createBuffer(struct Message* msg) {
 }
 
 unsigned short ClientHelloMessage::getPortFromMessage(unsigned char* buffer) {
-	char* portArray = AbstractMessage::getBytesWithOffset(buffer, 4, 16);
-	return portArray[0] << 8 | portArray[1];
+	unsigned char* portArray = AbstractMessage::getBytesWithOffset(buffer, 4, 16);
+	return static_cast<int16_t>(portArray[0]) << 8 | portArray[1];
 }

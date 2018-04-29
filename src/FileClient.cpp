@@ -16,7 +16,7 @@ void FileClient::startSendingFS() {
 	unsigned short listenPort = 1235;
 
 	while(state == disconnected) {
-		//sleep(1); // Sleep for 1s
+		sleep(1); // Sleep for 1s
 		sendClientHelloMessage(listenPort);
 	}
 }

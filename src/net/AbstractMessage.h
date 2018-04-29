@@ -22,11 +22,11 @@ namespace net {
 	protected:
 		char type;
 
-		static char* getBytesWithOffset(unsigned char* buffer, int bitOffset, int bitLength);
+		static unsigned char* getBytesWithOffset(unsigned char* buffer, int bitOffset, int bitLength);
 		void setBufferValue(struct Message* msg, char* value, int valueLength, int bitOffset);
 
 	private:
 		void setByteWithOffset(struct Message* msg, char value, int bitOffset);
-		static char getByteWithOffset(unsigned char* buffer, int bitOffset);
+		static unsigned char getByteWithOffset(unsigned char* buffer, int bitOffset);
 	};
 }
