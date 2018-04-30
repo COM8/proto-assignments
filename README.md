@@ -1,7 +1,7 @@
 # protocol-assignment-1
 
 ### ToDo:
-
+* Add some way to continue the file transfer once the client crashed
 
 ### Important:
 * UDP MTU
