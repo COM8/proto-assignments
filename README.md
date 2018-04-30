@@ -2,12 +2,14 @@
 
 ### ToDo:
 * Add some way to continue the file transfer once the client crashed
+* Send file metadate e.g. rights, owner, creation date, ...
 
 ### Important:
 * UDP MTU
 * Don't create packages with a size of (bit-size mod 8) != 0. It makes it hard on the receiver side to interpret those!
 
 ### Changelog:
+* 30.04.2018 [Fabian] Updated ToDo
 * 29.04.2018 [Fabian] Updated protocol
 * 29.04.2018 [Kilian] Added ```File-Status``` message
 * 29.04.2018 [Fabian] Added message description and ```Ping``` message
