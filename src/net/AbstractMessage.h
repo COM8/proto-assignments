@@ -1,6 +1,9 @@
 #pragma once
 
 #include <iostream>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <netdb.h>
 
 namespace net {
 
@@ -10,6 +13,14 @@ namespace net {
 		char* buffer;
 	};
 
+	struct ReadMessage
+	{
+		unsigned short msgType;
+		unsigned char* buffer;
+		unsigned int bufferLength;
+		char senderIp[INET_ADDRSTRLEN];
+	};
+
 	class AbstractMessage {
 	public:
 		virtual void createBuffer(struct Message* msg) { msg->bufferLength = -1; };
@@ -17,7 +28,8 @@ namespace net {
 		AbstractMessage(char type);
 		AbstractMessage() = default;
 		char getType();
-		void addChecksum(struct Message* msg, int bitOffset);
+		void addChecksum(struct Message* msg, unsigned int checkSumOffsetBits);
+		static bool isChecksumValid(struct ReadMessage* msg, unsigned int checkSumOffsetBits);
 
 	protected:
 		char type;

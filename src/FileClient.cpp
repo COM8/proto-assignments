@@ -10,10 +10,14 @@ FileClient::FileClient(std::string* serverAddress, unsigned short serverPort, Fi
 	this->state = disconnected;
 	this->cpQueue = new Queue<ReadMessage>();
 	this->shouldConsumerRun = false;
+	this->shouldTransferRun = false;
 	this->consumerThread = NULL;
+	this->seqNumber = 0;
 }
 
 void FileClient::startSendingFS() {
+	shouldTransferRun = true;
+
 	client = Client(*serverAddress, serverPort);
 
 	unsigned short listenPort = 1235;
@@ -41,6 +45,11 @@ void FileClient::stopConsumerThread() {
 }
 
 void FileClient::onServerHelloMessage(ReadMessage& msg) {
+	// Check if the checksum of the received package is valid else drop it:
+	if(!AbstractMessage::isChecksumValid(&msg, ServerHelloMessage::CHECKSUM_OFFSET_BITS)) {
+		return;
+	}
+
 	if(state == sendHandshake) {
 		state = connected;
 		cout << "Connected to server!" << endl;
@@ -69,11 +78,22 @@ void FileClient::sendClientHelloMessage(unsigned short listeningPort) {
 	client.send(&msg);
 }
 
+void FileClient::sendPingMessage(unsigned int plLength, unsigned int seqNumber) {
+	PingMessage msg = PingMessage(plLength, seqNumber);
+	client.send(&msg);
+	cout << "Ping" << endl;
+}
+
 void FileClient::transferFiles() {
 	// ToDo: File transfer logic
+	while(shouldTransferRun) {
+		sendPingMessage(0, seqNumber++);
+		sleep(1); // Sleep for 1s
+	}
 }
 
 void FileClient::stopSendingFS() {
+	shouldTransferRun = false;
 	stopConsumerThread();
 	server.stop();
 }

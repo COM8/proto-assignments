@@ -11,8 +11,12 @@ char AbstractMessage::getType() {
 	return type;
 }
 
-void AbstractMessage::addChecksum(struct Message* msg, int bitOffset) {
+void AbstractMessage::addChecksum(struct Message* msg, unsigned int checkSumOffsetBits) {
 	// ToDo: Calc checksum and add it
+}
+
+bool AbstractMessage::isChecksumValid(struct ReadMessage* msg, unsigned int checkSumOffsetBits) {
+	return true;
 }
 
 void AbstractMessage::setBufferValue(struct Message* msg, char* value, int valueLength, int bitOffset) {

@@ -19,17 +19,9 @@
 // Based on: https://www.cs.rutgers.edu/~pxk/417/notes/sockets/udp.html
 namespace net {
 
-	struct ReadMessage
-	{
-		unsigned short msgType;
-		unsigned char* buffer;
-		unsigned int bufferLength;
-		char senderIp[INET_ADDRSTRLEN];
-	};
-
 	class Server {
 	public:
-		Server(unsigned short port, Queue<ReadMessage>* cpQueue);
+		Server(unsigned short port, Queue<net::ReadMessage>* cpQueue);
 		Server() = default;
 		void start();
 		void stop();
@@ -42,7 +34,7 @@ namespace net {
     	struct sockaddr_in myAddr;
     	std::thread* serverThread;
     	bool shouldRun;
-    	Queue<ReadMessage>* cpQueue;
+    	Queue<net::ReadMessage>* cpQueue;
 
     	void setState(net::State state);
     	void contReadStart();

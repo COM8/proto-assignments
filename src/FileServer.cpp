@@ -52,6 +52,11 @@ void FileServer::consumerTask() {
 }
 
 void FileServer::onClientHelloMessage(ReadMessage &msg) {
+	// Check if the checksum of the received package is valid else drop it:
+	if(!AbstractMessage::isChecksumValid(&msg, ClientHelloMessage::CHECKSUM_OFFSET_BITS)) {
+		return;
+	}
+
 	if(!client) {
 		client = new FileClientConnection {};
 		client->clientId = clientId++;
