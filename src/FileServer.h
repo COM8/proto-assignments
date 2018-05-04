@@ -8,6 +8,8 @@
 #include "Queue.h"
 #include "net/ServerHelloMessage.h"
 #include "net/ClientHelloMessage.h"
+#include "net/PingMessage.h"
+#include "net/AckMessage.h"
 
 enum FileClientConnectionState {
 	c_disconnected,
@@ -49,5 +51,7 @@ private:
 	void stopConsumerThread();
 	void consumerTask();
 	void onClientHelloMessage(net::ReadMessage& msg);
+	void onPingMessage(net::ReadMessage &msg);
+	void onAckMessage(net::ReadMessage &msg);
 	void sendServerHelloMessage(const FileClientConnection& client);
 };

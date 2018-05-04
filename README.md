@@ -162,10 +162,10 @@ Last Sequence Number [32 Bit]:
 ### ACK:
 For acknowledging ```Ping```, ```File-Creation``` and ```File-Transfer``` messages.
 ```
-0      4           36                    68         100      104
-+------+-----------+---------------------+----------+--------+
-| Type | Client ID | ACK Sequence Number | Checksum | UNUSED |
-+------+-----------+---------------------+----------+--------+
+0      4                     36         68      72
++------+---------------------+----------+--------+
+| Type | ACK Sequence Number | Checksum | UNUSED |
++------+---------------------+----------+--------+
 ```
 
 ACK Sequence Number [32 Bit]:<br/>

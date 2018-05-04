@@ -66,11 +66,25 @@ void FileClient::consumerTask() {
 				onServerHelloMessage(msg);
 				break;
 
+			case 5:
+				onAckMessage(msg);
+				break;
+
 			default:
 				cerr << "Unknown message type received: " << msg.msgType << endl;
 				break;
 		}
 	}
+}
+
+void FileClient::onAckMessage(ReadMessage &msg) {
+	// Check if the checksum of the received message is valid else drop it:
+	if(!AbstractMessage::isChecksumValid(&msg, AckMessage::CHECKSUM_OFFSET_BITS)) {
+		return;
+	}
+	unsigned int seq = AckMessage::getSeqNumberFromMessage(msg.buffer);
+	cout << "Ack: " << seq << endl;
+	sendPingMessage(0, seqNumber++);
 }
 
 void FileClient::sendClientHelloMessage(unsigned short listeningPort) {
@@ -86,10 +100,13 @@ void FileClient::sendPingMessage(unsigned int plLength, unsigned int seqNumber) 
 
 void FileClient::transferFiles() {
 	// ToDo: File transfer logic
-	while(shouldTransferRun) {
+
+	sendPingMessage(0, seqNumber++);
+	
+	/*while(shouldTransferRun) {
 		sendPingMessage(0, seqNumber++);
 		sleep(1); // Sleep for 1s
-	}
+	}*/
 }
 
 void FileClient::stopSendingFS() {

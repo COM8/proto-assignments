@@ -8,6 +8,7 @@
 #include "net/ClientHelloMessage.h"
 #include "net/ServerHelloMessage.h"
 #include "net/PingMessage.h"
+#include "net/AckMessage.h"
 #include "Queue.h"
 
 enum TransferState
@@ -42,6 +43,7 @@ private:
 	void stopConsumerThread();
 	void consumerTask();
 	void onServerHelloMessage(net::ReadMessage& msg);
+	void onAckMessage(net::ReadMessage &msg);
 	void transferFiles();
 	void sendPingMessage(unsigned int plLength, unsigned int seqNumber);
 };

@@ -44,6 +44,14 @@ void FileServer::consumerTask() {
 				onClientHelloMessage(msg);
 				break;
 
+			case 5:
+				onAckMessage(msg);
+				break;
+
+			case 6:
+				onPingMessage(msg);
+				break;
+
 			default:
 				cerr << "Unknown message type received: " << msg.msgType << endl;
 				break;
@@ -51,8 +59,27 @@ void FileServer::consumerTask() {
 	}
 }
 
+void FileServer::onAckMessage(ReadMessage &msg) {
+	// Check if the checksum of the received message is valid else drop it:
+	if(!AbstractMessage::isChecksumValid(&msg, AckMessage::CHECKSUM_OFFSET_BITS)) {
+		return;
+	}
+	cout << "Ack" << endl;
+}
+
+void FileServer::onPingMessage(ReadMessage &msg) {
+	// Check if the checksum of the received message is valid else drop it:
+	if(!AbstractMessage::isChecksumValid(&msg, PingMessage::CHECKSUM_OFFSET_BITS)) {
+		return;
+	}
+
+	unsigned int seqNumber = PingMessage::getSeqNumberFromMessage(msg.buffer);
+	AckMessage ack(seqNumber);
+	client->udpClient->send(&ack);
+}
+
 void FileServer::onClientHelloMessage(ReadMessage &msg) {
-	// Check if the checksum of the received package is valid else drop it:
+	// Check if the checksum of the received message is valid else drop it:
 	if(!AbstractMessage::isChecksumValid(&msg, ClientHelloMessage::CHECKSUM_OFFSET_BITS)) {
 		return;
 	}
