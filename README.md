@@ -9,6 +9,7 @@
 * Don't create packages with a size of (bit-size mod 8) != 0. It makes it hard on the receiver side to interpret those!
 
 ### Changelog:
+* 04.05.2018 [Fabian] Added Ping checksum
 * 30.04.2018 [Fabian] Updated ToDo
 * 29.04.2018 [Fabian] Updated protocol
 * 29.04.2018 [Kilian] Added ```File-Status``` message
@@ -193,10 +194,10 @@ Flags [4 Bit]:
 This message is used for ensuring the opponent is still there. The opponent should acknowledge each received ```Ping``` message with an ```Server-ACK```.Should get send by each side if there was no message exchange for more than 5 seconds.<br/>
 It also can be used for package loss and throughput tests with a modified ```Payload Length```.
 ```
-0      4                      36               64
-+------+----------------------+----------------+---------+
-| Type | Ping Sequence Number | Payload Length | Payload |
-+------+----------------------+----------------+---------+
+0      4                      36         68               96
++------+----------------------+----------+----------------+---------+
+| Type | Ping Sequence Number | Checksum | Payload Length | Payload |
++------+----------------------+----------+----------------+---------+
 ```
 
 Ping Sequence Number [32 Bit]<br/>
