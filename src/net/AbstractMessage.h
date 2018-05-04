@@ -4,6 +4,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
+#include <cstdint>
 
 namespace net {
 
@@ -34,10 +35,13 @@ namespace net {
 	protected:
 		char type;
 
-		static unsigned char* getBytesWithOffset(unsigned char* buffer, int bitOffset, int bitLength);
-		void setBufferValue(struct Message* msg, char* value, int valueLength, int bitOffset);
+		static unsigned int getUnsignedIntFromMessage(unsigned char* buffer, int bitOffset);
+		static unsigned int getUnsignedShortFromMessage(unsigned char* buffer, int bitOffset);
+		static uint64_t getUnsignedInt64FromMessage(unsigned char* buffer, int bitOffset);
 
-	private:
+		static unsigned char* getBytesWithOffset(unsigned char* buffer, int bitOffset, int bitLength);
+		static unsigned char* getBytesWithOffset(unsigned char* buffer, int bitOffset, uint64_t bitLength);
+		void setBufferValue(struct Message* msg, char* value, int valueLength, int bitOffset);
 		void setByteWithOffset(struct Message* msg, char value, int bitOffset);
 		static unsigned char getByteWithOffset(unsigned char* buffer, int bitOffset);
 	};
