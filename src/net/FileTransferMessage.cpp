@@ -3,7 +3,7 @@
 using namespace net;
 using namespace std;
 
-FileTransferMessage::FileTransferMessage(unsigned int clientId, unsigned int seqNumber,unsigned char fileType, unsigned char* fileHash, uint64_t contentLength, unsigned char* content) : AbstractMessage(6 << 4) { // 01100000
+FileTransferMessage::FileTransferMessage(unsigned int clientId, unsigned int seqNumber,unsigned char fileType, unsigned char* fileHash, uint64_t contentLength, unsigned char* content) : AbstractMessage(3 << 4) { // 00110000
 	this->clientId = clientId;
 	this->seqNumber = seqNumber;
 	this->fileType = fileType;

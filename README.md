@@ -139,10 +139,10 @@ Content [defined in "Content Length" in Bit]:**Size not final. Don't forget abou
 ### File-Status:
 Used for requesting and responding the current file status e.g. after a connection disconnect.
 ```
-0      4        8                      40         72          134
-+------+--------+----------------------+----------+-----------+-----+
-| Type |  Flags | Last Sequence Number | Checksum |FID Length | FID | 
-+------+--------+----------------------+----------+-----------+-----+
+0      4        8           40                     72         104         168
++------+--------+-----------+----------------------+----------+-----------+-----+
+| Type |  Flags | Client ID | Last Sequence Number | Checksum |FID Length | FID | 
++------+--------+-----------+----------------------+----------+-----------+-----+
 ```
 
 Flags [4 Bit]:
