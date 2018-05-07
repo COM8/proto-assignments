@@ -18,11 +18,11 @@ void FileStatusMessage::createBuffer(struct Message* msg) {
 	// Add type:
 	msg->buffer[0] |= type;
 
-	// Add client id:
-	setBufferInt(msg, clientId, 4);
-
 	// Add flags:
 	setByteWithOffset(msg, flags, 0); // Starts at 4 - ensure the first 4 bit are 0
+
+	// Add client id:
+	setBufferInt(msg, clientId, 8);
 
 	// Add last sequence number:
 	setBufferInt(msg, lastSeqNumber, 40);
