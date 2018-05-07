@@ -7,7 +7,7 @@ namespace net {
 	
 	class FileCreationMessage : public AbstractMessage {
 	public:
-		static const unsigned int CHECKSUM_OFFSET_BITS = 36;
+		static const unsigned int CHECKSUM_OFFSET_BITS = 328;
 
 		FileCreationMessage(unsigned int clientId, unsigned int seqNumber, unsigned char fileType, unsigned char* fileHash, uint64_t fIDLength, unsigned char* fID);
 		void createBuffer(struct Message* msg);

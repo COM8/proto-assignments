@@ -1,4 +1,5 @@
 #pragma once
+
 #include "net/AbstractMessage.h"
 
 namespace net {
@@ -7,12 +8,12 @@ namespace net {
 	public:
 		static const unsigned int CHECKSUM_OFFSET_BITS = 56;
 
-		ServerHelloMessage(unsigned short port, unsigned int clientId, char flags);
+		ServerHelloMessage(unsigned short port, unsigned int clientId, unsigned char flags);
 		void createBuffer(struct Message* msg);
 
 	private:
 		unsigned short port;
 		unsigned int clientId;
-		char flags; // Only the fist 4 bits from the left are used!
+		unsigned char flags; // Only the fist 4 bits from the left are used!
 	};
 }

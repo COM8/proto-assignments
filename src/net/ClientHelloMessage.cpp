@@ -15,10 +15,7 @@ void ClientHelloMessage::createBuffer(struct Message* msg) {
 	msg->buffer[0] |= type;
 
 	// Add port:
-	char port16[2];
-	port16[0] = (port >> 8) & 0xFF;
-	port16[1] = port & 0xFF;
-	setBufferValue(msg, port16, 2, 4);
+	setBufferShort(msg, port, 4);
 
 	// Add checksum:
 	addChecksum(msg, 20);

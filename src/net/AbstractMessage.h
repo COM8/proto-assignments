@@ -41,8 +41,11 @@ namespace net {
 
 		static unsigned char* getBytesWithOffset(unsigned char* buffer, int bitOffset, int bitLength);
 		static unsigned char* getBytesWithOffset(unsigned char* buffer, int bitOffset, uint64_t bitLength);
-		void setBufferValue(struct Message* msg, char* value, int valueLength, int bitOffset);
-		void setByteWithOffset(struct Message* msg, char value, int bitOffset);
 		static unsigned char getByteWithOffset(unsigned char* buffer, int bitOffset);
+		void setBufferValue(struct Message* msg, unsigned char* value, int valueLength, int bitOffset);
+		void setByteWithOffset(struct Message* msg, unsigned char value, int bitOffset);
+		void setBufferInt(struct Message* msg, int i, int bitOffset);
+		void setBufferShort(struct Message* msg, short i, int bitOffset);
+		void setBufferUint64_t(struct Message* msg, uint64_t i, int bitOffset);
 	};
 }

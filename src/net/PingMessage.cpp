@@ -16,18 +16,10 @@ void PingMessage::createBuffer(struct Message* msg) {
 	msg->buffer[0] |= type;
 
 	// Add payload length:
-	char plLengthArray[4];
-    for (int i = 0; i < 4; i++) {
-		plLengthArray[3 - i] = (plLength >> (i * 8));
-    }
-	setBufferValue(msg, plLengthArray, 4, 72);
+	setBufferInt(msg, plLength, 72);
 
 	// Add sequence number:
-	char seqNumberArray[4];
-    for (int i = 0; i < 4; i++) {
-		seqNumberArray[3 - i] = (seqNumber >> (i * 8));
-    }
-	setBufferValue(msg, seqNumberArray, 4, 4);
+	setBufferInt(msg, seqNumber, 4);
 
 	// Add checksum:
 	addChecksum(msg, CHECKSUM_OFFSET_BITS);

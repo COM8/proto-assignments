@@ -13,28 +13,32 @@ FileCreationMessage::FileCreationMessage(unsigned int clientId, unsigned int seq
 }
 
 void FileCreationMessage::createBuffer(struct Message* msg) {
-	/*msg->buffer = new char[53 + plLength]{};
-	msg->bufferLength = 53 + plLength;
+	msg->buffer = new char[53 + fIDLength]{};
+	msg->bufferLength = 53 + fIDLength;
 	
 	// Add type:
 	msg->buffer[0] |= type;
 
-	// Add payload length:
-	char plLengthArray[4];
-    for (int i = 0; i < 4; i++) {
-		plLengthArray[3 - i] = (plLength >> (i * 8));
-    }
-	setBufferValue(msg, plLengthArray, 4, 72);
+	// Add client id:
+	setBufferInt(msg, clientId, 4);
 
 	// Add sequence number:
-	char seqNumberArray[4];
-    for (int i = 0; i < 4; i++) {
-		seqNumberArray[3 - i] = (seqNumber >> (i * 8));
-    }
-	setBufferValue(msg, seqNumberArray, 4, 4);
+	setBufferInt(msg, seqNumber, 36);
+
+	// Add file type:
+	setByteWithOffset(msg, fileType, 64); // Starts at 68 - ensure the first 4 bit are 0
+
+	// Add file hash:
+	setBufferValue(msg, fileHash, 32, 72);
 
 	// Add checksum:
-	addChecksum(msg, CHECKSUM_OFFSET_BITS);*/
+	addChecksum(msg, CHECKSUM_OFFSET_BITS);
+
+	// Add FID length:
+	setBufferUint64_t(msg, fIDLength, 360);
+
+	// Add FID:
+	setBufferValue(msg, fID, fIDLength, 424);
 }
 
 unsigned int FileCreationMessage::getSeqNumberFromMessage(unsigned char* buffer) {

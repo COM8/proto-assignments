@@ -19,14 +19,14 @@ bool AbstractMessage::isChecksumValid(struct ReadMessage* msg, unsigned int chec
 	return true;
 }
 
-void AbstractMessage::setBufferValue(struct Message* msg, char* value, int valueLength, int bitOffset) {
+void AbstractMessage::setBufferValue(struct Message* msg, unsigned char* value, int valueLength, int bitOffset) {
 	for (int i = 0; i < valueLength; ++i)
 	{
 		setByteWithOffset(msg, value[i], bitOffset + (8*i));
 	}
 }
 
-void AbstractMessage::setByteWithOffset(struct Message* msg, char value, int bitOffset) {
+void AbstractMessage::setByteWithOffset(struct Message* msg, unsigned char value, int bitOffset) {
 	int byteIndex = bitOffset/8;
 
 	if (bitOffset % 8 == 0) {
@@ -38,6 +38,30 @@ void AbstractMessage::setByteWithOffset(struct Message* msg, char value, int bit
 		msg->buffer[byteIndex++] |= first;
 		msg->buffer[byteIndex] |= second;
 	}
+}
+
+void AbstractMessage::setBufferInt(struct Message* msg, int i, int bitOffset) {
+	unsigned char intArray[4];
+	for (int i = 0; i < 4; i++) {
+		intArray[3 - i] = (i >> (i * 8));
+    }
+    setBufferValue(msg, intArray, 4, bitOffset);
+}
+
+void AbstractMessage::setBufferShort(struct Message* msg, short i, int bitOffset) {
+	unsigned char shortArray[2];
+	for (int i = 0; i < 2; i++) {
+		shortArray[3 - i] = (i >> (i * 8));
+    }
+    setBufferValue(msg, shortArray, 2, bitOffset);
+}
+
+void AbstractMessage::setBufferUint64_t(struct Message* msg, uint64_t i, int bitOffset) {
+	unsigned char intArray[8];
+	for (int i = 0; i < 8; i++) {
+		intArray[3 - i] = (i >> (i * 8));
+    }
+    setBufferValue(msg, intArray, 8, bitOffset);
 }
 
 unsigned char* AbstractMessage::getBytesWithOffset(unsigned char* buffer, int bitOffset, int bitLength) {
