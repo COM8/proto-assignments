@@ -13,7 +13,7 @@ FileCreationMessage::FileCreationMessage(unsigned int clientId, unsigned int seq
 }
 
 void FileCreationMessage::createBuffer(struct Message* msg) {
-	msg->buffer = new char[53 + fIDLength]{};
+	msg->buffer = new unsigned char[53 + fIDLength]{};
 	msg->bufferLength = 53 + fIDLength;
 	
 	// Add type:

@@ -8,7 +8,7 @@ AckMessage::AckMessage(unsigned int seqNumber) : AbstractMessage(5 << 4) { // 01
 }
 
 void AckMessage::createBuffer(struct Message* msg) {
-	msg->buffer = new char[9]{};
+	msg->buffer = new unsigned char[9]{};
 	msg->bufferLength = 9;
 	
 	// Add type:

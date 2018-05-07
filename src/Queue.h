@@ -5,6 +5,7 @@
 #include <mutex>
 #include <condition_variable>
 #include <iostream>
+#include "net/AbstractMessage.h"
 
 // Based on: https://juanchopanzacpp.wordpress.com/2013/02/26/concurrent-queue-c11/
 template <typename T> class Queue

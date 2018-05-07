@@ -8,7 +8,7 @@ TransferEndedMessage::TransferEndedMessage(unsigned int clientId, unsigned char 
 }
 
 void TransferEndedMessage::createBuffer(struct Message* msg) {
-	msg->buffer = new char[9]{};
+	msg->buffer = new unsigned char[9]{};
 	msg->bufferLength = 9;
 	
 	// Add type:

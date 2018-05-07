@@ -9,7 +9,7 @@ PingMessage::PingMessage(unsigned int plLength, unsigned int seqNumber) : Abstra
 }
 
 void PingMessage::createBuffer(struct Message* msg) {
-	msg->buffer = new char[12 + plLength]{};
+	msg->buffer = new unsigned char[12 + plLength]{};
 	msg->bufferLength = 12 + plLength;
 	
 	// Add type:

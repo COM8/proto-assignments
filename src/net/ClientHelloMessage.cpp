@@ -8,7 +8,7 @@ ClientHelloMessage::ClientHelloMessage(unsigned short port) : AbstractMessage(1 
 }
 
 void ClientHelloMessage::createBuffer(struct Message* msg) {
-	msg->buffer = new char[5]{};
+	msg->buffer = new unsigned char[5]{};
 	msg->bufferLength = 5;
 	
 	// Add type:
