@@ -94,17 +94,13 @@ void AbstractMessage::setByteWithOffset(unsigned char* buffer, unsigned char val
 }
 
 void AbstractMessage::setBufferUnsignedInt(struct Message* msg, unsigned int i, int bitOffset) {
-	cout << "Pre: " << i << endl;
-	AbstractMessage::printMessage(msg);
 	AbstractMessage::setBufferUnsignedInt(msg->buffer, i, bitOffset);
-	cout << "Set: " << endl;
-	AbstractMessage::printByteArray(msg->buffer, msg->bufferLength);
 }
 
 void AbstractMessage::setBufferUnsignedInt(unsigned char* buffer, unsigned int i, int bitOffset) {
 	unsigned char intArray[4];
-	for (int i = 0; i < 4; i++) {
-		intArray[3 - i] = (i >> (i * 8));
+	for (int e = 0; e < 4; e++) {
+		intArray[3 - e] = (i >> (e * 8));
     }
     AbstractMessage::setBufferValue(buffer, intArray, 4, bitOffset);
 }
@@ -115,8 +111,8 @@ void AbstractMessage::setBufferUnsignedShort(struct Message* msg, unsigned short
 
 void AbstractMessage::setBufferUnsignedShort(unsigned char* buffer, unsigned short i, int bitOffset) {
 	unsigned char shortArray[2];
-	for (int i = 0; i < 2; i++) {
-		shortArray[3 - i] = (i >> (i * 8));
+	for (int e = 0; e < 2; e++) {
+		shortArray[1 - e] = (i >> (e * 8));
     }
     AbstractMessage::setBufferValue(buffer, shortArray, 2, bitOffset);
 }
@@ -127,8 +123,8 @@ void AbstractMessage::setBufferUint64_t(struct Message* msg, uint64_t i, int bit
 
 void AbstractMessage::setBufferUint64_t(unsigned char* buffer, uint64_t i, int bitOffset) {
 	unsigned char intArray[8];
-	for (int i = 0; i < 8; i++) {
-		intArray[3 - i] = (i >> (i * 8));
+	for (int e = 0; e < 8; e++) {
+		intArray[3 - e] = (i >> (e * 8));
     }
     AbstractMessage::setBufferValue(buffer, intArray, 8, bitOffset);
 }
