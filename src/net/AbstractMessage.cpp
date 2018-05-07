@@ -106,7 +106,12 @@ unsigned int AbstractMessage::getUnsignedShortFromMessage(unsigned char* buffer,
 
 uint64_t AbstractMessage::getUnsignedInt64FromMessage(unsigned char* buffer, int bitOffset) {
 	unsigned char* int64Array = AbstractMessage::getBytesWithOffset(buffer, bitOffset, 64);
-	return static_cast<uint64_t>(int64Array[0]) << 56 | int64Array[1] << 48 | int64Array[2] << 40 
-						| int64Array[3] << 32 | int64Array[4] << 24 | int64Array[5] << 16 
-						| int64Array[6] << 8 | int64Array[7];
+	return static_cast<uint64_t>(int64Array[0]) << 56 
+						| static_cast<uint64_t>(int64Array[1]) << 48 
+						| static_cast<uint64_t>(int64Array[2]) << 40 
+						| static_cast<uint64_t>(int64Array[3]) << 32
+						| static_cast<uint64_t>(int64Array[4]) << 24 
+						| static_cast<uint64_t>(int64Array[5]) << 16 
+						| static_cast<uint64_t>(int64Array[6]) << 8 
+						| static_cast<uint64_t>(int64Array[7]);
 }
