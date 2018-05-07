@@ -15,13 +15,12 @@ void AckMessage::createBuffer(struct Message* msg) {
 	msg->buffer[0] |= type;
 
 	// Add sequence number:
-	setBufferInt(msg, seqNumber, 4);
+	setBufferUnsignedInt(msg, seqNumber, 4);
 
 	// Add checksum:
 	addChecksum(msg, CHECKSUM_OFFSET_BITS);
 }
 
 unsigned int AckMessage::getSeqNumberFromMessage(unsigned char* buffer) {
-	unsigned char* seqNumberArray = AbstractMessage::getBytesWithOffset(buffer, 4, 36);
-	return static_cast<int>(seqNumberArray[0]) << 24 | seqNumberArray[1] << 16 | seqNumberArray[2] << 8 | seqNumberArray[3];
+	return getUnsignedIntFromMessage(buffer, 36);
 }

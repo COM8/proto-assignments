@@ -16,21 +16,19 @@ void PingMessage::createBuffer(struct Message* msg) {
 	msg->buffer[0] |= type;
 
 	// Add payload length:
-	setBufferInt(msg, plLength, 72);
+	setBufferUnsignedInt(msg, plLength, 72);
 
 	// Add sequence number:
-	setBufferInt(msg, seqNumber, 4);
+	setBufferUnsignedInt(msg, seqNumber, 4);
 
 	// Add checksum:
 	addChecksum(msg, CHECKSUM_OFFSET_BITS);
 }
 
 unsigned int PingMessage::getPlLengthFromMessage(unsigned char* buffer) {
-	unsigned char* plLengthArray = AbstractMessage::getBytesWithOffset(buffer, 72, 32);
-	return static_cast<int>(plLengthArray[0]) << 24 | plLengthArray[1] << 16 | plLengthArray[2] << 8 | plLengthArray[3];
+	return getUnsignedIntFromMessage(buffer, 72);
 }
 
 unsigned int PingMessage::getSeqNumberFromMessage(unsigned char* buffer) {
-	unsigned char* seqNumberArray = AbstractMessage::getBytesWithOffset(buffer, 4, 32);
-	return static_cast<int>(seqNumberArray[0]) << 24 | seqNumberArray[1] << 16 | seqNumberArray[2] << 8 | seqNumberArray[3];
+	return getUnsignedIntFromMessage(buffer, 4);
 }

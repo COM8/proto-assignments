@@ -20,10 +20,10 @@ void FileCreationMessage::createBuffer(struct Message* msg) {
 	msg->buffer[0] |= type;
 
 	// Add client id:
-	setBufferInt(msg, clientId, 4);
+	setBufferUnsignedInt(msg, clientId, 4);
 
 	// Add sequence number:
-	setBufferInt(msg, seqNumber, 36);
+	setBufferUnsignedInt(msg, seqNumber, 36);
 
 	// Add file type:
 	setByteWithOffset(msg, fileType, 64); // Starts at 68 - ensure the first 4 bit are 0

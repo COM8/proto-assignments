@@ -22,10 +22,10 @@ void FileStatusMessage::createBuffer(struct Message* msg) {
 	setByteWithOffset(msg, flags, 0); // Starts at 4 - ensure the first 4 bit are 0
 
 	// Add client id:
-	setBufferInt(msg, clientId, 8);
+	setBufferUnsignedInt(msg, clientId, 8);
 
 	// Add last sequence number:
-	setBufferInt(msg, lastSeqNumber, 40);
+	setBufferUnsignedInt(msg, lastSeqNumber, 40);
 
 	// Add checksum:
 	addChecksum(msg, CHECKSUM_OFFSET_BITS);

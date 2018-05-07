@@ -26,21 +26,25 @@ unsigned int AbstractMessage::caclCRC32(unsigned char* buffer, int bufferLength)
 
 void AbstractMessage::addChecksum(struct Message* msg, unsigned int checkSumOffsetBits) {
 	// Ensure the CRC32 field is filled with 0:
-	setBufferInt(msg, 0, checkSumOffsetBits);
+	setBufferUnsignedInt(msg, 0, checkSumOffsetBits);
 
-	unsigned int crc32 = caclCRC32(msg->buffer, msg->bufferLength);
-	setBufferInt(msg, crc32, checkSumOffsetBits);
+	unsigned int crc32 = caclCRC32(msg->buffer, msg->bufferLength);	
+	setBufferUnsignedInt(msg, crc32, checkSumOffsetBits);
 }
 
 bool AbstractMessage::isChecksumValid(struct ReadMessage* msg, unsigned int checkSumOffsetBits) {
 	unsigned int crc32Read = getUnsignedIntFromMessage(msg->buffer, checkSumOffsetBits);
 	
 	// Fill the CRC32 field with 0:
-	setBufferInt(msg->buffer, 0, checkSumOffsetBits);
+	setBufferUnsignedInt(msg->buffer, 0, checkSumOffsetBits);
 
 	// Clac new CRC32:
 	unsigned int crc32Calc = caclCRC32(msg->buffer, msg->bufferLength);
 	
+	if(crc32Calc != crc32Read) {
+		cout << "Invalid CRC32: " << crc32Calc << " " << crc32Read << " " << msg->bufferLength << endl;
+	}
+
 	return crc32Read == crc32Calc;
 }
 
@@ -89,11 +93,15 @@ void AbstractMessage::setByteWithOffset(unsigned char* buffer, unsigned char val
 	}
 }
 
-void AbstractMessage::setBufferInt(struct Message* msg, int i, int bitOffset) {
-	AbstractMessage::setBufferInt(msg->buffer, i, bitOffset);
+void AbstractMessage::setBufferUnsignedInt(struct Message* msg, unsigned int i, int bitOffset) {
+	cout << "Pre: " << i << endl;
+	AbstractMessage::printMessage(msg);
+	AbstractMessage::setBufferUnsignedInt(msg->buffer, i, bitOffset);
+	cout << "Set: " << endl;
+	AbstractMessage::printByteArray(msg->buffer, msg->bufferLength);
 }
 
-void AbstractMessage::setBufferInt(unsigned char* buffer, int i, int bitOffset) {
+void AbstractMessage::setBufferUnsignedInt(unsigned char* buffer, unsigned int i, int bitOffset) {
 	unsigned char intArray[4];
 	for (int i = 0; i < 4; i++) {
 		intArray[3 - i] = (i >> (i * 8));
@@ -101,11 +109,11 @@ void AbstractMessage::setBufferInt(unsigned char* buffer, int i, int bitOffset) 
     AbstractMessage::setBufferValue(buffer, intArray, 4, bitOffset);
 }
 
-void AbstractMessage::setBufferShort(struct Message* msg, short i, int bitOffset) {
-	AbstractMessage::setBufferShort(msg->buffer, i, bitOffset);
+void AbstractMessage::setBufferUnsignedShort(struct Message* msg, unsigned short i, int bitOffset) {
+	AbstractMessage::setBufferUnsignedShort(msg->buffer, i, bitOffset);
 }
 
-void AbstractMessage::setBufferShort(unsigned char* buffer, short i, int bitOffset) {
+void AbstractMessage::setBufferUnsignedShort(unsigned char* buffer, unsigned short i, int bitOffset) {
 	unsigned char shortArray[2];
 	for (int i = 0; i < 2; i++) {
 		shortArray[3 - i] = (i >> (i * 8));

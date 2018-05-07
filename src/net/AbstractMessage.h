@@ -55,10 +55,10 @@ namespace net {
 		static void setBufferValue(unsigned char* buffer, unsigned char* value, int valueLength, int bitOffset);
 		void setByteWithOffset(struct Message* msg, unsigned char value, int bitOffset);
 		static void setByteWithOffset(unsigned char* buffer, unsigned char value, int bitOffset);
-		void setBufferInt(struct Message* msg, int i, int bitOffset);
-		static void setBufferInt(unsigned char*, int i, int bitOffset);
-		void setBufferShort(struct Message* msg, short i, int bitOffset);
-		static void setBufferShort(unsigned char*, short i, int bitOffset);
+		void setBufferUnsignedInt(struct Message* msg, unsigned int i, int bitOffset);
+		static void setBufferUnsignedInt(unsigned char*, unsigned int i, int bitOffset);
+		void setBufferUnsignedShort(struct Message* msg, unsigned short i, int bitOffset);
+		static void setBufferUnsignedShort(unsigned char*, unsigned short i, int bitOffset);
 		void setBufferUint64_t(struct Message* msg, uint64_t i, int bitOffset);
 		static void setBufferUint64_t(unsigned char*, uint64_t i, int bitOffset);
 	};

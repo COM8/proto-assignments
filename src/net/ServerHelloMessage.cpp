@@ -10,8 +10,8 @@ ServerHelloMessage::ServerHelloMessage(unsigned short port, unsigned int clientI
 }
 
 void ServerHelloMessage::createBuffer(struct Message* msg) {
-	msg->buffer = new unsigned char[9]{};
-	msg->bufferLength = 9;
+	msg->buffer = new unsigned char[11]{};
+	msg->bufferLength = 11;
 	
 	// Add type:
 	msg->buffer[0] |= type;
@@ -20,10 +20,10 @@ void ServerHelloMessage::createBuffer(struct Message* msg) {
 	setBufferValue(msg, &flags, 1, 4);
 
 	// Add client id:
-	setBufferInt(msg, clientId, 8);
+	setBufferUnsignedInt(msg, clientId, 8);
 
 	// Add port:
-	setBufferShort(msg, port, 40);
+	setBufferUnsignedShort(msg, port, 40);
 
 	// Add checksum:
 	addChecksum(msg, 56);
