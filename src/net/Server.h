@@ -12,6 +12,7 @@
 #include "net/State.h"
 #include "Helpers.h"
 #include "Queue.h"
+#include "net/AbstractMessage.h"
 
 #define BUF_SIZE 2048
 #define MAX_CLIENT_COUNT = 1;

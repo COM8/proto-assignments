@@ -34,15 +34,15 @@ namespace net {
 		char getType();
 		void addChecksum(struct Message* msg, unsigned int checkSumOffsetBits);
 		static bool isChecksumValid(struct ReadMessage* msg, unsigned int checkSumOffsetBits);
+		static void printMessage(struct Message* msg);
+		static void printByteArray(unsigned char* c, int length);
+		static void printByte(unsigned char c);
 
 	protected:
 		unsigned char type;
 
 		// Source: https://en.wikipedia.org/wiki/Cyclic_redundancy_check
 		static unsigned int caclCRC32(unsigned char* buffer, int bufferLength);
-		static void printMessage(struct Message* msg);
-		static void printByteArray(unsigned char* c, int length);
-		static void printByte(unsigned char c);
 
 		static unsigned int getUnsignedIntFromMessage(unsigned char* buffer, int bitOffset);
 		static unsigned int getUnsignedShortFromMessage(unsigned char* buffer, int bitOffset);

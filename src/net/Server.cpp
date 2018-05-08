@@ -117,6 +117,7 @@ void Server::readNextMessage() {
   	}
 
   	if (recvlen > 0) {
+		// AbstractMessage::printByteArray(buf, recvlen);
 		struct ReadMessage msg = {};
 		msg.bufferLength = recvlen;
 		msg.buffer = buf;
