@@ -16,10 +16,31 @@ int Filesystem::genMap(){
 return genMap(this->path);
 }
 
-long unsigned int Filesystem::filesize(const string filename)
-{
-    ifstream in(filename, ifstream::ate | ifstream::binary);
-    return in.tellg(); 
+long unsigned int Filesystem::filesize(const string FID) {
+    ifstream file(FID, ifstream::ate | ifstream::binary);
+    long unsigned int ret = file.tellg();  
+    file.close();
+    return ret;
+}
+
+int Filesystem::readFile(string FID, char* buffer, int partNr, int length) {
+	if(!(this->files[FID] == 0)) {
+		if (!this->files[FID]->isOpen){
+			this->files[FID]->fd = ifstream (FID, ifstream::ate | ifstream::binary);
+			if(!this->files[FID]->fd){
+				this->files.erase(FID);
+				cerr << "Error FID: " << FID << " is missing removing it" << endl;
+				return -2;
+			}else {
+				this->files[FID]->isOpen = true;
+			}
+		}
+		this->files[FID]->fd.seekg(length*partNr, this->files[FID]->fd.beg);
+		this->files[FID]->fd.read(buffer,length);
+		return 0;
+	}else {
+		return -2;
+	}
 }
 
 int Filesystem::genMap(string path) {

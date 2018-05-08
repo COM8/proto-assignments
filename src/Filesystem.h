@@ -10,7 +10,11 @@
 // At the moment the struct item is useless. Can later get used to save important information:
 struct File {
 	std::string name;
+    bool isOpen = false;
     long unsigned int size = 0;
+    std::ifstream fd;
+    long last_part = 0;
+
 
 };
 
@@ -25,6 +29,7 @@ public:
 	static bool exists(std::string path);
 	int genMap();
     int genMap(std::string path);
-    long unsigned int filesize(const std::string filename);
+    long unsigned int filesize(const std::string FID);
+    int readFile(std::string FID, char* buffer, int partNr, int length);
 	std::string toString();
 };
