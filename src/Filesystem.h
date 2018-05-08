@@ -28,6 +28,7 @@ class Filesystem {
 public:
     static long unsigned int filesize(const std::string FID);
     static bool exists(std::string path);
+    static void readFile(std::ifstream fd, char* buffer, int part, int length);
     };
 
 class FilesystemClient: Filesystem {

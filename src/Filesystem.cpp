@@ -23,6 +23,12 @@ long unsigned int Filesystem::filesize(const string FID) {
     return ret;
 }
 
+void Filesystem::readFile(ifstream fd, char* buffer, int partNr, int length) {
+	fd.seekg(length*partNr, fd.beg);
+	fd.read(buffer,length);
+
+}
+
 int FilesystemClient::readFile(string FID, char* buffer, int partNr, int length) {
 	if(!(this->files[FID] == 0)) {
 		if (!this->files[FID]->isOpen){
