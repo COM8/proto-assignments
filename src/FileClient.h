@@ -15,7 +15,9 @@ enum TransferState
 {
 	disconnected,
 	sendHandshake,
-	connected
+	connected,
+	awaitingAck,
+	ping
 };
 
 class FileClient

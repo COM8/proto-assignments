@@ -101,6 +101,8 @@ void FileClient::sendPingMessage(unsigned int plLength, unsigned int seqNumber) 
 void FileClient::transferFiles() {
 	// ToDo: File transfer logic
 
+	// setitimer https://linux.die.net/man/2/setitimer for detecting server timeouts
+
 	sendPingMessage(0, seqNumber++);
 	
 	/*while(shouldTransferRun) {

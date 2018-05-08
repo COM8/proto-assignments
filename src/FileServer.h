@@ -16,6 +16,7 @@ enum FileClientConnectionState {
 	c_clientHello,
 	c_serverHello,
 	c_connected,
+	c_ping,
 	c_error
 };
 
