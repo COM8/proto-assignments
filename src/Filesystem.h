@@ -8,6 +8,11 @@
 #pragma once
 
 // At the moment the struct item is useless. Can later get used to save important information:
+struct Folder {
+    std::string path = "";
+    bool isCreated = false;
+    };
+
 struct File {
 	std::string name;
     bool isOpen = false;
@@ -22,7 +27,9 @@ class Filesystem {
 private:
 	std::string path;
 	std::unordered_map <std::string, File*> files;
-	std::list<std::string> folders;
+	std::list<Folder*> folders;
+    Folder* genFolder(std::string path);
+    File* genFile(std::string FID);
 
 public:
 	Filesystem(std::string p);
