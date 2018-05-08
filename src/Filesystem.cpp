@@ -99,9 +99,17 @@ string FilesystemClient::toString() {
 
 FilesystemServer::FilesystemServer(string path) {
 	this->path = path;
+	if(!exists(path)) {
+		createPath();
+	}
 }
 
 //only quick and dirty should be changed in the future
+
+void FilesystemServer::createPath() {
+	system(("mkdir" + this->path).c_str());
+}
+
 void FilesystemServer::genFolder(string path) {
 	string temp = this->path + path;
 	this->folders[temp] = true;
@@ -111,15 +119,42 @@ void FilesystemServer::genFolder(string path) {
 void FilesystemServer::delFolder(string path) {
 	string temp = this->path + path;
 	this->folders.erase(temp);
+	folderClean(temp);
+}
+
+void FilesystemServer::folderClean(string folder) {
 	system(("rm "+this->path + path +  " -r -f").c_str());
 }
 
 void FilesystemServer::delFile(string FID) {
 	string temp = this->path + FID;
 	this->files.erase(temp);
-	system(("rm "+this->path + temp +  " -f").c_str());
+	fileClean(temp);
 }
 
-void FilesystemServer::writeFilePart(string FID, int part) {
+void FilesystemServer::fileClean(string file) {
+	system(("rm "+ file +  " -f").c_str());
+}
 
+void FilesystemServer::clearDirecotry() {
+	if (Filesystem::exists(path)) {
+		for (auto const &p : fs::directory_iterator(path)) {
+			if (fs::is_directory(p)) {
+				if(this->folders[p.path().string()] == 0) {
+					folderClean(p.path().string());
+				}
+			}
+			else {
+				if(this->files[p.path().string()] == 0) {
+					fileClean(p.path().string());
+				}
+			}
+		}
+	}else {
+		createPath();
+	}
+}
+
+void FilesystemServer::writeFilePart(string FID, int par) {
+	
 }
