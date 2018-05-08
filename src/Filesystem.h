@@ -24,19 +24,29 @@ struct File {
 };
 
 class Filesystem {
+
+public:
+    static long unsigned int filesize(const std::string FID);
+    static bool exists(std::string path);
+    };
+
+class FilesystemClient: Filesystem {
 private:
-	std::string path;
-	std::unordered_map <std::string, File*> files;
-	std::list<Folder*> folders;
+    std::string path;
+    std::unordered_map <std::string, File*> files;
+    std::list<Folder*> folders;
     Folder* genFolder(std::string path);
     File* genFile(std::string FID);
 
 public:
-	Filesystem(std::string p);
-	static bool exists(std::string path);
-	int genMap();
+    FilesystemClient(std::string p);
+    static bool exists(std::string path);
+    int genMap();
     int genMap(std::string path);
-    long unsigned int filesize(const std::string FID);
-    int readFile(std::string FID, char* buffer, int partNr, int length);
+    int readFile(std::string FID, char* buffer, int partNr, int length);     
 	std::string toString();
 };
+
+class FilesystemServer: Filesystem {
+
+    };

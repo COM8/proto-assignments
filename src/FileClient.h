@@ -21,14 +21,14 @@ enum TransferState
 class FileClient
 {
 public:
-	FileClient(std::string* serverAddress, unsigned short serverPort, Filesystem* fs);
+	FileClient(std::string* serverAddress, unsigned short serverPort, FilesystemClient* fs);
 	void startSendingFS();
 	void stopSendingFS();
 
 private:
 	unsigned short serverPort;
 	std::string* serverAddress;
-	Filesystem* fs;
+	FilesystemClient* fs;
 	TransferState state;
 	net::Client client;
 	net::Server server;
