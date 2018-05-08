@@ -7,7 +7,6 @@
 
 #pragma once
 
-// At the moment the struct item is useless. Can later get used to save important information:
 struct Folder {
     std::string path = "";
     bool isCreated = false;
@@ -18,33 +17,36 @@ struct File {
     bool isOpen = false;
     long unsigned int size = 0;
     std::ifstream fd;
-    long last_part = 0;
-
-
+    long unsigned last_part = 0;
 };
 
-class Filesystem {
+struct WorkingSet {
+    std::list<Folder*> *folders;
+    std::unordered_map <std::string, File*> *files;
+    };
 
+class Filesystem {
+protected:
+    static Folder* genFolder(std::string path);
+    static File* genFile(std::string FID);
 public:
     static long unsigned int filesize(const std::string FID);
     static bool exists(std::string path);
-    static void readFile(std::ifstream fd, char* buffer, int part, int length);
     };
 
 class FilesystemClient: Filesystem {
 private:
     std::string path;
-    std::unordered_map <std::string, File*> files;
-    std::list<Folder*> folders;
-    Folder* genFolder(std::string path);
-    File* genFile(std::string FID);
 
 public:
+    std::unordered_map <std::string, File*> files;
+    std::list<Folder*> folders;
     FilesystemClient(std::string p);
     static bool exists(std::string path);
     int genMap();
     int genMap(std::string path);
-    int readFile(std::string FID, char* buffer, int partNr, int length);     
+    int readFile(std::string FID, char* buffer, int partNr, int length);
+    WorkingSet* getWorkingSet();
 	std::string toString();
 };
 

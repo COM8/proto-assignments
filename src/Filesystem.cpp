@@ -23,10 +23,12 @@ long unsigned int Filesystem::filesize(const string FID) {
     return ret;
 }
 
-void Filesystem::readFile(ifstream fd, char* buffer, int partNr, int length) {
-	fd.seekg(length*partNr, fd.beg);
-	fd.read(buffer,length);
-
+//WorkingSet should later contet the delta to last Sync trial, but in the moment it won't do it
+WorkingSet* FilesystemClient::getWorkingSet() {
+	WorkingSet *ret = new WorkingSet();
+	ret->folders= &(this->folders);
+	ret->files = &(this->files);
+	return ret;
 }
 
 int FilesystemClient::readFile(string FID, char* buffer, int partNr, int length) {
@@ -66,13 +68,13 @@ int FilesystemClient::genMap(string path) {
 	return 0;
 }
 
-Folder* FilesystemClient::genFolder(string path) {
+Folder* Filesystem::genFolder(string path) {
 	Folder *f = new Folder();
 	f->path = path;
 	return f;
 }
 
-File* FilesystemClient::genFile(string FID){
+File* Filesystem::genFile(string FID){
 	File *f = new File();
 	f->name = FID;
 	f->size = filesize(FID);
