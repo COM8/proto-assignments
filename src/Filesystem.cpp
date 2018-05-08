@@ -16,6 +16,11 @@ int FilesystemClient::genMap(){
 return genMap(this->path);
 }
 
+//toDo
+string Filesystem::calcSHA256(const string FID){
+	return "";
+}
+
 long unsigned int Filesystem::filesize(const string FID) {
     ifstream file(FID, ifstream::ate | ifstream::binary);
     long unsigned int ret = file.tellg();  

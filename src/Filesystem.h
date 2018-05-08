@@ -14,6 +14,7 @@ struct Folder {
 
 struct File {
 	std::string name;
+    std::string hash;
     bool isOpen = false;
     long unsigned int size = 0;
     std::ifstream fd;
@@ -31,16 +32,17 @@ protected:
     static File* genFile(std::string FID);
 public:
     static long unsigned int filesize(const std::string FID);
+    static std::string calcSHA256(const std::string FID);
     static bool exists(std::string path);
     };
 
 class FilesystemClient: Filesystem {
 private:
     std::string path;
-
-public:
     std::unordered_map <std::string, File*> files;
     std::list<Folder*> folders;
+
+public:
     FilesystemClient(std::string p);
     static bool exists(std::string path);
     int genMap();
@@ -51,5 +53,13 @@ public:
 };
 
 class FilesystemServer: Filesystem {
-
+private:
+    std::string path = "";
+public:
+    FilesystemServer(std::string path);
+    void genFolder(std::string path);
+    void delFolder(std::string path);
+    void delFile(std::string path);
+    void writeFilePart(std::string FID, int part);
+    void loadDirectory();
     };
