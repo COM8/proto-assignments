@@ -30,6 +30,7 @@ class Filesystem {
 protected:
     static Folder* genFolder(std::string path);
     static File* genFile(std::string FID);
+    std::unordered_map <std::string, File*> files;
 public:
     static long unsigned int filesize(const std::string FID);
     static std::string calcSHA256(const std::string FID);
@@ -38,9 +39,8 @@ public:
 
 class FilesystemClient: Filesystem {
 private:
-    std::string path;
-    std::unordered_map <std::string, File*> files;
     std::list<Folder*> folders;
+    std::string path;
 
 public:
     FilesystemClient(std::string p);
@@ -55,11 +55,12 @@ public:
 class FilesystemServer: Filesystem {
 private:
     std::string path = "";
+    std::unordered_map <std::string, bool> folders;
 public:
     FilesystemServer(std::string path);
     void genFolder(std::string path);
     void delFolder(std::string path);
-    void delFile(std::string path);
+    void delFile(std::string FID);
     void writeFilePart(std::string FID, int part);
     void loadDirectory();
     };
