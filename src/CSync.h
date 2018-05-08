@@ -22,4 +22,5 @@ struct arg {
 struct arg* parseParameter(int argc, char* argv[]);
 void launchServer(unsigned int port);
 void launchClient(unsigned int port, std::string host, std::string dir);
+void printClientHelp();
 int main(int argc, char* argv[]);

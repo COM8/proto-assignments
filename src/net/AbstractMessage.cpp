@@ -142,7 +142,6 @@ unsigned char* AbstractMessage::getBytesWithOffset(unsigned char* buffer, int bi
 	unsigned char* result = new unsigned char[lengthBytes];
 	for(uint64_t i = 0; i < lengthBytes; i++) {	
 		result[i] = getByteWithOffset(buffer, bitOffset + i*8);
-		printByte(result[i]);
 	}
 
 	int lengthMod = bitLength % 8;
