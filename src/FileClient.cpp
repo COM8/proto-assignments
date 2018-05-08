@@ -3,7 +3,7 @@
 using namespace net;
 using namespace std;
 
-FileClient::FileClient(std::string* serverAddress, unsigned short serverPort, Filesystem* fs) {
+FileClient::FileClient(std::string* serverAddress, unsigned short serverPort, FilesystemClient* fs) {
 	this->serverPort = serverPort;
 	this->serverAddress = serverAddress;
 	this->fs = fs;

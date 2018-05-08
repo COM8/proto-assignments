@@ -4,7 +4,7 @@ namespace fs = std::experimental::filesystem;
 
 using namespace std;
 
-Filesystem::Filesystem(std::string p) {
+FilesystemClient::FilesystemClient(std::string p) {
 	path = p;
 }
 
@@ -12,29 +12,53 @@ bool Filesystem::exists(string path) {
 	return fs::exists(path);
 }
 
-int Filesystem::genMap(){
+int FilesystemClient::genMap(){
 return genMap(this->path);
 }
 
-long unsigned int Filesystem::filesize(const string filename)
-{
-    ifstream in(filename, ifstream::ate | ifstream::binary);
-    return in.tellg(); 
+long unsigned int Filesystem::filesize(const string FID) {
+    ifstream file(FID, ifstream::ate | ifstream::binary);
+    long unsigned int ret = file.tellg();  
+    file.close();
+    return ret;
 }
 
-int Filesystem::genMap(string path) {
+void Filesystem::readFile(ifstream fd, char* buffer, int partNr, int length) {
+	fd.seekg(length*partNr, fd.beg);
+	fd.read(buffer,length);
+
+}
+
+int FilesystemClient::readFile(string FID, char* buffer, int partNr, int length) {
+	if(!(this->files[FID] == 0)) {
+		if (!this->files[FID]->isOpen){
+			this->files[FID]->fd = ifstream (FID, ifstream::ate | ifstream::binary);
+			if(!this->files[FID]->fd){
+				this->files.erase(FID);
+				cerr << "Error FID: " << FID << " is missing removing it" << endl;
+				return -2;
+			}else {
+				this->files[FID]->isOpen = true;
+			}
+		}
+		this->files[FID]->fd.seekg(length*partNr, this->files[FID]->fd.beg);
+		this->files[FID]->fd.read(buffer,length);
+		return 0;
+	}else {
+		return -2;
+	}
+}
+
+int FilesystemClient::genMap(string path) {
 	if (Filesystem::exists(path)) {
 		for (auto const &p : fs::directory_iterator(path)) {
 			if (fs::is_directory(p)) {
-				this->folders.push_back(p.path().string());
+				this->folders.push_back(genFolder(p.path().string()));
 				genMap(p.path().string());
 			}
 			else {
 				string temp = p.path().string();
-				File *t = new File();
-				t->name = temp;
-				t->size = filesize(temp);
-				this->files[temp] = t;
+				this->files[temp] = genFile(temp);
 			}
 		}
 		return 1;
@@ -42,7 +66,20 @@ int Filesystem::genMap(string path) {
 	return 0;
 }
 
-string Filesystem::toString() {
+Folder* FilesystemClient::genFolder(string path) {
+	Folder *f = new Folder();
+	f->path = path;
+	return f;
+}
+
+File* FilesystemClient::genFile(string FID){
+	File *f = new File();
+	f->name = FID;
+	f->size = filesize(FID);
+	return f;
+}
+
+string FilesystemClient::toString() {
 	string temp = "";
 	for (auto const &ent1 : this->files) {
 		File *t = ent1.second;

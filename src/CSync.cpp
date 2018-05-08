@@ -76,9 +76,7 @@ void launchServer(unsigned int port) {
 
 void launchClient(unsigned int port, string host, string dir) {
 	//todo
-	Filesystem fi = Filesystem(dir);
-	fi.genMap();
-
+	FilesystemClient fi = FilesystemClient(dir);
 	FileClient fC = FileClient(&host, (unsigned short)port, &fi);
 	fC.startSendingFS();
 
