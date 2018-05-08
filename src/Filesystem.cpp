@@ -16,6 +16,11 @@ int FilesystemClient::genMap(){
 return genMap(this->path);
 }
 
+//toDo
+string Filesystem::calcSHA256(const string FID){
+	return "";
+}
+
 long unsigned int Filesystem::filesize(const string FID) {
     ifstream file(FID, ifstream::ate | ifstream::binary);
     long unsigned int ret = file.tellg();  
@@ -88,4 +93,33 @@ string FilesystemClient::toString() {
 		temp = temp + ent1.first + ": " + to_string(t->size) + " Bytes" + "\n";
 	}
 	return temp;
+}
+
+//SERVER
+
+FilesystemServer::FilesystemServer(string path) {
+	this->path = path;
+}
+
+//only quick and dirty should be changed in the future
+void FilesystemServer::genFolder(string path) {
+	string temp = this->path + path;
+	this->folders[temp] = true;
+	system(("mkdir "+temp).c_str());
+}
+
+void FilesystemServer::delFolder(string path) {
+	string temp = this->path + path;
+	this->folders.erase(temp);
+	system(("rm "+this->path + path +  " -r -f").c_str());
+}
+
+void FilesystemServer::delFile(string FID) {
+	string temp = this->path + FID;
+	this->files.erase(temp);
+	system(("rm "+this->path + temp +  " -f").c_str());
+}
+
+void FilesystemServer::writeFilePart(string FID, int part) {
+
 }
