@@ -48,6 +48,7 @@ public:
     int genMap();
     int genMap(std::string path);
     int readFile(std::string FID, char* buffer, int partNr, int length);
+    void close();
     WorkingSet* getWorkingSet();
 	std::string toString();
 };
@@ -64,6 +65,6 @@ public:
     void genFolder(std::string path);
     void delFolder(std::string path);
     void delFile(std::string FID);
-    void writeFilePart(std::string FID, int part);
+    int writeFilePart(std::string FID, char* buffer, int partNr, int length);
     void clearDirecotry();
     };

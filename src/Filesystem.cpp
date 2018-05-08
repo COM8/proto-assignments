@@ -86,6 +86,13 @@ File* Filesystem::genFile(string FID){
 	return f;
 }
 
+void FilesystemClient::close() {
+	for (auto const &ent1 : this->files) {
+		File *t = ent1.second;
+		t->fd.close();
+	}
+}
+
 string FilesystemClient::toString() {
 	string temp = "";
 	for (auto const &ent1 : this->files) {
@@ -107,7 +114,7 @@ FilesystemServer::FilesystemServer(string path) {
 //only quick and dirty should be changed in the future
 
 void FilesystemServer::createPath() {
-	system(("mkdir" + this->path).c_str());
+	system(("mkdir " + this->path).c_str());
 }
 
 void FilesystemServer::genFolder(string path) {
@@ -155,6 +162,19 @@ void FilesystemServer::clearDirecotry() {
 	}
 }
 
-void FilesystemServer::writeFilePart(string FID, int par) {
-	
+int FilesystemServer::writeFilePart(string FID, char* buffer, int partNr, int length) {
+	if(!exists(this->path+FID)){
+		fstream tmp ((this->path + FID),  fstream::out);
+		tmp.close();
+	}
+	fstream tmp ((this->path + FID),  fstream::out | fstream::in | fstream::binary);
+	if(tmp) {
+		tmp.seekp(partNr*length, tmp.beg);
+		tmp.write(buffer,length);
+		tmp.close();
+		return 0;
+	}
+	else {
+		return -1;
+	}
 }
