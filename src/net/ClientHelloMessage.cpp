@@ -22,5 +22,5 @@ void ClientHelloMessage::createBuffer(struct Message* msg) {
 }
 
 unsigned short ClientHelloMessage::getPortFromMessage(unsigned char* buffer) {
-	return getUnsignedShortFromMessage(buffer, 16);
+	return getUnsignedShortFromMessage(buffer, 4);
 }
