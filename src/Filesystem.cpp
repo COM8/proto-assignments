@@ -122,6 +122,7 @@ FilesystemServer::FilesystemServer(string path) {
 	} else {
 		readFileFile();
 	}
+	clearDirecotry();
 }
 
 void FilesystemServer::readFileFile() {
