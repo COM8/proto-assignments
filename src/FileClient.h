@@ -12,6 +12,7 @@
 #include "net/AckMessage.h"
 #include "net/TransferEndedMessage.h"
 #include "net/FileCreationMessage.h"
+#include "net/FileTransferMessage.h"
 #include "Queue.h"
 
 #define MAX_FILE_CHUNK_SIZE_IN_BYTE 500
@@ -68,4 +69,5 @@ private:
 	void sendNextFilePart();
 	void sendFolderCreationMessage(struct Folder *f);
 	void sendFileCreationMessage(std::string fid, struct File *f);
+	bool sendNextFilePart(std::string fid, struct File *f, int nextPartNr);
 };

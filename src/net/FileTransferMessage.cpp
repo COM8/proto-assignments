@@ -3,10 +3,10 @@
 using namespace net;
 using namespace std;
 
-FileTransferMessage::FileTransferMessage(unsigned int clientId, unsigned int seqNumber,unsigned char fileType, unsigned char* fileHash, uint64_t contentLength, unsigned char* content) : AbstractMessage(3 << 4) { // 00110000
+FileTransferMessage::FileTransferMessage(unsigned int clientId, unsigned int seqNumber, unsigned char flags, unsigned char* fileHash, uint64_t contentLength, unsigned char* content) : AbstractMessage(3 << 4) { // 00110000
 	this->clientId = clientId;
 	this->seqNumber = seqNumber;
-	this->fileType = fileType;
+	this->flags = flags;
 	this->fileHash = fileHash;
 	this->contentLength = contentLength;
 	this->content = content;
@@ -25,8 +25,8 @@ void FileTransferMessage::createBuffer(struct Message* msg) {
 	// Add sequence number:
 	setBufferUnsignedInt(msg, seqNumber, 36);
 
-	// Add file type:
-	setByteWithOffset(msg, fileType, 64); // Starts at 68 - ensure the first 4 bit are 0
+	// Add flags:
+	setByteWithOffset(msg, flags, 64); // Starts at 68 - ensure the first 4 bit are 0
 
 	// Add file hash:
 	setBufferValue(msg, fileHash, 32, 72);
@@ -49,7 +49,7 @@ unsigned int FileTransferMessage::getClientIdFromMessage(unsigned char* buffer) 
 	return getUnsignedIntFromMessage(buffer, 4);
 }
 
-unsigned char FileTransferMessage::getFileTypeFromMessage(unsigned char* buffer) {
+unsigned char FileTransferMessage::getFlagsFromMessage(unsigned char* buffer) {
 	// Flags start at 68, but it is easier to get a byte and ignore the first 4 bit
 	return getByteWithOffset(buffer, 64) & 0xF; // Only the firts 4 bit are the flag bits
 }

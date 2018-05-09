@@ -75,7 +75,7 @@ public:
 	SendMessageQueue() {}
 	~SendMessageQueue() {}
 
-	void pushSendMessage(int sequenceNumber, AbstractMessage msg) {
+	void pushSendMessage(int sequenceNumber, net::AbstractMessage msg) {
 		struct SendMessage sM;
 		sM.sendTime = time(NULL);
 		sM.sequenceNumber = sequenceNumber;
