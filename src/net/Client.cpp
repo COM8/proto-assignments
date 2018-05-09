@@ -35,7 +35,6 @@ void Client::init() {
 bool Client::send(AbstractMessage* msg) {
 	struct Message msgStruct = {};
 	msg->createBuffer(&msgStruct);
-
 	// Print message:
 	//AbstractMessage::printMessage(&msgStruct);
 	

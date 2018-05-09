@@ -28,3 +28,11 @@ void ServerHelloMessage::createBuffer(struct Message* msg) {
 	// Add checksum:
 	addChecksum(msg, 56);
 }
+
+unsigned int ServerHelloMessage::getClientIdFromMessage(unsigned char* buffer) {
+	return getUnsignedIntFromMessage(buffer, 8);
+}
+
+unsigned short ServerHelloMessage::getPortFromMessage(unsigned char* buffer) {
+	return getUnsignedShortFromMessage(buffer, 40);
+}

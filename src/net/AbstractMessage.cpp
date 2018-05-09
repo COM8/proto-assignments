@@ -128,7 +128,7 @@ void AbstractMessage::setBufferUint64_t(struct Message* msg, uint64_t i, int bit
 void AbstractMessage::setBufferUint64_t(unsigned char* buffer, uint64_t i, int bitOffset) {
 	unsigned char intArray[8];
 	for (int e = 0; e < 8; e++) {
-		intArray[3 - e] = (i >> (e * 8));
+		intArray[7 - e] = (i >> (e * 8));
     }
     AbstractMessage::setBufferValue(buffer, intArray, 8, bitOffset);
 }

@@ -29,14 +29,16 @@ void FileCreationMessage::createBuffer(struct Message* msg) {
 	setByteWithOffset(msg, fileType, 64); // Starts at 68 - ensure the first 4 bit are 0
 
 	// Add file hash:
-	setBufferValue(msg, fileHash, 32, 72);
+	if(fileHash) { // File hash is not mandatory
+		setBufferValue(msg, fileHash, 32, 72);
+	}
 
 	// Add checksum:
 	addChecksum(msg, CHECKSUM_OFFSET_BITS);
 
 	// Add FID length:
 	setBufferUint64_t(msg, fIDLength, 360);
-
+	
 	// Add FID:
 	setBufferValue(msg, fID, fIDLength, 424);
 }

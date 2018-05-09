@@ -79,14 +79,15 @@ void printClientHelp() {
 	cout << "help - print this" << endl;
 	cout << "stop - stop the client and exit" << endl;
 	cout << "ping - ping the connected server" << endl;	
-	cout << "state - print the current client state" << endl;	
+	cout << "state - print the current client state" << endl;
+	cout << "todo - the current transfer to do list" << endl;
 	cout << endl;
 }
 
 void launchClient(unsigned int port, string host, string dir) {
 	//todo
-	FilesystemClient fi = FilesystemClient(dir);
-	FileClient fC = FileClient(&host, (unsigned short)port, &fi);
+	FilesystemClient fS = FilesystemClient(dir);
+	FileClient fC = FileClient(&host, (unsigned short)port, &fS);
 	fC.startSendingFS();
 	
 
@@ -99,6 +100,7 @@ void launchClient(unsigned int port, string host, string dir) {
 		if(!s.compare("stop")) {
 			cout << "Stopping client..." << endl;
 			fC.stopSendingFS();
+			fS.close();
 			cout << "Stopped client!" << endl;
 			break;
 		}
@@ -107,6 +109,9 @@ void launchClient(unsigned int port, string host, string dir) {
 		}
 		else if(!s.compare("ping")) {
 			fC.pingServer();
+		}
+		else if(!s.compare("todo")) {
+			fC.printToDo();
 		}
 		else if(!s.compare("state")) {
 			cout << "State: " << fC.getState() << endl;
