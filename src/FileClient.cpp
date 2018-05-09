@@ -170,6 +170,11 @@ void FileClient::sendNextFilePart()
 	if (curWorkingSet->curFilePartNr >= 0)
 	{
 		cout << "cFile" << endl;
+		bool lastPartSend = sendNextFilePart(curWorkingSet->curFile.first, curWorkingSet->curFile.second, ++curWorkingSet->curFilePartNr);
+		if(lastPartSend) {
+			curWorkingSet->files->erase(curWorkingSet->curFile.first);
+			curWorkingSet->curFilePartNr = -1;
+		}
 	}
 	// Trasfer folder:
 	else if (!curWorkingSet->folders->empty())
@@ -216,10 +221,24 @@ void FileClient::sendFileCreationMessage(string fid, struct File *f)
 	cout << "Send file creation: " << fid << endl;
 }
 
-/*void FileClient::sendNextFileChunk() {
+bool FileClient::sendNextFilePart(string fid, struct File *f, int nextPartNr) {
 	char chunk[MAX_FILE_CHUNK_SIZE_IN_BYTE];
-	fs->readFile(fid, chunk, 0, MAX_FILE_CHUNK_SIZE_IN_BYTE);
-}*/
+	int readCount = fs->readFile(fid, chunk, nextPartNr, MAX_FILE_CHUNK_SIZE_IN_BYTE);
+
+	char flags = 1;
+	if(nextPartNr == 0) {
+		flags = 1;
+	}
+	else if(readCount == -1){
+		flags = 8;
+	}
+	else {
+		flags = 2;
+	}
+
+	FileTransferMessage msg = FileTransferMessage(clientId, seqNumber++, 0, (unsigned char *)f->hash, (uint64_t)readCount, (unsigned char*)chunk);
+	return true;
+}
 
 void FileClient::onTransferEndedMessage(net::ReadMessage *msg)
 {
