@@ -24,7 +24,9 @@ struct File {
 struct WorkingSet {
     std::list<Folder*> *folders;
     std::unordered_map <std::string, File*> *files;
-    };
+    struct File* curFile;
+    int curFilePartNr;
+};
 
 class Filesystem {
 protected:
