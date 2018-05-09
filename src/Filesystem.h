@@ -29,7 +29,9 @@ struct ServerFile {
 struct WorkingSet {
     std::list<Folder*> *folders;
     std::unordered_map <std::string, File*> *files;
-    };
+    std::pair<std::string, File*> curFile;
+    int curFilePartNr;
+};
 
 class Filesystem {
 protected:
