@@ -5,7 +5,7 @@
 #include <list>
 #include <fstream>
 
-#pragma once
+//#pragma once
 
 struct Folder {
     std::string path = "";
@@ -54,7 +54,7 @@ public:
     std::unordered_map <std::string, File*> files;
     int genMap();
     int genMap(std::string path);
-    int readFile(std::string FID, char* buffer, int partNr, int length);
+    int readFile(std::string FID, char* buffer, unsigned int partNr, unsigned int length);
     void close();
     WorkingSet* getWorkingSet();
 	std::string toString();
@@ -68,14 +68,20 @@ private:
     void createPath();
     void folderClean(std::string path);
     void fileClean(std::string file);
-    ServerFile* genServerFile(char* hash);
+    void readFolderFile();
+    void readFileFile();
+    char* intToArray(unsigned int i);
+    unsigned int charToInt(char* buffer);
+    void saveFolderFile();
+    void saveFileFile();
+    ServerFile* genServerFile(char* hash, unsigned int partNr);
 public:
     FilesystemServer(std::string path);
     void genFile(std::string FID, char* hash);
     void genFolder(std::string path);
     void delFolder(std::string path);
     void delFile(std::string FID);
-    int writeFilePart(std::string FID, char* buffer, int partNr, int length);
+    int writeFilePart(std::string FID, char* buffer, unsigned int partNr, unsigned int length);
     void clearDirecotry();
     void close();
     };

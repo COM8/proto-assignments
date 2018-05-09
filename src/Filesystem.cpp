@@ -39,7 +39,7 @@ WorkingSet* FilesystemClient::getWorkingSet() {
 	return ret;
 }
 
-int FilesystemClient::readFile(string FID, char* buffer, int partNr, int length) {
+int FilesystemClient::readFile(string FID, char* buffer, unsigned int partNr, unsigned int length) {
 	if(!(this->files[FID] == 0)) {
 		if (!this->files[FID]->isOpen){
 			this->files[FID]->fd = ifstream (FID, ifstream::ate | ifstream::binary);
@@ -114,13 +114,82 @@ FilesystemServer::FilesystemServer(string path) {
 	}
 	if(!exists(path+".csync.folders")) {
 		genFile(path+".csync.folders", new char[32]);
+	} else {
+		readFolderFile();
 	}
 	if(!exists(path+".csync.files")) {
 		genFile(path+".csync.folders", new char[32]);
+	} else {
+		readFileFile();
 	}
 }
 
-//only quick and dirty should be changed in the future
+void FilesystemServer::readFileFile() {
+	fstream tmp ((this->path + ".csync.folders"),  fstream::out | fstream::in | fstream::binary);
+	int size = tmp.tellg();
+	int currPosition = 0;
+	while (currPosition < size) {
+		char *length = new char[4];
+		tmp.read(length, 4);
+		int l = charToInt(length);
+		char *name = new char[l];
+		tmp.read(name, l);
+		tmp.read(length, 4);
+		int last_part = charToInt(length);
+		char *hash = new char[32];
+		tmp.read(hash, 32);
+		this->files[string(name)] = genServerFile(hash, last_part);
+	}
+	tmp.close();
+}
+
+void FilesystemServer::readFolderFile() {
+	fstream tmp ((this->path + ".csync.folders"),  fstream::out | fstream::in | fstream::binary);
+	int size = tmp.tellg();
+	int currPosition = 0;
+	while (currPosition < size) {
+		char *length = new char[4];
+		tmp.read(length, 4);
+		int l = charToInt(length);
+		char *name = new char[l];
+		tmp.read(name, l);
+		this->folders[string(name)] = true;
+		size += l + 4;
+	}
+	tmp.close();
+}
+
+void FilesystemServer::saveFolderFile() {
+	fstream tmp ((this->path + ".csync.folders"),  fstream::out | fstream::in | fstream::binary | fstream::trunc);
+	for(auto const &ent1 : this->folders) {
+		tmp.write(intToArray(ent1.first.length()),4);		
+		tmp.write(ent1.first.c_str(), ent1.first.length());
+	}
+	tmp.close();
+}
+
+char* FilesystemServer::intToArray(unsigned int i) {
+	char *ret = new char[4];
+	for (int e = 0; e < 4; e++) {
+			ret[3 - e] = (i >> (e * 8));
+    }
+    return ret;
+}
+
+unsigned int FilesystemServer::charToInt(char* buffer) {
+	return static_cast<int>(buffer[0]) << 24 | buffer[1] << 16 | buffer[2] << 8 | buffer[3];
+}
+
+void FilesystemServer::saveFileFile() {
+	fstream tmp ((this->path + ".csync.files"),  fstream::out | fstream::in | fstream::binary | fstream::trunc);
+	for(auto const &ent1 : this->files) {
+		tmp.write(intToArray(ent1.first.length()),4);
+		tmp.write(ent1.first.c_str(), ent1.first.length());
+		tmp.write(intToArray(ent1.second->last_part),4);
+		tmp.write(ent1.second->hash, 32);		
+	}
+	tmp.close();
+}
 
 void FilesystemServer::createPath() {
 	system(("mkdir " + this->path).c_str());
@@ -155,7 +224,7 @@ void FilesystemServer::fileClean(string file) {
 void FilesystemServer::genFile(std::string FID, char* hash) {
 	fstream tmp ((this->path + FID),  fstream::out);
 	tmp.close();
-	this->files[this->path + FID] = genServerFile(hash);
+	this->files[this->path + FID] = genServerFile(hash, 0);
 
 }
 
@@ -179,7 +248,7 @@ void FilesystemServer::clearDirecotry() {
 }
 
 
-int FilesystemServer::writeFilePart(string FID, char* buffer, int partNr, int length) {
+int FilesystemServer::writeFilePart(string FID, char* buffer, unsigned int partNr, unsigned int length) {
 	if(!exists(this->path+FID)){
 		cerr << "File: " << FID << " is unknown by the System, but it will be created with some hash" << endl;
 		genFile(FID, new char[32]);
@@ -199,8 +268,23 @@ int FilesystemServer::writeFilePart(string FID, char* buffer, int partNr, int le
 	}
 }
 
-ServerFile *FilesystemServer::genServerFile(char* hash) {
+ServerFile *FilesystemServer::genServerFile(char* hash, unsigned int partNr) {
 	ServerFile *ret = new ServerFile();
 	ret->hash = hash;
+	ret->last_part = partNr;
 	return ret;
+}
+
+void FilesystemServer::close() {
+	saveFolderFile();
+	saveFileFile();
+}
+
+int main() {
+	FilesystemServer fss = FilesystemServer("test/");
+	fss.genFile("test.file", new char[32]);
+	fss.genFolder("test");
+	fss.close();
+	
+	return 0;
 }
