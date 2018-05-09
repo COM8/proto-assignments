@@ -33,7 +33,6 @@ WorkingSet* FilesystemClient::getWorkingSet() {
 	WorkingSet *ret = new WorkingSet();
 	ret->folders= &(this->folders);
 	ret->files = &(this->files);
-	ret->curFile = NULL;
 	ret->curFilePartNr = -1;
 	return ret;
 }
