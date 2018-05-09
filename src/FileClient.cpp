@@ -209,7 +209,7 @@ void FileClient::sendFolderCreationMessage(struct Folder *f)
 void FileClient::sendFileCreationMessage(string fid, struct File *f)
 {
 	unsigned char *c = (unsigned char *)fid.c_str();
-	FileCreationMessage msg = FileCreationMessage(clientId, seqNumber++, 4, (unsigned char *)f->hash.c_str(), (uint64_t)fid.length(), c);
+	FileCreationMessage msg = FileCreationMessage(clientId, seqNumber++, 4, (unsigned char *)f->hash, (uint64_t)fid.length(), c);
 	sendMessageQueue->pushSendMessage(seqNumber - 1, msg);
 
 	client.send(&msg);
