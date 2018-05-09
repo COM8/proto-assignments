@@ -279,12 +279,3 @@ void FilesystemServer::close() {
 	saveFolderFile();
 	saveFileFile();
 }
-
-int main() {
-	FilesystemServer fss = FilesystemServer("test/");
-	fss.genFile("test.file", new char[32]);
-	fss.genFolder("test");
-	fss.close();
-	
-	return 0;
-}
