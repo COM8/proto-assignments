@@ -43,8 +43,9 @@ private:
 	FilesystemClient *fs;
 	struct WorkingSet *curWorkingSet;
 	TransferState state;
-	net::Client client;
-	net::Server server;
+	net::Client *client;
+	net::Client *uploadClient;
+	net::Server *server;
 	Queue<net::ReadMessage> *cpQueue;
 	SendMessageQueue *sendMessageQueue;
 	bool shouldConsumerRun;
@@ -55,7 +56,6 @@ private:
 	unsigned int seqNumber;
 	unsigned int clientId;
 
-	void sendClientHelloMessage(unsigned short listeningPort);
 	void startConsumerThread();
 	void stopConsumerThread();
 	void startHelloThread(unsigned short listenPort);
@@ -65,9 +65,10 @@ private:
 	void onServerHelloMessage(net::ReadMessage *msg);
 	void onAckMessage(net::ReadMessage *msg);
 	void onTransferEndedMessage(net::ReadMessage *msg);
-	void sendPingMessage(unsigned int plLength, unsigned int seqNumber);
 	void sendNextFilePart();
-	void sendFolderCreationMessage(struct Folder *f);
-	void sendFileCreationMessage(std::string fid, struct File *f);
-	bool sendNextFilePart(std::string fid, struct File *f, int nextPartNr);
+	void sendClientHelloMessage(unsigned short listeningPort, net::Client *client);
+	void sendPingMessage(unsigned int plLength, unsigned int seqNumber, net::Client *client);	
+	void sendFolderCreationMessage(struct Folder *f, net::Client *client);
+	void sendFileCreationMessage(std::string fid, struct File *f, net::Client *client);
+	bool sendNextFilePart(std::string fid, struct File *f, int nextPartNr, net::Client *client);
 };

@@ -18,17 +18,20 @@ FileClient::FileClient(std::string *serverAddress, unsigned short serverPort, Fi
 	this->consumerThread = NULL;
 	this->seqNumber = 0;
 	this->clientId = -1;
+	this->server = NULL;
+	this->client = NULL;
+	this->uploadClient = NULL;
 }
 
 void FileClient::startSendingFS()
 {
 	shouldTransferRun = true;
 
-	client = Client(*serverAddress, serverPort);
+	client = new Client(*serverAddress, serverPort);
 
 	unsigned short listenPort = 1235;
-	server = Server(listenPort, cpQueue);
-	server.start();
+	server = new Server(listenPort, cpQueue);
+	server->start();
 	startConsumerThread();
 	startHelloThread(listenPort);
 }
@@ -53,7 +56,7 @@ void FileClient::helloTask(unsigned short listenPort)
 	while (state < connected && shouldHelloRun)
 	{
 		sleep(1); // Sleep for 1s
-		sendClientHelloMessage(listenPort);
+		sendClientHelloMessage(listenPort, client);
 	}
 }
 
@@ -85,6 +88,8 @@ void FileClient::onServerHelloMessage(ReadMessage *msg)
 		state = connected;
 		cout << "Connected to server!" << endl;
 		clientId = ServerHelloMessage::getClientIdFromMessage(msg->buffer);
+		unsigned short uploadPort = ServerHelloMessage::getPortFromMessage(msg->buffer);
+		uploadClient = new Client(*serverAddress, uploadPort);
 
 		state = sendingFS;
 		sendNextFilePart();
@@ -170,7 +175,7 @@ void FileClient::sendNextFilePart()
 	if (curWorkingSet->curFilePartNr >= 0)
 	{
 		cout << "cFile" << endl;
-		bool lastPartSend = sendNextFilePart(curWorkingSet->curFile.first, curWorkingSet->curFile.second, ++curWorkingSet->curFilePartNr);
+		bool lastPartSend = sendNextFilePart(curWorkingSet->curFile.first, curWorkingSet->curFile.second, ++curWorkingSet->curFilePartNr, uploadClient);
 		if(lastPartSend) {
 			curWorkingSet->files->erase(curWorkingSet->curFile.first);
 			curWorkingSet->curFilePartNr = -1;
@@ -187,7 +192,7 @@ void FileClient::sendNextFilePart()
 	{
 		curWorkingSet->curFile = *curWorkingSet->files->begin();	
 		curWorkingSet->curFilePartNr = 0;
-		sendFileCreationMessage(curWorkingSet->curFile.first, curWorkingSet->curFile.second);
+		sendFileCreationMessage(curWorkingSet->curFile.first, curWorkingSet->curFile.second, uploadClient);
 		curWorkingSet->curFilePartNr = -1;
 	}
 	else
@@ -201,27 +206,27 @@ void FileClient::sendNextFilePart()
 	state = awaitingAck;
 }
 
-void FileClient::sendFolderCreationMessage(struct Folder *f)
+void FileClient::sendFolderCreationMessage(struct Folder *f, Client *client)
 {
 	unsigned char *c = (unsigned char *)f->path.c_str();
 	FileCreationMessage msg = FileCreationMessage(clientId, seqNumber++, 1, NULL, (uint64_t)f->path.length(), c);
 	sendMessageQueue->pushSendMessage(seqNumber - 1, msg);
 
-	client.send(&msg);
+	client->send(&msg);
 	cout << "Send folder: " << f->path << endl;
 }
 
-void FileClient::sendFileCreationMessage(string fid, struct File *f)
+void FileClient::sendFileCreationMessage(string fid, struct File *f, Client *client)
 {
 	unsigned char *c = (unsigned char *)fid.c_str();
 	FileCreationMessage msg = FileCreationMessage(clientId, seqNumber++, 4, (unsigned char *)f->hash, (uint64_t)fid.length(), c);
 	sendMessageQueue->pushSendMessage(seqNumber - 1, msg);
 
-	client.send(&msg);
+	client->send(&msg);
 	cout << "Send file creation: " << fid << endl;
 }
 
-bool FileClient::sendNextFilePart(string fid, struct File *f, int nextPartNr) {
+bool FileClient::sendNextFilePart(string fid, struct File *f, int nextPartNr, Client *client) {
 	char chunk[MAX_FILE_CHUNK_SIZE_IN_BYTE];
 	int readCount = fs->readFile(fid, chunk, nextPartNr, MAX_FILE_CHUNK_SIZE_IN_BYTE);
 
@@ -237,6 +242,7 @@ bool FileClient::sendNextFilePart(string fid, struct File *f, int nextPartNr) {
 	}
 
 	FileTransferMessage msg = FileTransferMessage(clientId, seqNumber++, 0, (unsigned char *)f->hash, (uint64_t)readCount, (unsigned char*)chunk);
+	client->send(&msg);
 	return true;
 }
 
@@ -274,7 +280,7 @@ void FileClient::pingServer()
 	case awaitingAck:
 	case sendingFS:
 		cout << "Ping" << endl;
-		sendPingMessage(0, seqNumber++);
+		sendPingMessage(0, seqNumber++, uploadClient);
 		break;
 
 	default:
@@ -288,18 +294,18 @@ TransferState FileClient::getState()
 	return state;
 }
 
-void FileClient::sendClientHelloMessage(unsigned short listeningPort)
+void FileClient::sendClientHelloMessage(unsigned short listeningPort, Client *client)
 {
 	ClientHelloMessage msg = ClientHelloMessage(listeningPort);
-	client.send(&msg);
+	client->send(&msg);
 }
 
-void FileClient::sendPingMessage(unsigned int plLength, unsigned int seqNumber)
+void FileClient::sendPingMessage(unsigned int plLength, unsigned int seqNumber, Client *client)
 {
 	PingMessage msg = PingMessage(plLength, seqNumber);
 	sendMessageQueue->pushSendMessage(seqNumber, msg);
 
-	client.send(&msg);
+	client->send(&msg);
 }
 
 void FileClient::stopSendingFS()
@@ -307,7 +313,7 @@ void FileClient::stopSendingFS()
 	shouldTransferRun = false;
 	stopConsumerThread();
 	stopHelloThread();
-	server.stop();
+	server->stop();
 }
 
 void FileClient::printToDo()
