@@ -5,7 +5,7 @@
 #include <list>
 #include <fstream>
 
-//#pragma once
+#pragma once
 
 struct Folder {
     std::string path = "";
