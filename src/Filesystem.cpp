@@ -17,8 +17,10 @@ return genMap(this->path);
 }
 
 //toDo
-string Filesystem::calcSHA256(const string FID){
-	return "";
+void Filesystem::calcSHA256(const string FID, char* buffer){
+	for(int i = 0; i < 32; i++) {
+		buffer[i] = '\0';
+	}
 }
 
 long unsigned int Filesystem::filesize(const string FID) {
@@ -110,6 +112,12 @@ FilesystemServer::FilesystemServer(string path) {
 	if(!exists(path)) {
 		createPath();
 	}
+	if(!exists(path+".csync.folders")) {
+		genFile(path+".csync.folders", new char[32]);
+	}
+	if(!exists(path+".csync.files")) {
+		genFile(path+".csync.folders", new char[32]);
+	}
 }
 
 //only quick and dirty should be changed in the future
@@ -144,6 +152,13 @@ void FilesystemServer::fileClean(string file) {
 	system(("rm "+ file +  " -f").c_str());
 }
 
+void FilesystemServer::genFile(std::string FID, char* hash) {
+	fstream tmp ((this->path + FID),  fstream::out);
+	tmp.close();
+	this->files[this->path + FID] = genServerFile(hash);
+
+}
+
 void FilesystemServer::clearDirecotry() {
 	if (Filesystem::exists(path)) {
 		for (auto const &p : fs::directory_iterator(path)) {
@@ -163,19 +178,29 @@ void FilesystemServer::clearDirecotry() {
 	}
 }
 
+
 int FilesystemServer::writeFilePart(string FID, char* buffer, int partNr, int length) {
 	if(!exists(this->path+FID)){
-		fstream tmp ((this->path + FID),  fstream::out);
-		tmp.close();
+		cerr << "File: " << FID << " is unknown by the System, but it will be created with some hash" << endl;
+		genFile(FID, new char[32]);
 	}
 	fstream tmp ((this->path + FID),  fstream::out | fstream::in | fstream::binary);
 	if(tmp) {
 		tmp.seekp(partNr*length, tmp.beg);
 		tmp.write(buffer,length);
 		tmp.close();
+		if (this->files[this->path + FID]->last_part+1 == partNr) {
+			this->files[this->path + FID]->last_part++;
+		}
 		return 0;
 	}
 	else {
 		return -1;
 	}
+}
+
+ServerFile *FilesystemServer::genServerFile(char* hash) {
+	ServerFile *ret = new ServerFile();
+	ret->hash = hash;
+	return ret;
 }

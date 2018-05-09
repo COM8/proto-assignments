@@ -14,12 +14,17 @@ struct Folder {
 
 struct File {
 	std::string name;
-    std::string hash;
+    char* hash = new char[32];
     bool isOpen = false;
-    long unsigned int size = 0;
+    unsigned int size = 0;
     std::ifstream fd;
-    long unsigned last_part = 0;
+    unsigned last_part = 0;
 };
+
+struct ServerFile {
+    char* hash = new char[32];
+    unsigned int last_part = 0;
+    };
 
 struct WorkingSet {
     std::list<Folder*> *folders;
@@ -34,7 +39,7 @@ protected:
     static File* genFile(std::string FID);
 public:
     static long unsigned int filesize(const std::string FID);
-    static std::string calcSHA256(const std::string FID);
+    static void calcSHA256(const std::string FID, char* buffer);
     static bool exists(std::string path);
     };
 
@@ -58,15 +63,19 @@ public:
 class FilesystemServer: Filesystem {
 private:
     std::string path = "";
-    std::unordered_map <std::string, bool> folders, files;
+    std::unordered_map <std::string, bool> folders;
+    std::unordered_map <std::string, ServerFile*> files;
     void createPath();
     void folderClean(std::string path);
     void fileClean(std::string file);
+    ServerFile* genServerFile(char* hash);
 public:
     FilesystemServer(std::string path);
+    void genFile(std::string FID, char* hash);
     void genFolder(std::string path);
     void delFolder(std::string path);
     void delFile(std::string FID);
     int writeFilePart(std::string FID, char* buffer, int partNr, int length);
     void clearDirecotry();
+    void close();
     };
