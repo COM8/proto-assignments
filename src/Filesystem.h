@@ -22,7 +22,7 @@ struct File {
 };
 
 struct ServerFile {
-    char* hash = new char[32];
+    char *hash = new char[32];
     unsigned int last_part = 0;
     };
 

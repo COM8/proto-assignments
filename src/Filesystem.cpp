@@ -113,12 +113,12 @@ FilesystemServer::FilesystemServer(string path) {
 		createPath();
 	}
 	if(!exists(path+".csync.folders")) {
-		genFile(path+".csync.folders", new char[32]);
+		genFile(".csync.folders", new char[32]);
 	} else {
 		readFolderFile();
 	}
 	if(!exists(path+".csync.files")) {
-		genFile(path+".csync.folders", new char[32]);
+		genFile(".csync.files", new char[32]);
 	} else {
 		readFileFile();
 	}
@@ -126,8 +126,8 @@ FilesystemServer::FilesystemServer(string path) {
 }
 
 void FilesystemServer::readFileFile() {
-	fstream tmp ((this->path + ".csync.folders"),  fstream::out | fstream::in | fstream::binary);
-	int size = tmp.tellg();
+	int size = filesize(this->path + ".csync.files");
+	fstream tmp ((this->path + ".csync.files"),  fstream::in | fstream::binary);
 	int currPosition = 0;
 	while (currPosition < size) {
 		char *length = new char[4];
@@ -140,7 +140,8 @@ void FilesystemServer::readFileFile() {
 		char *hash = new char[32];
 		tmp.read(hash, 32);
 		this->files[string(name)] = genServerFile(hash, last_part);
-	}
+		currPosition += l + 40;
+		}
 	tmp.close();
 }
 
@@ -155,7 +156,7 @@ void FilesystemServer::readFolderFile() {
 		char *name = new char[l];
 		tmp.read(name, l);
 		this->folders[string(name)] = true;
-		size += l + 4;
+		currPosition += l + 4;
 	}
 	tmp.close();
 }
@@ -165,6 +166,17 @@ void FilesystemServer::saveFolderFile() {
 	for(auto const &ent1 : this->folders) {
 		tmp.write(intToArray(ent1.first.length()),4);		
 		tmp.write(ent1.first.c_str(), ent1.first.length());
+	}
+	tmp.close();
+}
+
+void FilesystemServer::saveFileFile() {
+	fstream tmp ((this->path + ".csync.files"),  fstream::out | fstream::in | fstream::binary | fstream::trunc);
+	for(auto const &ent1 : this->files) {
+		tmp.write(intToArray(ent1.first.length()),4);
+		tmp.write(ent1.first.c_str(), ent1.first.length());
+		tmp.write(intToArray(ent1.second->last_part),4);
+		tmp.write(ent1.second->hash, 32);
 	}
 	tmp.close();
 }
@@ -181,16 +193,6 @@ unsigned int FilesystemServer::charToInt(char* buffer) {
 	return static_cast<int>(buffer[0]) << 24 | buffer[1] << 16 | buffer[2] << 8 | buffer[3];
 }
 
-void FilesystemServer::saveFileFile() {
-	fstream tmp ((this->path + ".csync.files"),  fstream::out | fstream::in | fstream::binary | fstream::trunc);
-	for(auto const &ent1 : this->files) {
-		tmp.write(intToArray(ent1.first.length()),4);
-		tmp.write(ent1.first.c_str(), ent1.first.length());
-		tmp.write(intToArray(ent1.second->last_part),4);
-		tmp.write(ent1.second->hash, 32);		
-	}
-	tmp.close();
-}
 
 void FilesystemServer::createPath() {
 	system(("mkdir " + this->path).c_str());
@@ -198,8 +200,10 @@ void FilesystemServer::createPath() {
 
 void FilesystemServer::genFolder(string path) {
 	string temp = this->path + path;
-	this->folders[temp] = true;
-	system(("mkdir "+temp).c_str());
+	if(this->folders[temp] == 0) {
+		this->folders[temp] = true;
+		system(("mkdir "+temp).c_str());
+	}
 }
 
 void FilesystemServer::delFolder(string path) {
@@ -223,9 +227,11 @@ void FilesystemServer::fileClean(string file) {
 }
 
 void FilesystemServer::genFile(std::string FID, char* hash) {
+	if(this->files[(this->path + FID)] == 0) {
+		this->files[(this->path + FID)] = genServerFile(hash, 0);
+	}
 	fstream tmp ((this->path + FID),  fstream::out);
 	tmp.close();
-	this->files[this->path + FID] = genServerFile(hash, 0);
 
 }
 
