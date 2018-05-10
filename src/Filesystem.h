@@ -60,7 +60,7 @@ public:
     int genMap();
     int genMap(std::string path);
     int genMap(std::string path, WorkingSet* woSet);
-    int readFile(std::string FID, char* buffer, unsigned int partNr);
+    int readFile(std::string FID, char* buffer, unsigned int partNr, bool *isLastPart);
     void close();
     WorkingSet* getWorkingSet();
 	std::string toString();

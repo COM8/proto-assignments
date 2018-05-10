@@ -96,7 +96,7 @@ bool FilesystemClient::isInFolders(string path) {
 	return false;
 }
 
-int FilesystemClient::readFile(string FID, char* buffer, unsigned int partNr) {
+int FilesystemClient::readFile(string FID, char* buffer, unsigned int partNr, bool *isLastPart) {
 	if(!(this->files[FID] == 0)) {
 		if (!this->files[FID]->isOpen){
 			this->files[FID]->fd = ifstream (FID, ifstream::ate | ifstream::binary);
@@ -112,10 +112,13 @@ int FilesystemClient::readFile(string FID, char* buffer, unsigned int partNr) {
 		int retLength = (this->files[FID]->size > (partLength*(partNr+1))) ? partLength : this->files[FID]->size - partLength*partNr;
 		retLength = retLength < 0 ? 0 : retLength;
 		this->files[FID]->fd.read(buffer,retLength);
-		if(retLength < (int)partLength) {
+		if(partNr == ((this->files[FID]->size/partLength)+(this->files[FID]->size % partLength == 0 ? 0: 1))) {
 			this->files[FID]->fd.close();
 			this->files[FID]->isOpen = false;
+			*isLastPart = true;
 		}
+		else 
+			*isLastPart = false;
 		return retLength;
 	}else {
 		return -2;
