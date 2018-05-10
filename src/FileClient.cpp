@@ -204,7 +204,6 @@ void FileClient::sendNextFilePart()
 		curWorkingSet->curFile = *curWorkingSet->files.begin();	
 		curWorkingSet->curFilePartNr = 0;
 		sendFileCreationMessage(curWorkingSet->curFile.first, curWorkingSet->curFile.second, uploadClient);
-		curWorkingSet->curFilePartNr = -1;
 	}
 	else
 	{

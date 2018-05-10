@@ -143,7 +143,7 @@ void FileServer::onFileCreationMessage(ReadMessage *msg)
 void FileServer::onFileTransferMessage(ReadMessage *msg)
 {
 	// Check if the checksum of the received message is valid else drop it:
-	if (!AbstractMessage::isChecksumValid(msg, FileCreationMessage::CHECKSUM_OFFSET_BITS))
+	if (!AbstractMessage::isChecksumValid(msg, FileTransferMessage::CHECKSUM_OFFSET_BITS))
 	{
 		return;
 	}
@@ -165,12 +165,12 @@ void FileServer::onFileTransferMessage(ReadMessage *msg)
 			unsigned int partNumber = FileTransferMessage::getFIDPartNumberFromMessage(msg->buffer);
 			uint64_t contLength = FileTransferMessage::getContentLengthFromMessage(msg->buffer);
 			unsigned char *content = FileTransferMessage::getContentFromMessage(msg->buffer, contLength);
-			// fCC->fS->writeFilePart(fCC->curFID, (char *)content, partNumber, contLength);
+			fCC->fS->writeFilePart(fCC->curFID, (char *)content, partNumber, contLength);
 			cout << "Wrote file part: " << partNumber << " for file: " << fCC->curFID << endl;
 		}
 		else
 		{
-			cerr << "Invalid FileTransferMessage flags received: " << flags << endl;
+			cerr << "Invalid FileTransferMessage flags received: " << (int)flags << endl;
 		}
 	}
 }

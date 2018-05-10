@@ -42,7 +42,7 @@ bool AbstractMessage::isChecksumValid(struct ReadMessage* msg, unsigned int chec
 	unsigned int crc32Calc = caclCRC32(msg->buffer, msg->bufferLength);
 	
 	if(crc32Calc != crc32Read) {
-		cout << "Invalid CRC32! Should: " << crc32Calc << ", Read: " << crc32Read << ", BufLength: " << msg->bufferLength << ", BitsOffset: " << checkSumOffsetBits << endl;
+		cout << "Invalid CRC32! Should: " << crc32Calc << ", Read: " << crc32Read << ", BufLength: " << msg->bufferLength << ", BitsOffset: " << checkSumOffsetBits << " Type: " << ((msg->buffer[0] & 0xf0) >> 4) << endl;
 	}
 
 	return crc32Read == crc32Calc;
