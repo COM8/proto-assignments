@@ -195,10 +195,10 @@ Flags [4 Bit]:
 This message is used for ensuring the opponent is still there. The opponent should acknowledge each received ```Ping``` message with an ```Server-ACK```.Should get send by each side if there was no message exchange for more than 5 seconds.<br/>
 It also can be used for package loss and throughput tests with a modified ```Payload Length```.
 ```
-0      4                      36         68       72        	   104
-+------+----------------------+----------+--------+----------------+---------+
-| Type | Ping Sequence Number | Checksum | Unused | Payload Length | Payload |
-+------+----------------------+----------+--------+----------------+---------+
+0      4                      36         68          100      104              136
++------+----------------------+-----------+----------+--------+----------------+---------+
+| Type | Ping Sequence Number | Client ID | Checksum | Unused | Payload Length | Payload |
++------+----------------------+-----------+----------+--------+----------------+---------+
 ```
 
 Ping Sequence Number [32 Bit]<br/>

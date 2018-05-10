@@ -1,15 +1,20 @@
 #pragma once
 
 #include <iostream>
+#include <string>
 #include <thread>
+#include <unordered_map>
+#include <cstdint>
 #include "net/State.h"
 #include "net/Server.h"
 #include "net/Client.h"
 #include "Queue.h"
 #include "net/ServerHelloMessage.h"
+#include "net/FileCreationMessage.h"
 #include "net/ClientHelloMessage.h"
 #include "net/PingMessage.h"
 #include "net/AckMessage.h"
+#include "Filesystem.h"
 
 enum FileClientConnectionState {
 	c_disconnected,
@@ -29,6 +34,7 @@ struct FileClientConnection {
 	net::Server* udpServer;
 	Queue<net::ReadMessage>* cpQueue;
 	FileClientConnectionState state = c_disconnected;
+	FilesystemServer *fS;
 };
 
 class FileServer
@@ -45,14 +51,15 @@ private:
 	Queue<net::ReadMessage>* cpQueue;
 	bool shouldConsumerRun;
 	std::thread* consumerThread;
-	FileClientConnection* client;
+	std::unordered_map <unsigned int, FileClientConnection*> *clients;
 	unsigned int clientId;
 
 	void startConsumerThread();
 	void stopConsumerThread();
 	void consumerTask();
-	void onClientHelloMessage(net::ReadMessage& msg);
-	void onPingMessage(net::ReadMessage &msg);
-	void onAckMessage(net::ReadMessage &msg);
+	void onClientHelloMessage(net::ReadMessage *msg);
+	void onPingMessage(net::ReadMessage *msg);
+	void onAckMessage(net::ReadMessage *msg);
+	void onFileCreationMessage(ReadMessage *msg);
 	void sendServerHelloMessage(const FileClientConnection& client);
 };
