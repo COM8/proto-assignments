@@ -31,35 +31,37 @@ long unsigned int Filesystem::filesize(const string FID) {
 }
 
 WorkingSet* FilesystemClient::getWorkingSet() {
-	WorkingSet *ret = new WorkingSet();
-	ret->curFilePartNr = -1;
-	genMap(this->path, ret);
+	unordered_map <std::string, File*> files;
+	list<std::string> deleteFolder;
+	list<std::string> deleteFile;
+	list<Folder*> folders;
+	genMap(this->path, files, folders, deleteFile, deleteFolder);
 
 	for(Folder* f: this->folders) {
 		if(!Filesystem::exists(f->path)) {
-			ret->deleteFolder.push_back(f->path);
+			deleteFolder.push_back(f->path);
 			//this->folders.erase(f);
 		}
 	}
 	for(const auto f: this->files) {
 		if(!Filesystem::exists(f.first)) {
-			ret->deleteFile.push_back(f.first);
+			deleteFile.push_back(f.first);
 			this->files.erase(f.first);
 		}
 	}
-	return ret;
+	return new WorkingSet(files, folders, deleteFile, deleteFolder);
 }
 
-int FilesystemClient::genMap(string path, WorkingSet* woSet) {
+int FilesystemClient::genMap(string path,unordered_map <std::string, File*> files, 	list<Folder*> folders, list<std::string> deleteFile, std::list<std::string> deleteFolder) {
 	if (Filesystem::exists(path)) {
 		for (auto const &p : fs::directory_iterator(path)) {
 			if (fs::is_directory(p)){
 				if (!isInFolders(p.path().string())) {
 					Folder *f = genFolder(p.path().string());
-					woSet->folders.push_back(f);									
+					folders.push_back(f);									
 					this->folders.push_back(f);
 					}
-					genMap(p.path().string(), woSet);
+					genMap(p.path().string(), files, folders, deleteFile, deleteFolder);
 			}
 			else {
 				string temp = p.path().string();
@@ -67,17 +69,17 @@ int FilesystemClient::genMap(string path, WorkingSet* woSet) {
 					char *hash = new char[32];
 					calcSHA256(temp, hash);
 					if(strcmp(this->files[temp]->hash,hash) == 1) {
-						woSet->deleteFile.push_back(temp);
+						deleteFile.push_back(temp);
 						this->files.erase(temp);
 						File *f = genFile(temp);
 						this->files[temp] = f;
-						woSet->files[temp] = f;
+						files[temp] = f;
 					}
 
 				}else {
 					File* f = genFile(temp);
 					this->files[temp] = f;
-					woSet->files[temp] = f;
+					files[temp] = f;
 				}
 			}
 

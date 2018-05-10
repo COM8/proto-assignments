@@ -5,36 +5,16 @@
 #include <list>
 #include <fstream>
 #include <cstring>
+#include <WorkingSet.h>
 
 #pragma once
 
-struct Folder {
-    std::string path = "";
-    bool isCreated = false;
-    };
-
-struct File {
-	std::string name;
-    char* hash = new char[32];
-    bool isOpen = false;
-    unsigned int size = 0;
-    std::ifstream fd;
-    unsigned last_part = 0;
-};
 
 struct ServerFile {
     char *hash = new char[32];
     unsigned int last_part = 0;
     };
 
-struct WorkingSet {
-    std::list<Folder*> folders;
-    std::unordered_map <std::string, File*> files;
-    std::pair<std::string, File*> curFile;
-    std::list<std::string> deleteFolder;
-    std::list<std::string> deleteFile;
-    int curFilePartNr;
-};
 
 class Filesystem {
 protected:
@@ -59,7 +39,7 @@ public:
     std::unordered_map <std::string, File*> files;
     int genMap();
     int genMap(std::string path);
-    int genMap(std::string path, WorkingSet* woSet);
+    int genMap(std::string path, std::unordered_map <std::string, File*> files, std::list<Folder*> folders, std::list<std::string> deleteFile, std::list<std::string> deleteFolder);
     int readFile(std::string FID, char* buffer, unsigned int partNr, bool *isLastPart);
     void close();
     WorkingSet* getWorkingSet();
