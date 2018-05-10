@@ -109,7 +109,7 @@ void FileServer::onFileCreationMessage(ReadMessage *msg)
 		{
 		case 1:
 			fCC->fS->genFolder(string((char *)fid));
-			cout << "Folder \"" << fid << "\" generated." << endl;			
+			cout << "Folder \"" << fid << "\" generated." << endl;
 			break;
 
 		case 2:
@@ -162,7 +162,8 @@ void FileServer::onFileTransferMessage(ReadMessage *msg)
 			// fCC->fS->writeFilePart(fCC->curFID, (char *)content, partNumber, contLength);
 			cout << "Wrote file part: " << partNumber << " for file: " << fCC->curFID << endl;
 		}
-		else {
+		else
+		{
 			cerr << "Invalid FileTransferMessage flags received: " << flags << endl;
 		}
 	}
@@ -190,8 +191,9 @@ void FileServer::onPingMessage(ReadMessage *msg)
 	auto c = clients->find(clientId);
 	if (c != clients->end())
 	{
-		unsigned int seqNumber = FileCreationMessage::getSeqNumberFromMessage(msg->buffer);
+		unsigned int seqNumber = PingMessage::getSeqNumberFromMessage(msg->buffer);
 		AckMessage ack(seqNumber);
+		cout << "Pong" << endl;
 		c->second->udpClient->send(&ack);
 	}
 }
@@ -210,7 +212,7 @@ void FileServer::onClientHelloMessage(ReadMessage *msg)
 	client->portRemote = ClientHelloMessage::getPortFromMessage(msg->buffer);
 	client->remoteIp = msg->senderIp;
 	client->portLocal = 2000 + client->clientId % 63000;
-	client->cpQueue = new Queue<ReadMessage>();
+	client->cpQueue = cpQueue;
 	client->udpClient = new Client(client->remoteIp, client->portRemote);
 	client->udpServer = new Server(client->portLocal, client->cpQueue);
 	client->fS = new FilesystemServer(to_string(client->clientId));
@@ -218,14 +220,15 @@ void FileServer::onClientHelloMessage(ReadMessage *msg)
 
 	// Check if client id is taken:
 	auto c = clients->find(client->clientId);
-	if (c != clients->end()) {
+	if (c != clients->end())
+	{
 		sendServerHelloMessage(client, 4);
 		cout << "Client request declined! Reason: Client ID already taken!" << endl;
 		return;
 	}
 
 	// Insert client into clients map:
-	(*clients)[client->clientId] = client;
+	clients->insert(std::pair<int, FileClientConnection*>(client->clientId, client));
 
 	client->udpServer->start();
 	sendServerHelloMessage(client, 1);

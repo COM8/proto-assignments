@@ -146,7 +146,7 @@ void FileClient::onAckMessage(ReadMessage *msg)
 	unsigned int seqNumber = AckMessage::getSeqNumberFromMessage(msg->buffer);
 	if (sendMessageQueue->onSequenceNumberAck(seqNumber))
 	{
-		cout << "Ack: " << seqNumber << endl;
+		cout << "Acked: " << seqNumber << endl;
 	}
 	else
 	{

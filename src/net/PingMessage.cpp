@@ -6,11 +6,12 @@ using namespace std;
 PingMessage::PingMessage(unsigned int plLength, unsigned int seqNumber, unsigned int clientId) : AbstractMessage(6 << 4) { // 01100000
 	this->plLength = plLength;
 	this->seqNumber = seqNumber;
+	this->clientId = clientId;
 }
 
 void PingMessage::createBuffer(struct Message* msg) {
-	msg->buffer = new unsigned char[12 + plLength]{};
-	msg->bufferLength = 12 + plLength;
+	msg->buffer = new unsigned char[17 + plLength]{};
+	msg->bufferLength = 17 + plLength;
 	
 	// Add type:
 	msg->buffer[0] |= type;
@@ -29,7 +30,7 @@ void PingMessage::createBuffer(struct Message* msg) {
 }
 
 unsigned int PingMessage::getPlLengthFromMessage(unsigned char* buffer) {
-	return getUnsignedIntFromMessage(buffer, 72);
+	return getUnsignedIntFromMessage(buffer, 104);
 }
 
 unsigned int PingMessage::getSeqNumberFromMessage(unsigned char* buffer) {
@@ -37,5 +38,5 @@ unsigned int PingMessage::getSeqNumberFromMessage(unsigned char* buffer) {
 }
 
 unsigned int PingMessage::getClientIdFromMessage(unsigned char* buffer) {
-	return getUnsignedIntFromMessage(buffer, 8);
+	return getUnsignedIntFromMessage(buffer, 36);
 }
