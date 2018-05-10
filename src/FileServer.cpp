@@ -4,12 +4,11 @@ using namespace net;
 using namespace std;
 
 FileServer::FileServer(unsigned short port) : port(port),
-											  clientId(0),
 											  state(stopped),
 											  shouldConsumerRun(false)
 {
 	this->cpQueue = new Queue<ReadMessage>();
-	this->clients = new unordered_map<unsigned int, FileClientConnection*>();
+	this->clients = new unordered_map<unsigned int, FileClientConnection *>();
 }
 
 void FileServer::start()
@@ -62,7 +61,7 @@ void FileServer::consumerTask()
 			onFileTransferMessage(&msg);
 			break;
 
-		/*case 4:
+			/*case 4:
 			break;*/
 
 		case 5:
@@ -73,7 +72,7 @@ void FileServer::consumerTask()
 			onPingMessage(&msg);
 			break;
 
-		/*case 7:
+			/*case 7:
 			break;*/
 
 		default:
@@ -93,11 +92,12 @@ void FileServer::onFileCreationMessage(ReadMessage *msg)
 
 	unsigned int clientId = FileCreationMessage::getClientIdFromMessage(msg->buffer);
 	auto c = clients->find(clientId);
-	if(c != clients->end()) {
+	if (c != clients->end())
+	{
 		// Send ack:
 		unsigned int seqNumber = FileCreationMessage::getSeqNumberFromMessage(msg->buffer);
 		AckMessage ack(seqNumber);
-		FileClientConnection * fCC = c->second;
+		FileClientConnection *fCC = c->second;
 		fCC->udpClient->send(&ack);
 
 		// Create file/folder:
@@ -105,33 +105,37 @@ void FileServer::onFileCreationMessage(ReadMessage *msg)
 		uint64_t fidLengt = FileCreationMessage::getFIDLengthFromMessage(msg->buffer);
 		unsigned char *fid = FileCreationMessage::getFIDFromMessage(msg->buffer, fidLengt);
 		unsigned char *hash;
-		switch(fileType) {
-			case 1:
-				fCC->fS->genFolder(string((char*)fid));
-				break;
+		switch (fileType)
+		{
+		case 1:
+			fCC->fS->genFolder(string((char *)fid));
+			cout << "Folder \"" << fid << "\" generated." << endl;			
+			break;
 
-			case 2:
-				fCC->fS->delFolder(string((char*)fid));
-				break;
+		case 2:
+			fCC->fS->delFolder(string((char *)fid));
+			break;
 
-			case 4:
-				hash = FileCreationMessage::getFileHashFromMessage(msg->buffer);
-				fCC->curFID = string((char*)fid);
-				fCC->fS->genFile(fCC->curFID, (char*)hash);
-				break;
+		case 4:
+			hash = FileCreationMessage::getFileHashFromMessage(msg->buffer);
+			fCC->curFID = string((char *)fid);
+			fCC->fS->genFile(fCC->curFID, (char *)hash);
+			cout << "File \"" << fid << "\" generated." << endl;
+			break;
 
-			case 8:
-				fCC->fS->delFile(string((char*)fid));
-				break;
+		case 8:
+			fCC->fS->delFile(string((char *)fid));
+			break;
 
-			default:
-				cerr << "Unknown fileType received: " << fileType << endl;
-				break;
+		default:
+			cerr << "Unknown fileType received: " << fileType << endl;
+			break;
 		}
 	}
 }
 
-void FileServer::onFileTransferMessage(ReadMessage *msg) {
+void FileServer::onFileTransferMessage(ReadMessage *msg)
+{
 	// Check if the checksum of the received message is valid else drop it:
 	if (!AbstractMessage::isChecksumValid(msg, FileCreationMessage::CHECKSUM_OFFSET_BITS))
 	{
@@ -140,19 +144,27 @@ void FileServer::onFileTransferMessage(ReadMessage *msg) {
 
 	unsigned int clientId = FileTransferMessage::getClientIdFromMessage(msg->buffer);
 	auto c = clients->find(clientId);
-	if(c != clients->end()) {
+	if (c != clients->end())
+	{
 		// Send ack:
 		unsigned int seqNumber = FileTransferMessage::getSeqNumberFromMessage(msg->buffer);
 		AckMessage ack(seqNumber);
-		FileClientConnection * fCC = c->second;
+		FileClientConnection *fCC = c->second;
 		fCC->udpClient->send(&ack);
 
 		// Write file:
-		unsigned int partNumber = FileTransferMessage::getFIDPartNumberFromMessage(msg->buffer);
-		uint64_t contLength = FileTransferMessage::getContentLengthFromMessage(msg->buffer);
-		unsigned char *content = FileTransferMessage::getContentFromMessage(msg->buffer, contLength);
-		fCC->fS->writeFilePart(fCC->curFID, (char*)content, partNumber, contLength);
-		cout << "Wrote file part: " << partNumber << " for file: " << fCC->curFID << endl;
+		char flags = FileTransferMessage::getFlagsFromMessage(msg->buffer);
+		if (flags & 2 == 2)
+		{
+			unsigned int partNumber = FileTransferMessage::getFIDPartNumberFromMessage(msg->buffer);
+			uint64_t contLength = FileTransferMessage::getContentLengthFromMessage(msg->buffer);
+			unsigned char *content = FileTransferMessage::getContentFromMessage(msg->buffer, contLength);
+			// fCC->fS->writeFilePart(fCC->curFID, (char *)content, partNumber, contLength);
+			cout << "Wrote file part: " << partNumber << " for file: " << fCC->curFID << endl;
+		}
+		else {
+			cerr << "Invalid FileTransferMessage flags received: " << flags << endl;
+		}
 	}
 }
 
@@ -176,7 +188,8 @@ void FileServer::onPingMessage(ReadMessage *msg)
 
 	unsigned int clientId = PingMessage::getClientIdFromMessage(msg->buffer);
 	auto c = clients->find(clientId);
-	if(c != clients->end()) {
+	if (c != clients->end())
+	{
 		unsigned int seqNumber = FileCreationMessage::getSeqNumberFromMessage(msg->buffer);
 		AckMessage ack(seqNumber);
 		c->second->udpClient->send(&ack);
@@ -192,31 +205,39 @@ void FileServer::onClientHelloMessage(ReadMessage *msg)
 	}
 
 	FileClientConnection *client = new FileClientConnection{};
-	client->clientId = clientId++;
+	client->clientId = ClientHelloMessage::getClientIdFromMessage(msg->buffer);
 	client->state = c_clientHello;
 	client->portRemote = ClientHelloMessage::getPortFromMessage(msg->buffer);
 	client->remoteIp = msg->senderIp;
-	client->portLocal = 1236; // ToDo: Get random unused port
+	client->portLocal = 2000 + client->clientId % 63000;
 	client->cpQueue = new Queue<ReadMessage>();
 	client->udpClient = new Client(client->remoteIp, client->portRemote);
 	client->udpServer = new Server(client->portLocal, client->cpQueue);
-	client->udpServer->start();
-	client->fS = new FilesystemServer("" + clientId);
+	client->fS = new FilesystemServer(to_string(client->clientId));
 	client->curFID = "";
+
+	// Check if client id is taken:
+	auto c = clients->find(client->clientId);
+	if (c != clients->end()) {
+		sendServerHelloMessage(client, 4);
+		cout << "Client request declined! Reason: Client ID already taken!" << endl;
+		return;
+	}
 
 	// Insert client into clients map:
 	(*clients)[client->clientId] = client;
 
-	sendServerHelloMessage(*client);
+	client->udpServer->start();
+	sendServerHelloMessage(client, 1);
 	client->state = c_serverHello;
 
-	cout << "New client accepted on port: " << client->portRemote << " and clientId: " << client->clientId << endl;
+	cout << "New client with id: " << client->clientId << " accepted on port: " << client->portRemote << " and clientId: " << client->clientId << endl;
 }
 
-void FileServer::sendServerHelloMessage(const FileClientConnection &client)
+void FileServer::sendServerHelloMessage(FileClientConnection *client, unsigned char flags)
 {
-	ServerHelloMessage msg(client.portLocal, client.clientId, 1 << 4);
-	client.udpClient->send(&msg);
+	ServerHelloMessage msg(client->portLocal, client->clientId, flags);
+	client->udpClient->send(&msg);
 }
 
 void FileServer::stop()
@@ -224,13 +245,16 @@ void FileServer::stop()
 	stopConsumerThread();
 
 	// Stop all clients:
-	for (auto itr = clients->begin(); itr != clients->end(); itr++) {
+	for (auto itr = clients->begin(); itr != clients->end(); itr++)
+	{
 		FileClientConnection *c = itr->second;
 		cout << "Stoping client: " << c->clientId << endl;
-		if(c->fS) {
+		if (c->fS)
+		{
 			c->fS->close();
 		}
-		if(c->udpServer) {
+		if (c->udpServer)
+		{
 			c->udpServer->stop();
 		}
 	}

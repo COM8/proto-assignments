@@ -17,7 +17,9 @@ FileClient::FileClient(std::string *serverAddress, unsigned short serverPort, Fi
 	this->shouldHelloRun = false;
 	this->consumerThread = NULL;
 	this->seqNumber = 0;
-	this->clientId = -1;
+	srand (time(NULL));
+	this->clientId = rand();
+	this->listeningPort = 2000 + rand() % 63000;
 	this->server = NULL;
 	this->client = NULL;
 	this->uploadClient = NULL;
@@ -29,17 +31,16 @@ void FileClient::startSendingFS()
 
 	client = new Client(*serverAddress, serverPort);
 
-	unsigned short listenPort = 1235;
-	server = new Server(listenPort, cpQueue);
+	server = new Server(listeningPort, cpQueue);
 	server->start();
 	startConsumerThread();
-	startHelloThread(listenPort);
+	startHelloThread();
 }
 
-void FileClient::startHelloThread(unsigned short listenPort)
+void FileClient::startHelloThread()
 {
 	shouldHelloRun = true;
-	helloThread = new thread(&FileClient::helloTask, this, listenPort);
+	helloThread = new thread(&FileClient::helloTask, this, listeningPort);
 }
 void FileClient::stopHelloThread()
 {
@@ -55,8 +56,8 @@ void FileClient::helloTask(unsigned short listenPort)
 	state = sendHandshake;
 	while (state < connected && shouldHelloRun)
 	{
-		sleep(1); // Sleep for 1s
 		sendClientHelloMessage(listenPort, client);
+		sleep(1); // Sleep for 1 second
 	}
 }
 
@@ -86,12 +87,23 @@ void FileClient::onServerHelloMessage(ReadMessage *msg)
 	if (state == sendHandshake)
 	{
 		state = connected;
+		// Check if client ID was still available:
+		if(ServerHelloMessage::getFlagsFromMessage(msg->buffer) & 1 != 1) {
+			cout << "Client ID already taken! Trying a new one." << endl;
+			stopHelloThread();
+			clientId = rand();
+			state = disconnected;
+			startHelloThread();
+			return;
+		}
+
 		cout << "Connected to server!" << endl;
 		clientId = ServerHelloMessage::getClientIdFromMessage(msg->buffer);
 		unsigned short uploadPort = ServerHelloMessage::getPortFromMessage(msg->buffer);
 		uploadClient = new Client(*serverAddress, uploadPort);
 
 		state = sendingFS;
+		printToDo();
 		sendNextFilePart();
 	}
 }
@@ -228,17 +240,19 @@ void FileClient::sendFileCreationMessage(string fid, struct File *f, Client *cli
 
 bool FileClient::sendNextFilePart(string fid, struct File *f, int nextPartNr, Client *client) {
 	char chunk[Filesystem::partLength];
-	int readCount = fs->readFile(fid, chunk, nextPartNr);
+	bool isLastPart = false;
+	int readCount = fs->readFile(fid, chunk, nextPartNr, &isLastPart);
 
-	char flags = 1;
+	// File part:
+	char flags = 2;
+
+	// First file part:
 	if(nextPartNr == 0) {
-		flags = 1;
+		flags |= 1;
 	}
-	else if(readCount == -1){
-		flags = 8;
-	}
-	else {
-		flags = 2;
+	// Last file part:
+	else if(isLastPart){
+		flags |= 8;
 	}
 
 	FileTransferMessage msg = FileTransferMessage(clientId, seqNumber++, 0, nextPartNr, (unsigned char *)f->hash, (uint64_t)readCount, (unsigned char*)chunk);
@@ -296,7 +310,7 @@ TransferState FileClient::getState()
 
 void FileClient::sendClientHelloMessage(unsigned short listeningPort, Client *client)
 {
-	ClientHelloMessage msg = ClientHelloMessage(listeningPort);
+	ClientHelloMessage msg = ClientHelloMessage(listeningPort, clientId);
 	client->send(&msg);
 }
 

@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <iostream>
 #include <cstdint>
+#include <stdlib.h>
 #include "Filesystem.h"
 #include "net/Client.h"
 #include "net/Server.h"
@@ -55,10 +56,11 @@ private:
 	std::thread *helloThread;
 	unsigned int seqNumber;
 	unsigned int clientId;
+	unsigned short listeningPort;
 
 	void startConsumerThread();
 	void stopConsumerThread();
-	void startHelloThread(unsigned short listenPort);
+	void startHelloThread();
 	void stopHelloThread();
 	void helloTask(unsigned short listenPort);
 	void consumerTask();

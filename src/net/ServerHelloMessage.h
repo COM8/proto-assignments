@@ -12,6 +12,7 @@ namespace net {
 		void createBuffer(struct Message* msg);
 		static unsigned int getClientIdFromMessage(unsigned char* buffer);
 		static unsigned short getPortFromMessage(unsigned char* buffer);
+		static unsigned char getFlagsFromMessage(unsigned char* buffer);
 
 	private:
 		unsigned short port;

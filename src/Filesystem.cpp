@@ -117,8 +117,9 @@ int FilesystemClient::readFile(string FID, char* buffer, unsigned int partNr, bo
 			this->files[FID]->isOpen = false;
 			*isLastPart = true;
 		}
-		else 
+		else {
 			*isLastPart = false;
+		}
 		return retLength;
 	}else {
 		return -2;

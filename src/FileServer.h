@@ -54,12 +54,11 @@ private:
 	bool shouldConsumerRun;
 	std::thread* consumerThread;
 	std::unordered_map <unsigned int, FileClientConnection*> *clients;
-	unsigned int clientId;
 
 	void startConsumerThread();
 	void stopConsumerThread();
 	void consumerTask();
-	void sendServerHelloMessage(const FileClientConnection& client);
+	void sendServerHelloMessage(FileClientConnection *client, unsigned char flags);
 	void onClientHelloMessage(net::ReadMessage *msg);
 	void onPingMessage(net::ReadMessage *msg);
 	void onAckMessage(net::ReadMessage *msg);

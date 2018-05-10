@@ -29,6 +29,11 @@ void ServerHelloMessage::createBuffer(struct Message* msg) {
 	addChecksum(msg, 56);
 }
 
+unsigned char ServerHelloMessage::getFlagsFromMessage(unsigned char* buffer) {
+	// Flags start at 4, but it is easier to get a byte and ignore the first 4 bit
+	return getByteWithOffset(buffer, 0) & 0xF; // Only the last 4 bit are the flag bits
+}
+
 unsigned int ServerHelloMessage::getClientIdFromMessage(unsigned char* buffer) {
 	return getUnsignedIntFromMessage(buffer, 8);
 }
