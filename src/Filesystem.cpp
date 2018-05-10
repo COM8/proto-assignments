@@ -30,16 +30,73 @@ long unsigned int Filesystem::filesize(const string FID) {
     return ret;
 }
 
-//WorkingSet should later contet the delta to last Sync trial, but in the moment it won't do it
 WorkingSet* FilesystemClient::getWorkingSet() {
 	WorkingSet *ret = new WorkingSet();
-	ret->folders= &(this->folders);
-	ret->files = &(this->files);
 	ret->curFilePartNr = -1;
+	genMap(this->path, ret);
+
+	for(Folder* f: this->folders) {
+		if(!Filesystem::exists(f->path)) {
+			ret->deleteFolder.push_back(f->path);
+			//this->folders.erase(f);
+		}
+	}
+	for(const auto f: this->files) {
+		if(!Filesystem::exists(f.first)) {
+			ret->deleteFile.push_back(f.first);
+			this->files.erase(f.first);
+		}
+	}
 	return ret;
 }
 
-int FilesystemClient::readFile(string FID, char* buffer, unsigned int partNr, unsigned int length) {
+int FilesystemClient::genMap(string path, WorkingSet* woSet) {
+	if (Filesystem::exists(path)) {
+		for (auto const &p : fs::directory_iterator(path)) {
+			if (fs::is_directory(p)){
+				if (!isInFolders(p.path().string())) {
+					Folder *f = genFolder(p.path().string());
+					woSet->folders.push_back(f);									
+					this->folders.push_back(f);
+					}
+					genMap(p.path().string(), woSet);
+			}
+			else {
+				string temp = p.path().string();
+				if(!this->files[temp] == 0){
+					char *hash = new char[32];
+					calcSHA256(temp, hash);
+					if(strcmp(this->files[temp]->hash,hash) == 1) {
+						woSet->deleteFile.push_back(temp);
+						this->files.erase(temp);
+						File *f = genFile(temp);
+						this->files[temp] = f;
+						woSet->files[temp] = f;
+					}
+
+				}else {
+					File* f = genFile(temp);
+					this->files[temp] = f;
+					woSet->files[temp] = f;
+				}
+			}
+
+		}
+		return 1;
+	}
+	return 0;
+}
+
+bool FilesystemClient::isInFolders(string path) {
+	for(const auto f: this->folders) {
+		if(path.compare(f->path)) {
+			return true;
+		}
+	}
+	return false;
+}
+
+int FilesystemClient::readFile(string FID, char* buffer, unsigned int partNr) {
 	if(!(this->files[FID] == 0)) {
 		if (!this->files[FID]->isOpen){
 			this->files[FID]->fd = ifstream (FID, ifstream::ate | ifstream::binary);
@@ -51,9 +108,15 @@ int FilesystemClient::readFile(string FID, char* buffer, unsigned int partNr, un
 				this->files[FID]->isOpen = true;
 			}
 		}
-		this->files[FID]->fd.seekg(length*partNr, this->files[FID]->fd.beg);
-		this->files[FID]->fd.read(buffer,length);
-		return 0;
+		this->files[FID]->fd.seekg(partLength*partNr, this->files[FID]->fd.beg);
+		int retLength = (this->files[FID]->size > (partLength*(partNr+1))) ? partLength : this->files[FID]->size - partLength*partNr;
+		retLength = retLength < 0 ? 0 : retLength;
+		this->files[FID]->fd.read(buffer,retLength);
+		if(retLength < (int)partLength) {
+			this->files[FID]->fd.close();
+			this->files[FID]->isOpen = false;
+		}
+		return retLength;
 	}else {
 		return -2;
 	}
@@ -105,7 +168,6 @@ string FilesystemClient::toString() {
 	return temp;
 }
 
-//SERVER
 
 FilesystemServer::FilesystemServer(string path) {
 	this->path = path;
@@ -202,7 +264,8 @@ void FilesystemServer::genFolder(string path) {
 	string temp = this->path + path;
 	if(this->folders[temp] == 0) {
 		this->folders[temp] = true;
-		system(("mkdir "+temp).c_str());
+		if(!exists(temp))
+			system(("mkdir "+temp).c_str());
 	}
 }
 
@@ -262,7 +325,7 @@ int FilesystemServer::writeFilePart(string FID, char* buffer, unsigned int partN
 	}
 	fstream tmp ((this->path + FID),  fstream::out | fstream::in | fstream::binary);
 	if(tmp) {
-		tmp.seekp(partNr*length, tmp.beg);
+		tmp.seekp(partNr*partLength, tmp.beg);
 		tmp.write(buffer,length);
 		tmp.close();
 		if (this->files[this->path + FID]->last_part+1 == partNr) {

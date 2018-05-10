@@ -177,20 +177,20 @@ void FileClient::sendNextFilePart()
 		cout << "cFile" << endl;
 		bool lastPartSend = sendNextFilePart(curWorkingSet->curFile.first, curWorkingSet->curFile.second, ++curWorkingSet->curFilePartNr, uploadClient);
 		if(lastPartSend) {
-			curWorkingSet->files->erase(curWorkingSet->curFile.first);
+			curWorkingSet->files.erase(curWorkingSet->curFile.first);
 			curWorkingSet->curFilePartNr = -1;
 		}
 	}
 	// Trasfer folder:
-	else if (!curWorkingSet->folders->empty())
+	else if (!curWorkingSet->folders.empty())
 	{
-		struct Folder *f = curWorkingSet->folders->front();
-		curWorkingSet->folders->pop_front();
+		struct Folder *f = curWorkingSet->folders.front();
+		curWorkingSet->folders.pop_front();
 	}
 	// Transfer file:
-	else if (!curWorkingSet->files->empty())
+	else if (!curWorkingSet->files.empty())
 	{
-		curWorkingSet->curFile = *curWorkingSet->files->begin();	
+		curWorkingSet->curFile = *curWorkingSet->files.begin();	
 		curWorkingSet->curFilePartNr = 0;
 		sendFileCreationMessage(curWorkingSet->curFile.first, curWorkingSet->curFile.second, uploadClient);
 		curWorkingSet->curFilePartNr = -1;
@@ -227,8 +227,8 @@ void FileClient::sendFileCreationMessage(string fid, struct File *f, Client *cli
 }
 
 bool FileClient::sendNextFilePart(string fid, struct File *f, int nextPartNr, Client *client) {
-	char chunk[MAX_FILE_CHUNK_SIZE_IN_BYTE];
-	int readCount = fs->readFile(fid, chunk, nextPartNr, MAX_FILE_CHUNK_SIZE_IN_BYTE);
+	char chunk[Filesystem::partLength];
+	int readCount = fs->readFile(fid, chunk, nextPartNr);
 
 	char flags = 1;
 	if(nextPartNr == 0) {
@@ -323,8 +323,8 @@ void FileClient::printToDo()
 		cout << "Nothing to do!" << endl;
 	}
 	else {
-		cout << "Files: " << curWorkingSet->files->size() << endl;
-		cout << "Folders: " << curWorkingSet->folders->size() << endl;
+		cout << "Files: " << curWorkingSet->files.size() << endl;
+		cout << "Folders: " << curWorkingSet->folders.size() << endl;
 		cout << "Current file: ";
 		if(curWorkingSet->curFilePartNr >= 0) {
 			cout << "FID: " << curWorkingSet->curFile.first << ", Part: " << curWorkingSet->curFilePartNr << endl;
