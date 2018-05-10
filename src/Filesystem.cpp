@@ -55,6 +55,10 @@ int FilesystemClient::readFile(string FID, char* buffer, unsigned int partNr) {
 		int retLength = (this->files[FID]->size > (partLength*(partNr+1))) ? partLength : this->files[FID]->size - partLength*partNr;
 		retLength = retLength < 0 ? 0 : retLength;
 		this->files[FID]->fd.read(buffer,retLength);
+		if(retLength < partLength) {
+			this->files[FID]->fd.close();
+			this->files[FID]->isOpen = false;
+		}
 		return retLength;
 	}else {
 		return -2;
