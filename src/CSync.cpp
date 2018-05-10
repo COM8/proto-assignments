@@ -86,7 +86,6 @@ void printClientHelp() {
 
 void launchClient(unsigned int port, string host, string dir) {
 	FilesystemClient *fS = new FilesystemClient(dir);
-	cout << "genMap: " << fS->genMap() << endl;
 	FileClient *fC = new FileClient(&host, (unsigned short)port, fS);
 	fC->startSendingFS();
 	

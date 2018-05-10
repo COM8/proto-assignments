@@ -110,10 +110,12 @@ public:
 		{
 			if(difftime(now, i->sendTime) > maxMessageAgeInSec) {
 				tooOldMessages->push_back(*i);
-				queue.erase(i);
+				i = queue.erase(i);
 				break;
 			}
-			i++;
+			else {
+				i++;
+			}
 		}
     	mlock.unlock();
     	condVar->notify_one();

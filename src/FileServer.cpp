@@ -9,6 +9,11 @@ FileServer::FileServer(unsigned short port) : port(port),
 {
 	this->cpQueue = new Queue<ReadMessage>();
 	this->clients = new unordered_map<unsigned int, FileClientConnection *>();
+	this->cleanupTimer = new Timer(true, 5000, this);
+}
+
+void FileServer::onTimerTick() {
+	cleanupClients();
 }
 
 void FileServer::start()
@@ -23,6 +28,7 @@ void FileServer::start()
 		server = Server(port, cpQueue);
 		server.start();
 		startConsumerThread();
+		cleanupTimer->start();
 		state = running;
 	}
 }
@@ -198,6 +204,32 @@ void FileServer::onPingMessage(ReadMessage *msg)
 	}
 }
 
+void FileServer::cleanupClients()
+{
+	time_t now = time(NULL);
+	for (auto itr = clients->begin(); itr != clients->end();)
+	{
+		FileClientConnection *c = itr->second;
+		if (difftime(now, c->lastMessageTime) > 10)
+		{
+			cout << "Removing client: " << c->clientId << " for inactivity." << endl;
+			if (c->fS)
+			{
+				c->fS->close();
+			}
+			if (c->udpServer)
+			{
+				c->udpServer->stop();
+			}
+			itr = clients->erase(itr);
+		}
+		else
+		{
+			itr++;
+		}
+	}
+}
+
 void FileServer::onClientHelloMessage(ReadMessage *msg)
 {
 	// Check if the checksum of the received message is valid else drop it:
@@ -217,6 +249,7 @@ void FileServer::onClientHelloMessage(ReadMessage *msg)
 	client->udpServer = new Server(client->portLocal, client->cpQueue);
 	client->fS = new FilesystemServer(to_string(client->clientId));
 	client->curFID = "";
+	(client->lastMessageTime) = time(NULL);
 
 	// Check if client id is taken:
 	auto c = clients->find(client->clientId);
@@ -228,7 +261,7 @@ void FileServer::onClientHelloMessage(ReadMessage *msg)
 	}
 
 	// Insert client into clients map:
-	clients->insert(std::pair<int, FileClientConnection*>(client->clientId, client));
+	clients->insert(std::pair<int, FileClientConnection *>(client->clientId, client));
 
 	client->udpServer->start();
 	sendServerHelloMessage(client, 1);
@@ -246,6 +279,7 @@ void FileServer::sendServerHelloMessage(FileClientConnection *client, unsigned c
 void FileServer::stop()
 {
 	stopConsumerThread();
+	cleanupTimer->stop();
 
 	// Stop all clients:
 	for (auto itr = clients->begin(); itr != clients->end(); itr++)
