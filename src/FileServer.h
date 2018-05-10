@@ -11,6 +11,7 @@
 #include "Queue.h"
 #include "net/ServerHelloMessage.h"
 #include "net/FileCreationMessage.h"
+#include "net/FileTransferMessage.h"
 #include "net/ClientHelloMessage.h"
 #include "net/PingMessage.h"
 #include "net/AckMessage.h"
@@ -35,6 +36,7 @@ struct FileClientConnection {
 	Queue<net::ReadMessage>* cpQueue;
 	FileClientConnectionState state = c_disconnected;
 	FilesystemServer *fS;
+	std::string curFID;
 };
 
 class FileServer
@@ -57,9 +59,10 @@ private:
 	void startConsumerThread();
 	void stopConsumerThread();
 	void consumerTask();
+	void sendServerHelloMessage(const FileClientConnection& client);
 	void onClientHelloMessage(net::ReadMessage *msg);
 	void onPingMessage(net::ReadMessage *msg);
 	void onAckMessage(net::ReadMessage *msg);
 	void onFileCreationMessage(net::ReadMessage *msg);
-	void sendServerHelloMessage(const FileClientConnection& client);
+	void onFileTransferMessage(net::ReadMessage *msg);
 };

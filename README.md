@@ -45,7 +45,10 @@ FID Length [64 Bit]:<br/>
 	The length of the ```FID``` field in bytes.
 
 FID [Defined in the ```FID Length``` filed]:
-	The relative path to the file. Includes the file name e.g. ```folder/file.txt```
+	The relative path to the file. Includes the file name e.g. ```folder/file.txt```.
+
+FID Part Number [32 Bit]:<br/>
+	The file part number.
 
 ### Client-Hello-Handshake:
 The initial connection message that gets send by the client.
@@ -112,10 +115,15 @@ File SHA3 256 [256 Bit]:<br/>
 ### File-Transfer:
 The actual file transfer message containing the file content.
 ```
-0      4           36                68      72             328        360
-+------+-----------+-----------------+-------+--------------+----------+----------------+---------+
-| Type | Client ID | Sequence Number | Flags | FID SHA3 256 | Checksum | Content Length | Content |
-+------+-----------+-----------------+-------+--------------+----------+----------------+---------+
+0      4           36                68      72                104
++------+-----------+-----------------+-------+-----------------+
+| Type | Client ID | Sequence Number | Flags | FID Part Number |
++------+-----------+-----------------+-------+-----------------+
+
+104            360        392              456
++--------------+----------+----------------+---------+
+| FID SHA3 256 | Checksum | Content Length | Content |
++--------------+----------+----------------+---------+
 ```
 
 Flags [4 Bit]:

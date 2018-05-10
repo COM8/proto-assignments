@@ -59,10 +59,11 @@ void FileServer::consumerTask()
 			break;
 
 		case 3:
+			onFileTransferMessage(&msg);
 			break;
 
-		case 4:
-			break;
+		/*case 4:
+			break;*/
 
 		case 5:
 			onAckMessage(&msg);
@@ -72,8 +73,8 @@ void FileServer::consumerTask()
 			onPingMessage(&msg);
 			break;
 
-		case 7:
-			break;
+		/*case 7:
+			break;*/
 
 		default:
 			cerr << "Unknown message type received: " << msg.msgType << endl;
@@ -85,7 +86,7 @@ void FileServer::consumerTask()
 void FileServer::onFileCreationMessage(ReadMessage *msg)
 {
 	// Check if the checksum of the received message is valid else drop it:
-	if (!AbstractMessage::isChecksumValid(msg, AckMessage::CHECKSUM_OFFSET_BITS))
+	if (!AbstractMessage::isChecksumValid(msg, FileCreationMessage::CHECKSUM_OFFSET_BITS))
 	{
 		return;
 	}
@@ -115,7 +116,8 @@ void FileServer::onFileCreationMessage(ReadMessage *msg)
 
 			case 4:
 				hash = FileCreationMessage::getFileHashFromMessage(msg->buffer);
-				fCC->fS->genFile(string((char*)fid), (char*)hash);
+				fCC->curFID = string((char*)fid);
+				fCC->fS->genFile(fCC->curFID, (char*)hash);
 				break;
 
 			case 8:
@@ -126,6 +128,31 @@ void FileServer::onFileCreationMessage(ReadMessage *msg)
 				cerr << "Unknown fileType received: " << fileType << endl;
 				break;
 		}
+	}
+}
+
+void FileServer::onFileTransferMessage(ReadMessage *msg) {
+	// Check if the checksum of the received message is valid else drop it:
+	if (!AbstractMessage::isChecksumValid(msg, FileCreationMessage::CHECKSUM_OFFSET_BITS))
+	{
+		return;
+	}
+
+	unsigned int clientId = FileTransferMessage::getClientIdFromMessage(msg->buffer);
+	auto c = clients->find(clientId);
+	if(c != clients->end()) {
+		// Send ack:
+		unsigned int seqNumber = FileTransferMessage::getSeqNumberFromMessage(msg->buffer);
+		AckMessage ack(seqNumber);
+		FileClientConnection * fCC = c->second;
+		fCC->udpClient->send(&ack);
+
+		// Write file:
+		unsigned int partNumber = FileTransferMessage::getFIDPartNumberFromMessage(msg->buffer);
+		uint64_t contLength = FileTransferMessage::getContentLengthFromMessage(msg->buffer);
+		unsigned char *content = FileTransferMessage::getContentFromMessage(msg->buffer, contLength);
+		fCC->fS->writeFilePart(fCC->curFID, (char*)content, partNumber, contLength);
+		cout << "Wrote file part: " << partNumber << " for file: " << fCC->curFID << endl;
 	}
 }
 
@@ -175,6 +202,7 @@ void FileServer::onClientHelloMessage(ReadMessage *msg)
 	client->udpServer = new Server(client->portLocal, client->cpQueue);
 	client->udpServer->start();
 	client->fS = new FilesystemServer("" + clientId);
+	client->curFID = "";
 
 	// Insert client into clients map:
 	(*clients)[client->clientId] = client;
@@ -194,4 +222,16 @@ void FileServer::sendServerHelloMessage(const FileClientConnection &client)
 void FileServer::stop()
 {
 	stopConsumerThread();
+
+	// Stop all clients:
+	for (auto itr = clients->begin(); itr != clients->end(); itr++) {
+		FileClientConnection *c = itr->second;
+		cout << "Stoping client: " << c->clientId << endl;
+		if(c->fS) {
+			c->fS->close();
+		}
+		if(c->udpServer) {
+			c->udpServer->stop();
+		}
+	}
 }

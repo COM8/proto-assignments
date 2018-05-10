@@ -241,7 +241,7 @@ bool FileClient::sendNextFilePart(string fid, struct File *f, int nextPartNr, Cl
 		flags = 2;
 	}
 
-	FileTransferMessage msg = FileTransferMessage(clientId, seqNumber++, 0, (unsigned char *)f->hash, (uint64_t)readCount, (unsigned char*)chunk);
+	FileTransferMessage msg = FileTransferMessage(clientId, seqNumber++, 0, nextPartNr, (unsigned char *)f->hash, (uint64_t)readCount, (unsigned char*)chunk);
 	client->send(&msg);
 	return true;
 }
