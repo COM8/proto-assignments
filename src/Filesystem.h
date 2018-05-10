@@ -4,6 +4,7 @@
 #include <unordered_map>
 #include <list>
 #include <fstream>
+#include <cstring>
 
 #pragma once
 
@@ -27,9 +28,11 @@ struct ServerFile {
     };
 
 struct WorkingSet {
-    std::list<Folder*> *folders;
-    std::unordered_map <std::string, File*> *files;
+    std::list<Folder*> folders;
+    std::unordered_map <std::string, File*> files;
     std::pair<std::string, File*> curFile;
+    std::list<std::string> deleteFolder;
+    std::list<std::string> deleteFile;
     int curFilePartNr;
 };
 
@@ -48,6 +51,7 @@ class FilesystemClient: Filesystem {
 private:
     std::list<Folder*> folders;
     std::string path;
+    bool isInFolders(std::string path);
 
 public:
     FilesystemClient(std::string p);
@@ -55,6 +59,7 @@ public:
     std::unordered_map <std::string, File*> files;
     int genMap();
     int genMap(std::string path);
+    int genMap(std::string path, WorkingSet* woSet);
     int readFile(std::string FID, char* buffer, unsigned int partNr);
     void close();
     WorkingSet* getWorkingSet();

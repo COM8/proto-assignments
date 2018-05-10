@@ -177,20 +177,20 @@ void FileClient::sendNextFilePart()
 		cout << "cFile" << endl;
 		bool lastPartSend = sendNextFilePart(curWorkingSet->curFile.first, curWorkingSet->curFile.second, ++curWorkingSet->curFilePartNr, uploadClient);
 		if(lastPartSend) {
-			curWorkingSet->files->erase(curWorkingSet->curFile.first);
+			curWorkingSet->files.erase(curWorkingSet->curFile.first);
 			curWorkingSet->curFilePartNr = -1;
 		}
 	}
 	// Trasfer folder:
-	else if (!curWorkingSet->folders->empty())
+	else if (!curWorkingSet->folders.empty())
 	{
-		struct Folder *f = curWorkingSet->folders->front();
-		curWorkingSet->folders->pop_front();
+		struct Folder *f = curWorkingSet->folders.front();
+		curWorkingSet->folders.pop_front();
 	}
 	// Transfer file:
-	else if (!curWorkingSet->files->empty())
+	else if (!curWorkingSet->files.empty())
 	{
-		curWorkingSet->curFile = *curWorkingSet->files->begin();	
+		curWorkingSet->curFile = *curWorkingSet->files.begin();	
 		curWorkingSet->curFilePartNr = 0;
 		sendFileCreationMessage(curWorkingSet->curFile.first, curWorkingSet->curFile.second, uploadClient);
 		curWorkingSet->curFilePartNr = -1;
@@ -323,8 +323,8 @@ void FileClient::printToDo()
 		cout << "Nothing to do!" << endl;
 	}
 	else {
-		cout << "Files: " << curWorkingSet->files->size() << endl;
-		cout << "Folders: " << curWorkingSet->folders->size() << endl;
+		cout << "Files: " << curWorkingSet->files.size() << endl;
+		cout << "Folders: " << curWorkingSet->folders.size() << endl;
 		cout << "Current file: ";
 		if(curWorkingSet->curFilePartNr >= 0) {
 			cout << "FID: " << curWorkingSet->curFile.first << ", Part: " << curWorkingSet->curFilePartNr << endl;
