@@ -31,7 +31,7 @@ enum TransferState
 class FileClient
 {
 public:
-	FileClient(std::string* serverAddress, unsigned short serverPort, FilesystemClient* fs);
+	FileClient(std::string* serverAddress, unsigned short serverPort, FilesystemClient* fS);
 	void startSendingFS();
 	void stopSendingFS();
 	void pingServer();
@@ -41,7 +41,7 @@ public:
 private:
 	unsigned short serverPort;
 	std::string *serverAddress;
-	FilesystemClient *fs;
+	FilesystemClient *fS;
 	struct WorkingSet *curWorkingSet;
 	TransferState state;
 	net::Client *client;

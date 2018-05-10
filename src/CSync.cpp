@@ -85,10 +85,10 @@ void printClientHelp() {
 }
 
 void launchClient(unsigned int port, string host, string dir) {
-	//todo
-	FilesystemClient fS = FilesystemClient(dir);
-	FileClient fC = FileClient(&host, (unsigned short)port, &fS);
-	fC.startSendingFS();
+	FilesystemClient *fS = new FilesystemClient(dir);
+	cout << "genMap: " << fS->genMap() << endl;
+	FileClient *fC = new FileClient(&host, (unsigned short)port, fS);
+	fC->startSendingFS();
 	
 
 	cout << "Client console type \"stop\" to stop the server or \"help\" for a list of all commands." << endl;
@@ -99,8 +99,8 @@ void launchClient(unsigned int port, string host, string dir) {
 
 		if(!s.compare("stop")) {
 			cout << "Stopping client..." << endl;
-			fC.stopSendingFS();
-			fS.close();
+			fC->stopSendingFS();
+			fS->close();
 			cout << "Stopped client!" << endl;
 			break;
 		}
@@ -108,13 +108,13 @@ void launchClient(unsigned int port, string host, string dir) {
 			printClientHelp();
 		}
 		else if(!s.compare("ping")) {
-			fC.pingServer();
+			fC->pingServer();
 		}
 		else if(!s.compare("todo")) {
-			fC.printToDo();
+			fC->printToDo();
 		}
 		else if(!s.compare("state")) {
-			cout << "State: " << fC.getState() << endl;
+			cout << "State: " << fC->getState() << endl;
 		}
 		else {
 			cout << "Unknown command: \"" << s << "\"" << endl;

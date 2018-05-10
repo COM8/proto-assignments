@@ -3,11 +3,11 @@
 using namespace net;
 using namespace std;
 
-FileClient::FileClient(std::string *serverAddress, unsigned short serverPort, FilesystemClient *fs)
+FileClient::FileClient(std::string *serverAddress, unsigned short serverPort, FilesystemClient *fS)
 {
 	this->serverPort = serverPort;
 	this->serverAddress = serverAddress;
-	this->fs = fs;
+	this->fS = fS;
 	this->curWorkingSet = NULL;
 	this->state = disconnected;
 	this->cpQueue = new Queue<ReadMessage>();
@@ -178,8 +178,8 @@ void FileClient::sendNextFilePart()
 
 	if (!curWorkingSet)
 	{
-		fs->genMap();
-		curWorkingSet = fs->getWorkingSet();
+		fS->genMap();
+		curWorkingSet = fS->getWorkingSet();
 		wsRefreshed = true;
 	}
 
@@ -241,7 +241,7 @@ void FileClient::sendFileCreationMessage(string fid, struct File *f, Client *cli
 bool FileClient::sendNextFilePart(string fid, struct File *f, int nextPartNr, Client *client) {
 	char chunk[Filesystem::partLength];
 	bool isLastPart = false;
-	int readCount = fs->readFile(fid, chunk, nextPartNr, &isLastPart);
+	int readCount = fS->readFile(fid, chunk, nextPartNr, &isLastPart);
 
 	// File part:
 	char flags = 2;
