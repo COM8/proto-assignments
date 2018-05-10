@@ -27,14 +27,14 @@ void FileStatusMessage::createBuffer(struct Message* msg) {
 	// Add last sequence number:
 	setBufferUnsignedInt(msg, lastSeqNumber, 40);
 
-	// Add checksum:
-	addChecksum(msg, CHECKSUM_OFFSET_BITS);
-
 	// Add content length:
 	setBufferUint64_t(msg, fIDLength, 104);
 
 	// Add content:
 	setBufferValue(msg, fID, fIDLength, 168);
+
+	// Add checksum:
+	addChecksum(msg, CHECKSUM_OFFSET_BITS);
 }
 
 unsigned int FileStatusMessage::getClientIdFromMessage(unsigned char* buffer) {

@@ -36,7 +36,7 @@ bool Client::send(AbstractMessage* msg) {
 	struct Message msgStruct = {};
 	msg->createBuffer(&msgStruct);
 	// Print message:
-	//AbstractMessage::printMessage(&msgStruct);
+	// AbstractMessage::printMessage(&msgStruct);
 	
 	if (sendto(sockFD, msgStruct.buffer, msgStruct.bufferLength, 0, (struct sockaddr *)&serverAddressStruct, sizeof(serverAddressStruct)) < 0) {
 		cerr << "UDP client failed to send message!" << endl;

@@ -11,7 +11,7 @@ init:
 
 client:
 	make default
-	./$(BUILD_DIR)/csync -h localhost -p 1234 -f build/
+	./$(BUILD_DIR)/csync -h localhost -p 1234 -f specification
 
 server:
 	make default

@@ -35,14 +35,14 @@ void FileTransferMessage::createBuffer(struct Message* msg) {
 	// Add file hash:
 	setBufferValue(msg, fileHash, 32, 104);
 
-	// Add checksum:
-	addChecksum(msg, CHECKSUM_OFFSET_BITS);
-
 	// Add content length:
 	setBufferUint64_t(msg, contentLength, 392);
 
 	// Add content:
 	setBufferValue(msg, content, contentLength, 456);
+
+	// Add checksum:
+	addChecksum(msg, CHECKSUM_OFFSET_BITS);
 }
 
 unsigned int FileTransferMessage::getClientIdFromMessage(unsigned char* buffer) {

@@ -33,14 +33,14 @@ void FileCreationMessage::createBuffer(struct Message* msg) {
 		setBufferValue(msg, fileHash, 32, 72);
 	}
 
-	// Add checksum:
-	addChecksum(msg, CHECKSUM_OFFSET_BITS);
-
 	// Add FID length:
 	setBufferUint64_t(msg, fIDLength, 360);
 	
 	// Add FID:
 	setBufferValue(msg, fID, fIDLength, 424);
+
+	// Add checksum:
+	addChecksum(msg, CHECKSUM_OFFSET_BITS);
 }
 
 unsigned int FileCreationMessage::getSeqNumberFromMessage(unsigned char* buffer) {
@@ -65,5 +65,5 @@ uint64_t FileCreationMessage::getFIDLengthFromMessage(unsigned char* buffer) {
 }
 
 unsigned char* FileCreationMessage::getFIDFromMessage(unsigned char* buffer, uint64_t fIDLength) {
-	return getBytesWithOffset(buffer, 72, fIDLength * 8);
+	return getBytesWithOffset(buffer, 424, fIDLength * 8);
 }

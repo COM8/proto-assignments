@@ -103,7 +103,6 @@ void FileClient::onServerHelloMessage(ReadMessage *msg)
 		uploadClient = new Client(*serverAddress, uploadPort);
 
 		state = sendingFS;
-		printToDo();
 		sendNextFilePart();
 	}
 }
@@ -178,15 +177,14 @@ void FileClient::sendNextFilePart()
 
 	if (!curWorkingSet)
 	{
-		fS->genMap();
 		curWorkingSet = fS->getWorkingSet();
+		printToDo();
 		wsRefreshed = true;
 	}
 
 	// Continue file transfer:
 	if (curWorkingSet->curFilePartNr >= 0)
 	{
-		cout << "cFile" << endl;
 		bool lastPartSend = sendNextFilePart(curWorkingSet->curFile.first, curWorkingSet->curFile.second, ++curWorkingSet->curFilePartNr, uploadClient);
 		if(lastPartSend) {
 			curWorkingSet->files.erase(curWorkingSet->curFile.first);
@@ -198,6 +196,7 @@ void FileClient::sendNextFilePart()
 	{
 		struct Folder *f = curWorkingSet->folders.front();
 		curWorkingSet->folders.pop_front();
+		sendFolderCreationMessage(f, uploadClient);
 	}
 	// Transfer file:
 	else if (!curWorkingSet->files.empty())
