@@ -219,9 +219,10 @@ void FileClient::sendNextFilePart()
 
 void FileClient::sendFolderCreationMessage(struct Folder *f, Client *client)
 {
-	unsigned char *c = (unsigned char *)f->path.c_str();
+	const char *c = f->path.c_str();
+	uint64_t l = strlen(c);
 	int i = getNextSeqNumber();
-	FileCreationMessage msg = FileCreationMessage(clientId, i, 1, NULL, (uint64_t)f->path.length(), c);
+	FileCreationMessage msg = FileCreationMessage(clientId, i, 1, NULL, l, (unsigned char *)c);
 	sendMessageQueue->pushSendMessage(i, msg);
 
 	client->send(&msg);
@@ -230,9 +231,10 @@ void FileClient::sendFolderCreationMessage(struct Folder *f, Client *client)
 
 void FileClient::sendFileCreationMessage(string fid, struct File *f, Client *client)
 {
-	unsigned char *c = (unsigned char *)fid.c_str();
+	const char *c = fid.c_str();
+	uint64_t l = strlen(c);
 	int i = getNextSeqNumber();
-	FileCreationMessage msg = FileCreationMessage(clientId, i, 4, (unsigned char *)f->hash, (uint64_t)fid.length(), c);
+	FileCreationMessage msg = FileCreationMessage(clientId, i, 4, (unsigned char *)f->hash, l, (unsigned char *)c);
 	sendMessageQueue->pushSendMessage(i, msg);
 
 	client->send(&msg);
@@ -261,7 +263,7 @@ bool FileClient::sendNextFilePart(string fid, struct File *f, int nextPartNr, Cl
 	sendMessageQueue->pushSendMessage(i, msg);
 
 	client->send(&msg);
-	cout << "Send file part " << nextPartNr << " fot: " << fid << endl;
+	cout << "Send file part " << nextPartNr << " for file: " << fid << endl;
 	return isLastPart;
 }
 
