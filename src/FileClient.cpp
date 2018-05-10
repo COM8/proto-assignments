@@ -302,7 +302,7 @@ void FileClient::sendClientHelloMessage(unsigned short listeningPort, Client *cl
 
 void FileClient::sendPingMessage(unsigned int plLength, unsigned int seqNumber, Client *client)
 {
-	PingMessage msg = PingMessage(plLength, seqNumber);
+	PingMessage msg = PingMessage(plLength, seqNumber, clientId);
 	sendMessageQueue->pushSendMessage(seqNumber, msg);
 
 	client->send(&msg);

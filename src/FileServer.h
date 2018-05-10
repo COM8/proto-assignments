@@ -60,6 +60,6 @@ private:
 	void onClientHelloMessage(net::ReadMessage *msg);
 	void onPingMessage(net::ReadMessage *msg);
 	void onAckMessage(net::ReadMessage *msg);
-	void onFileCreationMessage(ReadMessage *msg);
+	void onFileCreationMessage(net::ReadMessage *msg);
 	void sendServerHelloMessage(const FileClientConnection& client);
 };

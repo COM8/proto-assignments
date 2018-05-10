@@ -102,7 +102,8 @@ void FileServer::onFileCreationMessage(ReadMessage *msg)
 		// Create file/folder:
 		unsigned char fileType = FileCreationMessage::getFileTypeFromMessage(msg->buffer);
 		uint64_t fidLengt = FileCreationMessage::getFIDLengthFromMessage(msg->buffer);
-		unsigned char* fid = FileCreationMessage::getFIDFromMessage(msg->buffer, fidLengt);
+		unsigned char *fid = FileCreationMessage::getFIDFromMessage(msg->buffer, fidLengt);
+		unsigned char *hash;
 		switch(fileType) {
 			case 1:
 				fCC->fS->genFolder(string((char*)fid));
@@ -113,7 +114,7 @@ void FileServer::onFileCreationMessage(ReadMessage *msg)
 				break;
 
 			case 4:
-				unsigned char* hash = FileCreationMessage::getFileHashFromMessage(msg->buffer);
+				hash = FileCreationMessage::getFileHashFromMessage(msg->buffer);
 				fCC->fS->genFile(string((char*)fid), (char*)hash);
 				break;
 
