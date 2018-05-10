@@ -15,7 +15,7 @@ void TransferEndedMessage::createBuffer(struct Message* msg) {
 	msg->buffer[0] |= type;
 
     // Add flags:
-	setByteWithOffset(msg, flags, 0); // Starts at 4 - ensure the first 4 bit are 0
+	msg->buffer[0] |= flags;
 
 	// Add client id:
 	setBufferUnsignedInt(msg, clientId, 8);
@@ -29,5 +29,5 @@ unsigned int TransferEndedMessage::getClientIdFromMessage(unsigned char* buffer)
 }
 
 unsigned char TransferEndedMessage::getFlagsFromMessage(unsigned char* buffer) {
-	return getByteWithOffset(buffer, 0) & 0xf;
+	return buffer[0] & 0xF; // 4 bit offset
 }

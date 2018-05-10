@@ -23,6 +23,7 @@ FileClient::FileClient(std::string *serverAddress, unsigned short serverPort, Fi
 	this->server = NULL;
 	this->client = NULL;
 	this->uploadClient = NULL;
+	this->seqNumberMutex = new mutex();
 }
 
 void FileClient::startSendingFS()
@@ -145,7 +146,7 @@ void FileClient::onAckMessage(ReadMessage *msg)
 	unsigned int seqNumber = AckMessage::getSeqNumberFromMessage(msg->buffer);
 	if (sendMessageQueue->onSequenceNumberAck(seqNumber))
 	{
-		cout << "Acked: " << seqNumber << endl;
+		// cout << "Acked: " << seqNumber << endl;
 	}
 	else
 	{
@@ -219,8 +220,9 @@ void FileClient::sendNextFilePart()
 void FileClient::sendFolderCreationMessage(struct Folder *f, Client *client)
 {
 	unsigned char *c = (unsigned char *)f->path.c_str();
-	FileCreationMessage msg = FileCreationMessage(clientId, seqNumber++, 1, NULL, (uint64_t)f->path.length(), c);
-	sendMessageQueue->pushSendMessage(seqNumber - 1, msg);
+	int i = getNextSeqNumber();
+	FileCreationMessage msg = FileCreationMessage(clientId, i, 1, NULL, (uint64_t)f->path.length(), c);
+	sendMessageQueue->pushSendMessage(i, msg);
 
 	client->send(&msg);
 	cout << "Send folder: " << f->path << endl;
@@ -229,8 +231,9 @@ void FileClient::sendFolderCreationMessage(struct Folder *f, Client *client)
 void FileClient::sendFileCreationMessage(string fid, struct File *f, Client *client)
 {
 	unsigned char *c = (unsigned char *)fid.c_str();
-	FileCreationMessage msg = FileCreationMessage(clientId, seqNumber++, 4, (unsigned char *)f->hash, (uint64_t)fid.length(), c);
-	sendMessageQueue->pushSendMessage(seqNumber - 1, msg);
+	int i = getNextSeqNumber();
+	FileCreationMessage msg = FileCreationMessage(clientId, i, 4, (unsigned char *)f->hash, (uint64_t)fid.length(), c);
+	sendMessageQueue->pushSendMessage(i, msg);
 
 	client->send(&msg);
 	cout << "Send file creation: " << fid << endl;
@@ -253,9 +256,20 @@ bool FileClient::sendNextFilePart(string fid, struct File *f, int nextPartNr, Cl
 		flags |= 8;
 	}
 
-	FileTransferMessage msg = FileTransferMessage(clientId, seqNumber++, 0, nextPartNr, (unsigned char *)f->hash, (uint64_t)readCount, (unsigned char*)chunk);
+	int i = getNextSeqNumber();
+	FileTransferMessage msg = FileTransferMessage(clientId, i, flags, nextPartNr, (unsigned char *)f->hash, (uint64_t)readCount, (unsigned char*)chunk);
+	sendMessageQueue->pushSendMessage(i, msg);
+
 	client->send(&msg);
-	return true;
+	cout << "Send file part " << nextPartNr << " fot: " << fid << endl;
+	return isLastPart;
+}
+
+unsigned int FileClient::getNextSeqNumber() {
+	unique_lock<mutex> mlock(*seqNumberMutex);
+	unsigned int i = seqNumber++;
+	mlock.unlock();
+	return i;
 }
 
 void FileClient::onTransferEndedMessage(net::ReadMessage *msg)
@@ -292,7 +306,7 @@ void FileClient::pingServer()
 	case awaitingAck:
 	case sendingFS:
 		cout << "Ping" << endl;
-		sendPingMessage(0, seqNumber++, uploadClient);
+		sendPingMessage(0, getNextSeqNumber(), uploadClient);
 		break;
 
 	default:

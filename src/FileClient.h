@@ -4,6 +4,7 @@
 #include <iostream>
 #include <cstdint>
 #include <stdlib.h>
+#include <mutex>
 #include "Filesystem.h"
 #include "net/Client.h"
 #include "net/Server.h"
@@ -57,11 +58,13 @@ private:
 	unsigned int seqNumber;
 	unsigned int clientId;
 	unsigned short listeningPort;
+	std::mutex* seqNumberMutex;
 
 	void startConsumerThread();
 	void stopConsumerThread();
 	void startHelloThread();
 	void stopHelloThread();
+	unsigned int getNextSeqNumber();
 	void helloTask(unsigned short listenPort);
 	void consumerTask();
 	void onServerHelloMessage(net::ReadMessage *msg);

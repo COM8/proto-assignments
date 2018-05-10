@@ -22,5 +22,5 @@ void AckMessage::createBuffer(struct Message* msg) {
 }
 
 unsigned int AckMessage::getSeqNumberFromMessage(unsigned char* buffer) {
-	return getUnsignedIntFromMessage(buffer, 36);
+	return getUnsignedIntFromMessage(buffer, 4);
 }

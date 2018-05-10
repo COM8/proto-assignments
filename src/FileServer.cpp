@@ -114,6 +114,7 @@ void FileServer::onFileCreationMessage(ReadMessage *msg)
 		switch (fileType)
 		{
 		case 1:
+			cout << "dsfdsad" << endl;
 			fCC->fS->genFolder(string((char *)fid));
 			cout << "Folder \"" << fid << "\" generated." << endl;
 			break;
@@ -160,13 +161,16 @@ void FileServer::onFileTransferMessage(ReadMessage *msg)
 
 		// Write file:
 		char flags = FileTransferMessage::getFlagsFromMessage(msg->buffer);
-		if (flags & 2 == 2)
+		if ((flags & 2) == 2)
 		{
 			unsigned int partNumber = FileTransferMessage::getFIDPartNumberFromMessage(msg->buffer);
 			uint64_t contLength = FileTransferMessage::getContentLengthFromMessage(msg->buffer);
 			unsigned char *content = FileTransferMessage::getContentFromMessage(msg->buffer, contLength);
 			fCC->fS->writeFilePart(fCC->curFID, (char *)content, partNumber, contLength);
 			cout << "Wrote file part: " << partNumber << " for file: " << fCC->curFID << endl;
+			if((flags & 8) == 8) {
+				cout << "File ende received: " << fCC->curFID << endl;
+			}
 		}
 		else
 		{
