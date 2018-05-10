@@ -227,8 +227,8 @@ void FileClient::sendFileCreationMessage(string fid, struct File *f, Client *cli
 }
 
 bool FileClient::sendNextFilePart(string fid, struct File *f, int nextPartNr, Client *client) {
-	char chunk[MAX_FILE_CHUNK_SIZE_IN_BYTE];
-	int readCount = fs->readFile(fid, chunk, nextPartNr, MAX_FILE_CHUNK_SIZE_IN_BYTE);
+	char chunk[Filesystem::partLength];
+	int readCount = fs->readFile(fid, chunk, nextPartNr);
 
 	char flags = 1;
 	if(nextPartNr == 0) {

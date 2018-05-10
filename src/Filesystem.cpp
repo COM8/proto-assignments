@@ -39,7 +39,7 @@ WorkingSet* FilesystemClient::getWorkingSet() {
 	return ret;
 }
 
-int FilesystemClient::readFile(string FID, char* buffer, unsigned int partNr, unsigned int length) {
+int FilesystemClient::readFile(string FID, char* buffer, unsigned int partNr) {
 	if(!(this->files[FID] == 0)) {
 		if (!this->files[FID]->isOpen){
 			this->files[FID]->fd = ifstream (FID, ifstream::ate | ifstream::binary);
@@ -51,9 +51,11 @@ int FilesystemClient::readFile(string FID, char* buffer, unsigned int partNr, un
 				this->files[FID]->isOpen = true;
 			}
 		}
-		this->files[FID]->fd.seekg(length*partNr, this->files[FID]->fd.beg);
-		this->files[FID]->fd.read(buffer,length);
-		return 0;
+		this->files[FID]->fd.seekg(partLength*partNr, this->files[FID]->fd.beg);
+		int retLength = (this->files[FID]->size > (partLength*(partNr+1))) ? partLength : this->files[FID]->size - partLength*partNr;
+		retLength = retLength < 0 ? 0 : retLength;
+		this->files[FID]->fd.read(buffer,retLength);
+		return retLength;
 	}else {
 		return -2;
 	}
@@ -105,7 +107,6 @@ string FilesystemClient::toString() {
 	return temp;
 }
 
-//SERVER
 
 FilesystemServer::FilesystemServer(string path) {
 	this->path = path;
@@ -262,7 +263,7 @@ int FilesystemServer::writeFilePart(string FID, char* buffer, unsigned int partN
 	}
 	fstream tmp ((this->path + FID),  fstream::out | fstream::in | fstream::binary);
 	if(tmp) {
-		tmp.seekp(partNr*length, tmp.beg);
+		tmp.seekp(partNr*partLength, tmp.beg);
 		tmp.write(buffer,length);
 		tmp.close();
 		if (this->files[this->path + FID]->last_part+1 == partNr) {

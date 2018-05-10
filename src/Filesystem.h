@@ -38,6 +38,7 @@ protected:
     static Folder* genFolder(std::string path);
     static File* genFile(std::string FID);
 public:
+    const unsigned static int partLength = 500;
     static long unsigned int filesize(const std::string FID);
     static void calcSHA256(const std::string FID, char* buffer);
     static bool exists(std::string path);
@@ -54,7 +55,7 @@ public:
     std::unordered_map <std::string, File*> files;
     int genMap();
     int genMap(std::string path);
-    int readFile(std::string FID, char* buffer, unsigned int partNr, unsigned int length);
+    int readFile(std::string FID, char* buffer, unsigned int partNr);
     void close();
     WorkingSet* getWorkingSet();
 	std::string toString();
