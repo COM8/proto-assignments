@@ -266,11 +266,11 @@ void FilesystemServer::createPath() {
 
 void FilesystemServer::genFolder(string path) {
 	string temp = this->path + path;
-	if(this->folders[temp] == 0) {
+	if(this->folders[temp] == 0) 
 		this->folders[temp] = true;
-		if(!exists(temp))
-			system(("mkdir "+temp).c_str());
-	}
+	if(!exists(temp))
+		system(("mkdir -p "+temp).c_str());
+
 }
 
 void FilesystemServer::delFolder(string path) {
