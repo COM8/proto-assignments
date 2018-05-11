@@ -44,7 +44,8 @@ public:
     int readFile(std::string FID, char* buffer, unsigned int partNr, bool *isLastPart);
     void close();
     WorkingSet* getWorkingSet();
-	std::string toString();
+	std::string filesToString();
+    std::string foldersToString();
 };
 
 class FilesystemServer: Filesystem {

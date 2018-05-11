@@ -189,6 +189,7 @@ int FilesystemClient::genMap(string path)
 			}
 			else
 			{
+		cout << "wub" << endl;
 				string temp = p.path().string();
 				this->files[temp] = genFile(temp);
 			}
@@ -225,13 +226,21 @@ void FilesystemClient::close()
 	}
 }
 
-string FilesystemClient::toString()
+string FilesystemClient::filesToString()
 {
 	string temp = "";
 	for (auto const &ent1 : this->files)
 	{
 		File *t = ent1.second;
 		temp = temp + ent1.first + ": " + to_string(t->size) + " Bytes" + "\n";
+	}
+	return temp;
+}
+
+string FilesystemClient::foldersToString() {
+	string temp = "";
+	for (auto const &ent1 : this->folders) {
+		temp = temp + ent1->path + "\n";
 	}
 	return temp;
 }
