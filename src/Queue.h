@@ -54,7 +54,16 @@ public:
 	    condVar->notify_one();
 	}
 
-	void clear() {}
+	void clear() {
+		std::unique_lock<std::mutex> mlock(*queueMutex);
+	    queue.clear();
+	    mlock.unlock();
+	    condVar->notify_one();
+	}
+
+	int size() {
+		return queue.size();
+	}
 
 protected:
 	std::list<T> queue;
@@ -64,22 +73,24 @@ protected:
 };
 
 struct SendMessage {
-	net::AbstractMessage msg;
+	net::AbstractMessage *msg;
 	unsigned int sequenceNumber;
 	time_t sendTime;
+	unsigned int sendCount;
 };
 
-class SendMessageQueue : Queue<struct SendMessage> {
+class SendMessageQueue : public Queue<struct SendMessage> {
 
 public:
 	SendMessageQueue() {}
 	~SendMessageQueue() {}
 
-	void pushSendMessage(int sequenceNumber, net::AbstractMessage msg) {
+	void pushSendMessage(int sequenceNumber, net::AbstractMessage *msg) {
 		struct SendMessage sM;
 		sM.sendTime = time(NULL);
 		sM.sequenceNumber = sequenceNumber;
 		sM.msg = msg;
+		sM.sendCount = 1;
 		push(sM);
 	}
 
@@ -101,10 +112,10 @@ public:
 		return found;
 	}
 
-	std::list<struct SendMessage> popNotAckedMessages(uint maxMessageAgeInSec, std::list<struct SendMessage> *tooOldMessages) {
+	void popNotAckedMessages(uint maxMessageAgeInSec, std::list<struct SendMessage> *tooOldMessages) {
 		std::unique_lock<std::mutex> mlock(*queueMutex);
 		time_t now = time(NULL);
-		std::list<struct SendMessage>::iterator i = queue.begin();
+		auto i = queue.begin();
 		bool found = false;
 		while (i != queue.end())
 		{

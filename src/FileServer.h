@@ -43,7 +43,7 @@ struct FileClientConnection {
 	time_t lastMessageTime;
 };
 
-class FileServer : TimerTickable
+class FileServer : public TimerTickable
 {
 public:
 	FileServer(unsigned short port);

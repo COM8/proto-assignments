@@ -7,6 +7,7 @@ Client::Client(string hostAddr, unsigned short port) {
 	this->hostAddr = hostAddr;
 	this->port = port;
 	this->sockFD = -1;
+	srand (time(NULL));
 	init();
 }
 
@@ -38,6 +39,13 @@ bool Client::send(AbstractMessage* msg) {
 	// Print message:
 	// AbstractMessage::printMessage(&msgStruct);
 	
+	// Message drop chance:
+	if(rand() % 100 + 1 <= MESSAGE_DROP_CHANCE) {
+		cout << "Droped message!" << endl;
+		return true;
+	}
+
+
 	if (sendto(sockFD, msgStruct.buffer, msgStruct.bufferLength, 0, (struct sockaddr *)&serverAddressStruct, sizeof(serverAddressStruct)) < 0) {
 		cerr << "UDP client failed to send message!" << endl;
 		return false;

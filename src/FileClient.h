@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <stdlib.h>
 #include <mutex>
+#include <list>
 #include "Filesystem.h"
 #include "net/Client.h"
 #include "net/Server.h"
@@ -17,8 +18,10 @@
 #include "net/FileTransferMessage.h"
 #include "Queue.h"
 #include "WorkingSet.h"
+#include "Timer.h"
+#include "TimerTickable.h"
 
-#define MAX_FILE_CHUNK_SIZE_IN_BYTE 500
+#define MAX_ACK_TIME_IN_S 1
 
 enum TransferState
 {
@@ -30,14 +33,16 @@ enum TransferState
 	ping
 };
 
-class FileClient
+class FileClient : public TimerTickable
 {
 public:
 	FileClient(std::string* serverAddress, unsigned short serverPort, FilesystemClient* fS);
 	void startSendingFS();
 	void stopSendingFS();
+	void restartSendingFS();
 	void pingServer();
 	void printToDo();
+	void onTimerTick();
 	TransferState getState();
 
 private:
@@ -60,6 +65,7 @@ private:
 	unsigned int clientId;
 	unsigned short listeningPort;
 	std::mutex* seqNumberMutex;
+	Timer *sendMessageTimer;
 
 	void startConsumerThread();
 	void stopConsumerThread();

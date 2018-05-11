@@ -24,6 +24,54 @@ FileClient::FileClient(std::string *serverAddress, unsigned short serverPort, Fi
 	this->client = NULL;
 	this->uploadClient = NULL;
 	this->seqNumberMutex = new mutex();
+	this->sendMessageTimer = new Timer(true, 1000, this);
+	this->sendMessageTimer->start();
+}
+
+void FileClient::onTimerTick() {
+	// cout << "Tick " << sendMessageQueue->size() << endl;
+	list<struct SendMessage> msgs = list<struct SendMessage>();
+	sendMessageQueue->popNotAckedMessages(MAX_ACK_TIME_IN_S, &msgs);
+
+	if(state == disconnected) {
+		cout << "Discariding " << msgs.size() << "unacked messages!" << endl;
+		return;
+	}
+
+	for(struct SendMessage msg : msgs) {
+		if(msg.sendCount >= 3) {
+			restartSendingFS();
+		}
+		else
+		{
+			// Resend message:
+			cout << "Resending message!" << endl;
+			uploadClient->send(msg.msg);
+			msg.sendCount++;
+			msg.sendTime = time(NULL);
+			sendMessageQueue->push(msg);
+		}
+	}
+}
+
+void FileClient::restartSendingFS() {
+	cout << "Restarting file transfer." << endl;
+	// Stop:
+	state = disconnected;
+	stopConsumerThread();
+	sendMessageTimer->stop();
+	server->stop();
+	sendMessageQueue->clear();
+
+	// Switch listen port to prevent binding problems:
+	listeningPort = 2000 + rand() % 63000;
+
+	// Start:
+	server = new Server(listeningPort, cpQueue);
+	server->start();
+	startConsumerThread();
+	startHelloThread();
+	sendMessageTimer->start();
 }
 
 void FileClient::startSendingFS()
@@ -36,6 +84,7 @@ void FileClient::startSendingFS()
 	server->start();
 	startConsumerThread();
 	startHelloThread();
+	sendMessageTimer->start();
 }
 
 void FileClient::startHelloThread()
@@ -241,7 +290,7 @@ void FileClient::sendFolderCreationMessage(struct Folder *f, Client *client)
 	uint64_t l = f->path.length();
 	int i = getNextSeqNumber();
 	FileCreationMessage msg = FileCreationMessage(clientId, i, 1, NULL, l, (unsigned char *)c);
-	sendMessageQueue->pushSendMessage(i, msg);
+	sendMessageQueue->pushSendMessage(i, &msg);
 
 	client->send(&msg);
 	cout << "Send folder creation: \"" << f->path << "\""<< endl;
@@ -253,7 +302,7 @@ void FileClient::sendFileCreationMessage(string fid, struct File *f, Client *cli
 	uint64_t l = fid.length();
 	int i = getNextSeqNumber();
 	FileCreationMessage msg = FileCreationMessage(clientId, i, 4, (unsigned char *)f->hash, l, (unsigned char *)c);
-	sendMessageQueue->pushSendMessage(i, msg);
+	sendMessageQueue->pushSendMessage(i, &msg);
 
 	client->send(&msg);
 	cout << "Send file creation: " << fid << endl;
@@ -278,7 +327,7 @@ bool FileClient::sendNextFilePart(string fid, struct File *f, unsigned int nextP
 
 	int i = getNextSeqNumber();
 	FileTransferMessage msg = FileTransferMessage(clientId, i, flags, nextPartNr, (unsigned char *)f->hash, (uint64_t)readCount, (unsigned char*)chunk);
-	sendMessageQueue->pushSendMessage(i, msg);
+	sendMessageQueue->pushSendMessage(i, &msg);
 
 	client->send(&msg);
 	cout << "Send file part " << nextPartNr << ", length: " << readCount << " for file: " << fid << endl;
@@ -349,7 +398,7 @@ void FileClient::sendClientHelloMessage(unsigned short listeningPort, Client *cl
 void FileClient::sendPingMessage(unsigned int plLength, unsigned int seqNumber, Client *client)
 {
 	PingMessage msg = PingMessage(plLength, seqNumber, clientId);
-	sendMessageQueue->pushSendMessage(seqNumber, msg);
+	sendMessageQueue->pushSendMessage(seqNumber, &msg);
 
 	client->send(&msg);
 }
