@@ -190,7 +190,7 @@ void FileClient::sendNextFilePart()
 	int curFilePartNr = curWorkingSet->getCurFilePartNr();
 	if (curFilePartNr >= 0)
 	{	
-		curWorkingSet->setCurFilePartNr(++curFilePartNr);
+		curWorkingSet->setCurFilePartNr(curFilePartNr);
 		auto curFile = curWorkingSet->getCurFile();
 		bool lastPartSend = sendNextFilePart(curFile->first, curFile->second, curFilePartNr, uploadClient);
 
@@ -259,7 +259,7 @@ void FileClient::sendFileCreationMessage(string fid, struct File *f, Client *cli
 	cout << "Send file creation: " << fid << endl;
 }
 
-bool FileClient::sendNextFilePart(string fid, struct File *f, int nextPartNr, Client *client) {
+bool FileClient::sendNextFilePart(string fid, struct File *f, unsigned int nextPartNr, Client *client) {
 	char chunk[Filesystem::partLength];
 	bool isLastPart = false;
 	int readCount = fS->readFile(fid, chunk, nextPartNr, &isLastPart);

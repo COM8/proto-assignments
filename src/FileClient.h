@@ -76,5 +76,5 @@ private:
 	void sendPingMessage(unsigned int plLength, unsigned int seqNumber, net::Client *client);	
 	void sendFolderCreationMessage(struct Folder *f, net::Client *client);
 	void sendFileCreationMessage(std::string fid, struct File *f, net::Client *client);
-	bool sendNextFilePart(std::string fid, struct File *f, int nextPartNr, net::Client *client);
+	bool sendNextFilePart(std::string fid, struct File *f, unsigned int nextPartNr, net::Client *client);
 };

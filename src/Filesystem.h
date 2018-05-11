@@ -41,7 +41,7 @@ public:
     int genMap();
     int genMap(std::string path);
     int genMap(std::string path, std::unordered_map <std::string, File*> *files, std::list<Folder*> *folders, std::list<std::string> *deleteFile, std::list<std::string> *deleteFolder);
-    int readFile(std::string FID, char* buffer, unsigned int partNr, bool *isLastPart);
+    int readFile(std::string FID, char *buffer, unsigned int partNr, bool *isLastPart);
     void close();
     WorkingSet* getWorkingSet();
 	std::string filesToString();
