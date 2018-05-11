@@ -166,8 +166,8 @@ void FileServer::onFileTransferMessage(ReadMessage *msg)
 			unsigned int partNumber = FileTransferMessage::getFIDPartNumberFromMessage(msg->buffer);
 			uint64_t contLength = FileTransferMessage::getContentLengthFromMessage(msg->buffer);
 			unsigned char *content = FileTransferMessage::getContentFromMessage(msg->buffer, contLength);
-			fCC->fS->writeFilePart(fCC->curFID, (char *)content, partNumber, contLength);
-			cout << "Wrote file part: " << partNumber << " for file: " << fCC->curFID << endl;
+			int result = fCC->fS->writeFilePart(fCC->curFID, (char *)content, partNumber, contLength);
+			cout << "Wrote file part: " << partNumber << " for file: \"" << fCC->curFID  << "\" with result: " << result << endl;
 			if((flags & 8) == 8) {
 				cout << "File ende received: " << fCC->curFID << endl;
 			}
