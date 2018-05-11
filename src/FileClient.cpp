@@ -183,35 +183,53 @@ void FileClient::sendNextFilePart()
 		wsRefreshed = true;
 	}
 
+	auto folders = curWorkingSet->getFolders();
+	auto files = curWorkingSet->getFiles();
+
 	// Continue file transfer:
-	if (curWorkingSet->curFilePartNr >= 0)
-	{
-		bool lastPartSend = sendNextFilePart(curWorkingSet->curFile.first, curWorkingSet->curFile.second, ++curWorkingSet->curFilePartNr, uploadClient);
+	int curFilePartNr = curWorkingSet->getCurFilePartNr();
+	if (curFilePartNr >= 0)
+	{	
+		curWorkingSet->setCurFilePartNr(++curFilePartNr);
+		auto curFile = curWorkingSet->getCurFile();
+		bool lastPartSend = sendNextFilePart(curFile->first, curFile->second, curFilePartNr, uploadClient);
+
 		if(lastPartSend) {
-			curWorkingSet->files.erase(curWorkingSet->curFile.first);
-			curWorkingSet->curFilePartNr = -1;
+
+			files->erase(curFile->first);
+			curWorkingSet->setCurFilePartNr(-1);
 		}
+		curWorkingSet->unlockCurFile();
 	}
 	// Trasfer folder:
-	else if (!curWorkingSet->folders.empty())
+	else if (!folders->empty())
 	{
-		struct Folder *f = curWorkingSet->folders.front();
-		curWorkingSet->folders.pop_front();
+		struct Folder *f = folders->front();
+		folders->pop_front();
 		sendFolderCreationMessage(f, uploadClient);
 	}
 	// Transfer file:
-	else if (!curWorkingSet->files.empty())
+	else if (!files->empty())
 	{
-		curWorkingSet->curFile = *curWorkingSet->files.begin();	
-		curWorkingSet->curFilePartNr = 0;
-		sendFileCreationMessage(curWorkingSet->curFile.first, curWorkingSet->curFile.second, uploadClient);
+		pair<string, File *> *nextCurFile = new pair<string, File *>(files->begin()->first, files->begin()->second);
+		curWorkingSet->setCurFile(nextCurFile);
+		curWorkingSet->setCurFilePartNr(0);
+		
+		auto curFile = curWorkingSet->getCurFile();
+		sendFileCreationMessage(curFile->first, curFile->second, uploadClient);
+		curWorkingSet->unlockCurFile();
 	}
 	else
 	{
+		curWorkingSet->unlockFiles();
+		curWorkingSet->unlockdelFolders();
 		cout << "Transfer finished!" << endl;
 		state = connected;
 		return;
 	}
+
+	curWorkingSet->unlockFiles();
+	curWorkingSet->unlockFolders();	
 
 	// ToDo: send next file part...
 	state = awaitingAck;
@@ -351,14 +369,23 @@ void FileClient::printToDo()
 		cout << "Nothing to do!" << endl;
 	}
 	else {
-		cout << "Files: " << curWorkingSet->files.size() << endl;
-		cout << "Folders: " << curWorkingSet->folders.size() << endl;
+		cout << "Files: " << curWorkingSet->getFiles()->size() << endl;
+		cout << "Folders: " << curWorkingSet->getFolders()->size() << endl;
+		cout << "Delete files: " << curWorkingSet->getdelFiles()->size() << endl;
+		cout << "Delete folders: " << curWorkingSet->getdelFolders()->size() << endl;
 		cout << "Current file: ";
-		if(curWorkingSet->curFilePartNr >= 0) {
-			cout << "FID: " << curWorkingSet->curFile.first << ", Part: " << curWorkingSet->curFilePartNr << endl;
+		if(curWorkingSet->getCurFilePartNr() >= 0) {
+			cout << "FID: " << curWorkingSet->getCurFile()->first << ", Part: " << curWorkingSet->getCurFilePartNr() << endl;
 		}
 		else {
 			cout << "None" << endl;
 		}
+		
+		// Unlock workingset:
+		curWorkingSet->unlockCurFile();
+		curWorkingSet->unlockdelFiles();
+		curWorkingSet->unlockdelFolders();
+		curWorkingSet->unlockFiles();
+		curWorkingSet->unlockFolders();
 	}
 }

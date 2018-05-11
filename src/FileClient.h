@@ -16,6 +16,7 @@
 #include "net/FileCreationMessage.h"
 #include "net/FileTransferMessage.h"
 #include "Queue.h"
+#include "WorkingSet.h"
 
 #define MAX_FILE_CHUNK_SIZE_IN_BYTE 500
 
@@ -43,7 +44,7 @@ private:
 	unsigned short serverPort;
 	std::string *serverAddress;
 	FilesystemClient *fS;
-	struct WorkingSet *curWorkingSet;
+	WorkingSet *curWorkingSet;
 	TransferState state;
 	net::Client *client;
 	net::Client *uploadClient;
