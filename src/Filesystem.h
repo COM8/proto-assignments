@@ -6,6 +6,7 @@
 #include <fstream>
 #include <cstring>
 #include <WorkingSet.h>
+#include <lib/zedwood/md5.h>
 
 #pragma once
 

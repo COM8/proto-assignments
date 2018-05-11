@@ -22,10 +22,26 @@ int FilesystemClient::genMap()
 //toDo
 void Filesystem::calcSHA256(const string FID, char *buffer)
 {
-	for (int i = 0; i < 32; i++)
-	{
-		buffer[i] = '\0';
+	MD5 m = MD5();
+	ifstream file(FID, ifstream::binary);
+	if(file) {
+		file.seekg(0, file.beg);
+		int length = file.tellg();
+		char *b = new char[length];
+		file.read(b, length);
+		file.close();
+		m.update(b, length);
+		m.finalize();
+		cout << FID << ": " << m.hexdigest()<< endl;
+		strcpy(buffer, m.hexdigest().c_str());
+	}else {
+		cerr << "error opening " << FID << "for hashing using empty hash" << endl;
+		for (int i = 0; i < 32; i++)
+		{
+			buffer[i] = '\0';
+		}
 	}
+
 }
 
 long unsigned int Filesystem::filesize(const string FID)
@@ -194,6 +210,9 @@ File *Filesystem::genFile(string FID)
 	File *f = new File();
 	f->name = FID;
 	f->size = filesize(FID);
+	char* buffer = new char[32];
+	calcSHA256(FID, buffer);
+	f->hash = buffer;
 	return f;
 }
 
