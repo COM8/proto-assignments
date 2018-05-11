@@ -190,9 +190,10 @@ void FileClient::sendNextFilePart()
 	int curFilePartNr = curWorkingSet->getCurFilePartNr();
 	if (curFilePartNr >= 0)
 	{	
-		curWorkingSet->setCurFilePartNr(curFilePartNr);
 		auto curFile = curWorkingSet->getCurFile();
 		bool lastPartSend = sendNextFilePart(curFile->first, curFile->second, curFilePartNr, uploadClient);
+
+		curWorkingSet->setCurFilePartNr(++curFilePartNr);
 
 		if(lastPartSend) {
 
@@ -243,7 +244,7 @@ void FileClient::sendFolderCreationMessage(struct Folder *f, Client *client)
 	sendMessageQueue->pushSendMessage(i, msg);
 
 	client->send(&msg);
-	cout << "Send folder: \"" << f->path << "\""<< endl;
+	cout << "Send folder creation: \"" << f->path << "\""<< endl;
 }
 
 void FileClient::sendFileCreationMessage(string fid, struct File *f, Client *client)

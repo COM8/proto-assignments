@@ -13,7 +13,7 @@ FileServer::FileServer(unsigned short port) : port(port),
 }
 
 void FileServer::onTimerTick() {
-	cleanupClients();
+	//cleanupClients();
 }
 
 void FileServer::start()
