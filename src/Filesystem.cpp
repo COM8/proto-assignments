@@ -32,7 +32,7 @@ void Filesystem::calcSHA256(const string FID, char *buffer)
 		file.close();
 		m.update(b, length);
 		m.finalize();
-		cout << FID << ": " << m.hexdigest()<< endl;
+		//cout << FID << ": " << m.hexdigest()<< endl;
 		strcpy(buffer, m.hexdigest().c_str());
 	}else {
 		cerr << "error opening " << FID << "for hashing using empty hash" << endl;
