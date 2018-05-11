@@ -440,9 +440,6 @@ int FilesystemServer::writeFilePart(string FID, char *buffer, unsigned int partN
 	fstream tmp((this->path + FID), fstream::out | fstream::in | fstream::binary);
 	if (tmp)
 	{
-		cout << endl;
-		cout.write(buffer, length);
-		cout << endl;
 		tmp.seekp(partNr * partLength, tmp.beg);
 		tmp.write(buffer, length > partLength ? partLength: length);
 		tmp.close();
