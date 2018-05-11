@@ -238,19 +238,19 @@ void FileClient::sendNextFilePart()
 void FileClient::sendFolderCreationMessage(struct Folder *f, Client *client)
 {
 	const char *c = f->path.c_str();
-	uint64_t l = strlen(c);
+	uint64_t l = f->path.length();
 	int i = getNextSeqNumber();
 	FileCreationMessage msg = FileCreationMessage(clientId, i, 1, NULL, l, (unsigned char *)c);
 	sendMessageQueue->pushSendMessage(i, msg);
 
 	client->send(&msg);
-	cout << "Send folder: " << f->path << endl;
+	cout << "Send folder: \"" << f->path << "\""<< endl;
 }
 
 void FileClient::sendFileCreationMessage(string fid, struct File *f, Client *client)
 {
 	const char *c = fid.c_str();
-	uint64_t l = strlen(c);
+	uint64_t l = fid.length();
 	int i = getNextSeqNumber();
 	FileCreationMessage msg = FileCreationMessage(clientId, i, 4, (unsigned char *)f->hash, l, (unsigned char *)c);
 	sendMessageQueue->pushSendMessage(i, msg);

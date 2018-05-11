@@ -111,27 +111,28 @@ void FileServer::onFileCreationMessage(ReadMessage *msg)
 		uint64_t fidLengt = FileCreationMessage::getFIDLengthFromMessage(msg->buffer);
 		unsigned char *fid = FileCreationMessage::getFIDFromMessage(msg->buffer, fidLengt);
 		unsigned char *hash;
+		string fidString = string((char *)fid, fidLengt);
 		switch (fileType)
 		{
 		case 1:
 			cout << "dsfdsad" << endl;
-			fCC->fS->genFolder(string((char *)fid));
-			cout << "Folder \"" << fid << "\" generated." << endl;
+			fCC->fS->genFolder(fidString);			
+			cout << "Folder \"" << fidString << "\" generated." << endl;
 			break;
 
 		case 2:
-			fCC->fS->delFolder(string((char *)fid));
+			fCC->fS->delFolder(fidString);
 			break;
 
 		case 4:
 			hash = FileCreationMessage::getFileHashFromMessage(msg->buffer);
-			fCC->curFID = string((char *)fid);
+			fCC->curFID = fidString;
 			fCC->fS->genFile(fCC->curFID, (char *)hash);
 			cout << "File \"" << fid << "\" generated." << endl;
 			break;
 
 		case 8:
-			fCC->fS->delFile(string((char *)fid));
+			fCC->fS->delFile(fidString);
 			break;
 
 		default:

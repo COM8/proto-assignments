@@ -83,6 +83,11 @@ int FilesystemClient::genMap(string path, unordered_map<std::string, File *> *fi
 {
 	if (Filesystem::exists(path))
 	{
+		// Gethofix to add sync folder to folders list:
+		Folder *f = genFolder(path);
+		folders->push_back(f);
+		this->folders.push_back(f);
+		
 		for (auto const &p : fs::directory_iterator(path))
 		{
 			if (fs::is_directory(p))
