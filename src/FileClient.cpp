@@ -231,7 +231,6 @@ void FileClient::sendNextFilePart()
 	curWorkingSet->unlockFiles();
 	curWorkingSet->unlockFolders();	
 
-	// ToDo: send next file part...
 	state = awaitingAck;
 }
 
@@ -281,7 +280,7 @@ bool FileClient::sendNextFilePart(string fid, struct File *f, int nextPartNr, Cl
 	sendMessageQueue->pushSendMessage(i, msg);
 
 	client->send(&msg);
-	cout << "Send file part " << nextPartNr << " for file: " << fid << endl;
+	cout << "Send file part " << nextPartNr << ", length: " << readCount << " for file: " << fid << endl;
 	return isLastPart;
 }
 
