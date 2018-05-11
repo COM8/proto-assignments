@@ -189,7 +189,6 @@ int FilesystemClient::genMap(string path)
 			}
 			else
 			{
-		cout << "wub" << endl;
 				string temp = p.path().string();
 				this->files[temp] = genFile(temp);
 			}
@@ -437,7 +436,7 @@ int FilesystemServer::writeFilePart(string FID, char *buffer, unsigned int partN
 	if (tmp)
 	{
 		tmp.seekp(partNr * partLength, tmp.beg);
-		tmp.write(buffer, length);
+		tmp.write(buffer, length > partLength ? partLength: length);
 		tmp.close();
 		if (this->files[this->path + FID]->last_part + 1 == partNr)
 		{
