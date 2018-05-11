@@ -92,9 +92,9 @@ Marks the start of a file transfer. Tells the server to create the given file wi
 Replaces existing files.
 ```
 0      4           36                68          72              328        360          424
-+------+-----------+-----------------+-----------+---------------+----------+------------+-----+
-| Type | Client ID | Sequence Number | File Type | File SHA3 256 | Checksum | FID Length | FID |
-+------+-----------+-----------------+-----------+---------------+----------+------------+-----+
++------+-----------+-----------------+-----------+----------+----------+------------+-----+
+| Type | Client ID | Sequence Number | File Type | File MD% | Checksum | FID Length | FID |
++------+-----------+-----------------+-----------+----------+----------+------------+-----+
 
 ```
 
@@ -108,8 +108,8 @@ File Type [4 Bit]:<br/>
 +----> Delete file
 ```
 
-File SHA3 256 [256 Bit]:<br/>
-	The file SHA3 256 hash to check if the file was transmitted correctly. Unused for folders. [Wiki Link](https://en.wikipedia.org/wiki/SHA-3)
+File MD5 hash [256 Bit]:<br/>
+	The file MD5 hash to check if the file was transmitted correctly. Unused for folders. [Wiki Link](https://en.wikipedia.org/wiki/MD5)
 
 
 ### File-Transfer:
