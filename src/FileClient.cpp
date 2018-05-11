@@ -8,7 +8,7 @@ FileClient::FileClient(std::string *serverAddress, unsigned short serverPort, Fi
 	this->serverPort = serverPort;
 	this->serverAddress = serverAddress;
 	this->fS = fS;
-	this->curWorkingSet = NULL;
+	this->curWorkingSet = fS->getWorkingSet();
 	this->state = disconnected;
 	this->cpQueue = new Queue<ReadMessage>();
 	this->sendMessageQueue = new SendMessageQueue();
@@ -30,15 +30,15 @@ FileClient::FileClient(std::string *serverAddress, unsigned short serverPort, Fi
 
 void FileClient::onTimerTick() {
 	// cout << "Tick " << sendMessageQueue->size() << endl;
-	list<struct SendMessage> msgs = list<struct SendMessage>();
-	sendMessageQueue->popNotAckedMessages(MAX_ACK_TIME_IN_S, &msgs);
+	list<struct SendMessage> *msgs = new list<struct SendMessage>();
+	sendMessageQueue->popNotAckedMessages(MAX_ACK_TIME_IN_S, msgs);
 
 	if(state == disconnected) {
-		cout << "Discariding " << msgs.size() << "unacked messages!" << endl;
+		cout << "Discariding " << msgs->size() << "unacked messages!" << endl;
 		return;
 	}
 
-	for(struct SendMessage msg : msgs) {
+	for(struct SendMessage msg : *msgs) {
 		if(msg.sendCount >= 3) {
 			restartSendingFS();
 		}
@@ -85,6 +85,8 @@ void FileClient::startSendingFS()
 	startConsumerThread();
 	startHelloThread();
 	sendMessageTimer->start();
+
+	printToDo();
 }
 
 void FileClient::startHelloThread()
@@ -223,15 +225,6 @@ void FileClient::sendNextFilePart()
 		return;
 	}
 
-	bool wsRefreshed = false;
-
-	if (!curWorkingSet)
-	{
-		curWorkingSet = fS->getWorkingSet();
-		printToDo();
-		wsRefreshed = true;
-	}
-
 	auto folders = curWorkingSet->getFolders();
 	auto files = curWorkingSet->getFiles();
 
@@ -245,7 +238,6 @@ void FileClient::sendNextFilePart()
 		curWorkingSet->setCurFilePartNr(++curFilePartNr);
 
 		if(lastPartSend) {
-
 			files->erase(curFile->first);
 			curWorkingSet->setCurFilePartNr(-1);
 		}
@@ -288,11 +280,11 @@ void FileClient::sendFolderCreationMessage(struct Folder *f, Client *client)
 {
 	const char *c = f->path.c_str();
 	uint64_t l = f->path.length();
-	int i = getNextSeqNumber();
-	FileCreationMessage msg = FileCreationMessage(clientId, i, 1, NULL, l, (unsigned char *)c);
-	sendMessageQueue->pushSendMessage(i, &msg);
+	int i = getNextSeqNumber();	
+	FileCreationMessage *msg = new FileCreationMessage(clientId, i, 1, NULL, l, (unsigned char *)c);
+	sendMessageQueue->pushSendMessage(i, msg);
 
-	client->send(&msg);
+	client->send(msg);
 	cout << "Send folder creation: \"" << f->path << "\""<< endl;
 }
 
@@ -301,10 +293,10 @@ void FileClient::sendFileCreationMessage(string fid, struct File *f, Client *cli
 	const char *c = fid.c_str();
 	uint64_t l = fid.length();
 	int i = getNextSeqNumber();
-	FileCreationMessage msg = FileCreationMessage(clientId, i, 4, (unsigned char *)f->hash, l, (unsigned char *)c);
-	sendMessageQueue->pushSendMessage(i, &msg);
+	FileCreationMessage *msg = new FileCreationMessage(clientId, i, 4, (unsigned char *)f->hash, l, (unsigned char *)c);
+	sendMessageQueue->pushSendMessage(i, msg);
 
-	client->send(&msg);
+	client->send(msg);
 	cout << "Send file creation: " << fid << endl;
 }
 
@@ -326,10 +318,10 @@ bool FileClient::sendNextFilePart(string fid, struct File *f, unsigned int nextP
 	}
 
 	int i = getNextSeqNumber();
-	FileTransferMessage msg = FileTransferMessage(clientId, i, flags, nextPartNr, (unsigned char *)f->hash, (uint64_t)readCount, (unsigned char*)chunk);
-	sendMessageQueue->pushSendMessage(i, &msg);
+	FileTransferMessage *msg = new FileTransferMessage(clientId, i, flags, nextPartNr, (unsigned char *)f->hash, (uint64_t)readCount, (unsigned char*)chunk);
+	sendMessageQueue->pushSendMessage(i, msg);
 
-	client->send(&msg);
+	client->send(msg);
 	cout << "Send file part " << nextPartNr << ", length: " << readCount << " for file: " << fid << endl;
 	return isLastPart;
 }
@@ -341,7 +333,7 @@ unsigned int FileClient::getNextSeqNumber() {
 	return i;
 }
 
-void FileClient::onTransferEndedMessage(net::ReadMessage *msg)
+void FileClient::onTransferEndedMessage(ReadMessage *msg)
 {
 	// Check if the checksum of the received message is valid else drop it:
 	if (!AbstractMessage::isChecksumValid(msg, TransferEndedMessage::CHECKSUM_OFFSET_BITS))
@@ -391,16 +383,16 @@ TransferState FileClient::getState()
 
 void FileClient::sendClientHelloMessage(unsigned short listeningPort, Client *client)
 {
-	ClientHelloMessage msg = ClientHelloMessage(listeningPort, clientId);
-	client->send(&msg);
+	ClientHelloMessage *msg = new ClientHelloMessage(listeningPort, clientId);
+	client->send(msg);
 }
 
 void FileClient::sendPingMessage(unsigned int plLength, unsigned int seqNumber, Client *client)
 {
-	PingMessage msg = PingMessage(plLength, seqNumber, clientId);
-	sendMessageQueue->pushSendMessage(seqNumber, &msg);
+	PingMessage *msg = new PingMessage(plLength, seqNumber, clientId);
+	sendMessageQueue->pushSendMessage(seqNumber, msg);
 
-	client->send(&msg);
+	client->send(msg);
 }
 
 void FileClient::stopSendingFS()

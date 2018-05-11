@@ -86,12 +86,12 @@ public:
 	~SendMessageQueue() {}
 
 	void pushSendMessage(int sequenceNumber, net::AbstractMessage *msg) {
-		struct SendMessage sM;
-		sM.sendTime = time(NULL);
-		sM.sequenceNumber = sequenceNumber;
-		sM.msg = msg;
-		sM.sendCount = 1;
-		push(sM);
+		struct SendMessage *sM = new struct SendMessage();
+		sM->sendTime = time(NULL);
+		sM->sequenceNumber = sequenceNumber;
+		sM->msg = msg;
+		sM->sendCount = 1;
+		push(*sM);
 	}
 
 	bool onSequenceNumberAck(unsigned int sequenceNumber) {

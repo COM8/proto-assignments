@@ -13,7 +13,7 @@ FileServer::FileServer(unsigned short port) : port(port),
 }
 
 void FileServer::onTimerTick() {
-	//cleanupClients();
+	cleanupClients();
 }
 
 void FileServer::start()
@@ -42,7 +42,7 @@ void FileServer::startConsumerThread()
 void FileServer::stopConsumerThread()
 {
 	shouldConsumerRun = false;
-	if (consumerThread && consumerThread->joinable())
+	if (consumerThread)
 	{
 		consumerThread->join();
 	}
@@ -102,9 +102,11 @@ void FileServer::onFileCreationMessage(ReadMessage *msg)
 	{
 		// Send ack:
 		unsigned int seqNumber = FileCreationMessage::getSeqNumberFromMessage(msg->buffer);
-		AckMessage ack(seqNumber);
+		AckMessage *ack = new AckMessage(seqNumber);
 		FileClientConnection *fCC = c->second;
-		fCC->udpClient->send(&ack);
+		fCC->udpClient->send(ack);
+
+		fCC->lastMessageTime = time(NULL);
 
 		// Create file/folder:
 		unsigned char fileType = FileCreationMessage::getFileTypeFromMessage(msg->buffer);
@@ -155,9 +157,11 @@ void FileServer::onFileTransferMessage(ReadMessage *msg)
 	{
 		// Send ack:
 		unsigned int seqNumber = FileTransferMessage::getSeqNumberFromMessage(msg->buffer);
-		AckMessage ack(seqNumber);
+		AckMessage *ack = new AckMessage(seqNumber);
 		FileClientConnection *fCC = c->second;
-		fCC->udpClient->send(&ack);
+		fCC->udpClient->send(ack);
+
+		fCC->lastMessageTime = time(NULL);
 
 		// Write file:
 		char flags = FileTransferMessage::getFlagsFromMessage(msg->buffer);
@@ -201,6 +205,7 @@ void FileServer::onPingMessage(ReadMessage *msg)
 	auto c = clients->find(clientId);
 	if (c != clients->end())
 	{
+		c->second->lastMessageTime = time(NULL);
 		unsigned int seqNumber = PingMessage::getSeqNumberFromMessage(msg->buffer);
 		AckMessage ack(seqNumber);
 		cout << "Pong" << endl;
@@ -211,11 +216,12 @@ void FileServer::onPingMessage(ReadMessage *msg)
 void FileServer::cleanupClients()
 {
 	time_t now = time(NULL);
-	for (auto itr = clients->begin(); itr != clients->end();)
+
+	auto i = clients->begin();
+	while (i != clients->end())
 	{
-		FileClientConnection *c = itr->second;
-		if (difftime(now, c->lastMessageTime) > 10)
-		{
+		FileClientConnection *c = i->second;
+		if (difftime(now, c->lastMessageTime) > 10) {
 			cout << "Removing client: " << c->clientId << " for inactivity." << endl;
 			if (c->fS)
 			{
@@ -225,11 +231,10 @@ void FileServer::cleanupClients()
 			{
 				c->udpServer->stop();
 			}
-			itr = clients->erase(itr);
+			i = clients->erase(i);
 		}
-		else
-		{
-			itr++;
+		else {
+			i++;
 		}
 	}
 }
@@ -253,7 +258,7 @@ void FileServer::onClientHelloMessage(ReadMessage *msg)
 	client->udpServer = new Server(client->portLocal, client->cpQueue);
 	client->fS = new FilesystemServer(to_string(client->clientId)+"/");
 	client->curFID = "";
-	(client->lastMessageTime) = time(NULL);
+	client->lastMessageTime = time(NULL);
 
 	// Check if client id is taken:
 	auto c = clients->find(client->clientId);
@@ -276,8 +281,8 @@ void FileServer::onClientHelloMessage(ReadMessage *msg)
 
 void FileServer::sendServerHelloMessage(FileClientConnection *client, unsigned char flags)
 {
-	ServerHelloMessage msg(client->portLocal, client->clientId, flags);
-	client->udpClient->send(&msg);
+	ServerHelloMessage *msg = new ServerHelloMessage(client->portLocal, client->clientId, flags);
+	client->udpClient->send(msg);
 }
 
 void FileServer::stop()
