@@ -161,14 +161,14 @@ void FileServer::onFileTransferMessage(ReadMessage *msg)
 
 		// Write file:
 		char flags = FileTransferMessage::getFlagsFromMessage(msg->buffer);
-		if ((flags & 2) == 2)
+		if ((flags & 0b10) == 0b10)
 		{
 			unsigned int partNumber = FileTransferMessage::getFIDPartNumberFromMessage(msg->buffer);
 			uint64_t contLength = FileTransferMessage::getContentLengthFromMessage(msg->buffer);
 			unsigned char *content = FileTransferMessage::getContentFromMessage(msg->buffer, contLength);
 			int result = fCC->fS->writeFilePart(fCC->curFID, (char *)content, partNumber, contLength);
 			cout << "Wrote file part: " << partNumber << ", length: " << contLength << " for file: \"" << fCC->curFID  << "\" with result: " << result << endl;
-			if((flags & 8) == 8) {
+			if((flags & 0b1000) == 0b1000) {
 				cout << "File ende received: " << fCC->curFID << endl;
 			}
 		}
