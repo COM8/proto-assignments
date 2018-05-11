@@ -115,7 +115,6 @@ void FileServer::onFileCreationMessage(ReadMessage *msg)
 		switch (fileType)
 		{
 		case 1:
-			cout << "dsfdsad" << endl;
 			fCC->fS->genFolder(fidString);			
 			cout << "Folder \"" << fidString << "\" generated." << endl;
 			break;
