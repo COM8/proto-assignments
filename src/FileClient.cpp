@@ -116,7 +116,7 @@ void FileClient::startHelloThread()
 void FileClient::stopHelloThread()
 {
 	shouldHelloRun = false;
-	if (helloThread && helloThread->joinable())
+	if (helloThread && helloThread->joinable() && helloThread->get_id() != this_thread::get_id())
 	{
 		helloThread->join();
 	}
@@ -141,8 +141,11 @@ void FileClient::startConsumerThread()
 void FileClient::stopConsumerThread()
 {
 	shouldConsumerRun = false;
-	if (consumerThread && consumerThread->joinable())
+	if (consumerThread && consumerThread->joinable() && consumerThread->get_id() != this_thread::get_id())
 	{
+		ReadMessage *msg = new ReadMessage();
+		msg->msgType = 0xff;
+		cpQueue->push(*msg);
 		consumerThread->join();
 	}
 }
@@ -198,7 +201,9 @@ void FileClient::setState(TransferState state)
 		stopConsumerThread();
 		stopHelloThread();
 		server->stop();
-		startHelloThread();
+		if(shouldTransferRun) {
+			startHelloThread();
+		}		
 		break;
 
 	case sendHandshake:
@@ -235,7 +240,11 @@ void FileClient::consumerTask()
 	while (shouldConsumerRun)
 	{
 		ReadMessage msg = cpQueue->pop();
-		// cout << msg.msgType << endl;
+		if (!shouldConsumerRun)
+		{
+			return;
+		}
+
 		switch (msg.msgType)
 		{
 		case 2:

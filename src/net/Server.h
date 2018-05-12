@@ -10,6 +10,7 @@
 #include <thread>
 #include <sys/time.h>
 #include <bitset>
+#include <unistd.h>
 #include "net/State.h"
 #include "Helpers.h"
 #include "Queue.h"

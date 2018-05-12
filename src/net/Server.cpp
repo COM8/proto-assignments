@@ -33,9 +33,11 @@ void Server::setState(State state)
 		break;
 
 	case stopping:
-		if (serverThread && serverThread->joinable())
+		close(sockFD);
+		if (serverThread && serverThread->joinable() && serverThread->get_id() != this_thread::get_id())
 		{
-			serverThread->join();
+			// Broken never joins because recvfrom has no timeout:
+			// serverThread->join();
 		}
 		serverThread = NULL;
 		setState(stopped);
@@ -125,7 +127,7 @@ void Server::startTask()
 void Server::contReadStart()
 {
 	while (shouldRun)
-	{
+	{		
 		readNextMessage();
 	}
 }
@@ -137,7 +139,7 @@ void Server::readNextMessage()
 	struct sockaddr_in remAddr;
 	socklen_t addrLen = sizeof(remAddr);
 
-	while (recvlen <= 0 && shouldRun)
+	while (shouldRun && recvlen <= 0)
 	{
 		recvlen = recvfrom(sockFD, buf, BUF_SIZE, 0, (struct sockaddr *)&remAddr, &addrLen);
 	}

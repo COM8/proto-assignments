@@ -83,8 +83,11 @@ void FileServer::startConsumerThread()
 void FileServer::stopConsumerThread()
 {
 	shouldConsumerRun = false;
-	if (consumerThread)
+	if (consumerThread && consumerThread->joinable() && consumerThread->get_id() != this_thread::get_id())
 	{
+		ReadMessage *msg = new ReadMessage();
+		msg->msgType = 0xff;
+		cpQueue->push(*msg);
 		consumerThread->join();
 	}
 }
@@ -94,6 +97,11 @@ void FileServer::consumerTask()
 	while (shouldConsumerRun)
 	{
 		ReadMessage msg = cpQueue->pop();
+		if (!shouldConsumerRun)
+		{
+			return;
+		}
+
 		switch (msg.msgType)
 		{
 		case 1:
@@ -360,14 +368,7 @@ void FileServer::stop()
 	{
 		FileClientConnection *c = itr->second;
 		cout << "Stoping client: " << c->clientId << endl;
-		if (c->fS)
-		{
-			c->fS->close();
-		}
-		if (c->udpServer)
-		{
-			c->udpServer->stop();
-		}
+		disconnectClient(c);
 	}
 	mlock.unlock();
 }
