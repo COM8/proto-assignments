@@ -88,4 +88,5 @@ private:
 	void sendFolderCreationMessage(struct Folder *f, net::Client *client);
 	void sendFileCreationMessage(std::string fid, struct File *f, net::Client *client);
 	bool sendNextFilePart(std::string fid, struct File *f, unsigned int nextPartNr, net::Client *client);
+	void sendTransferEndedMessage(unsigned char flags, net::Client *client);
 };

@@ -37,7 +37,7 @@ void Timer::start()
 
 void Timer::stop()
 {
-    if (state != t_stop)
+    if (state != t_run && state != t_reset)
     {
         return;
     }

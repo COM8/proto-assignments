@@ -67,7 +67,7 @@ public:
 
 protected:
 	std::list<T> queue;
-	std::mutex* queueMutex;
+	std::mutex *queueMutex;
 	std::condition_variable* condVar;
 	
 };

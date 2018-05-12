@@ -15,7 +15,35 @@ Server::Server(unsigned short port, Queue<ReadMessage> *cpQueue)
 
 void Server::setState(State state)
 {
+	if (this->state == state)
+	{
+		return;
+	}
 	this->state = state;
+
+	switch (state)
+	{
+	case stopped:
+		break;
+
+	case starting:
+		break;
+
+	case running:
+		break;
+
+	case stopping:
+		if (serverThread && serverThread->joinable())
+		{
+			serverThread->join();
+		}
+		serverThread = NULL;
+		setState(stopped);
+		break;
+
+	case error:
+		break;
+	}
 }
 
 State Server::getState()
@@ -27,26 +55,25 @@ void Server::stop()
 {
 	setState(stopping);
 	shouldRun = false;
-	if (serverThread && serverThread->joinable())
-	{
-		serverThread->join();
-	}
-	setState(stopped);
 }
 
 void Server::start()
 {
+	if (state != stopped)
+	{
+		cout << "Unable to start server - state != " << stopped << " state is " << state << endl;
+		return;
+	}
 	if (serverThread)
 	{
 		cerr << "UDP server already running! Please stop first!" << endl;
 	}
 	else
 	{
-		// Start a new server thread:
+		setState(starting);
 		shouldRun = true;
+		// Start a new server thread:
 		serverThread = new thread(&Server::startTask, this);
-		// Keep server thread running even if got out of focus:
-		//serverThread->detach();
 	}
 }
 
@@ -63,8 +90,6 @@ void Server::startTask()
 	}
 	else
 	{
-		setState(starting);
-
 		// Fill memory block with 0:
 		myAddr = {};
 
@@ -81,7 +106,7 @@ void Server::startTask()
 		{
 			// Setup read timeout:
 			struct timeval tv;
-			tv.tv_sec = 2;
+			tv.tv_sec = 1;
 			tv.tv_usec = 0;
 			if (setsockopt(sockFD, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) < 0)
 			{

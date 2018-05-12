@@ -6,6 +6,7 @@
 #include <unordered_map>
 #include <cstdint>
 #include <time.h>
+#include <mutex>
 #include "net/State.h"
 #include "net/Server.h"
 #include "net/Client.h"
@@ -14,6 +15,7 @@
 #include "net/FileCreationMessage.h"
 #include "net/FileTransferMessage.h"
 #include "net/ClientHelloMessage.h"
+#include "net/TransferEndedMessage.h"
 #include "net/PingMessage.h"
 #include "net/AckMessage.h"
 #include "Filesystem.h"
@@ -58,12 +60,14 @@ private:
 	bool shouldConsumerRun;
 	std::thread* consumerThread;
 	std::unordered_map <unsigned int, FileClientConnection*> *clients;
+	std::mutex *clientsMutex;
 	Timer *cleanupTimer;
 
 	void startConsumerThread();
 	void stopConsumerThread();
 	void consumerTask();
 	void cleanupClients();
+	void disconnectClient(FileClientConnection *client);
 	void onTimerTick(int identifier);
 	void sendServerHelloMessage(FileClientConnection *client, unsigned char flags);
 	void onClientHelloMessage(net::ReadMessage *msg);
@@ -71,4 +75,5 @@ private:
 	void onAckMessage(net::ReadMessage *msg);
 	void onFileCreationMessage(net::ReadMessage *msg);
 	void onFileTransferMessage(net::ReadMessage *msg);
+	void onTransferEndedMessage(net::ReadMessage *msg);
 };

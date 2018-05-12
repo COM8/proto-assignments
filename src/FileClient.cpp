@@ -42,7 +42,7 @@ void FileClient::onTimerTick(int identifier)
 
 		if (state == disconnected)
 		{
-			cout << "Discariding " << msgs->size() << "unacked messages!" << endl;
+			// cout << "Discariding " << msgs->size() << "unacked messages!" << endl;
 			return;
 		}
 
@@ -243,7 +243,7 @@ void FileClient::consumerTask()
 			break;
 
 		case 5:
-			cout << "Ack"<< endl;
+			cout << "Ack" << endl;
 			onAckMessage(&msg);
 			break;
 
@@ -341,14 +341,21 @@ void FileClient::sendNextFilePart()
 	{
 		curWorkingSet->unlockFiles();
 		curWorkingSet->unlockdelFolders();
+		sendTransferEndedMessage(0b0001, uploadClient);
 		transferFinished = true;
 		cout << "Transfer finished!" << endl;
-		setState(connected);
+		setState(disconnected);
 		return;
 	}
 
 	curWorkingSet->unlockFiles();
 	curWorkingSet->unlockFolders();
+}
+
+void FileClient::sendTransferEndedMessage(unsigned char flags, Client *client)
+{
+	TransferEndedMessage *msg = new TransferEndedMessage(clientId, flags);
+	client->send(msg);
 }
 
 void FileClient::sendFolderCreationMessage(struct Folder *f, Client *client)
@@ -472,6 +479,14 @@ void FileClient::sendPingMessage(unsigned int plLength, unsigned int seqNumber, 
 
 void FileClient::stopSendingFS()
 {
+	switch (state)
+	{
+	case sendingFS:
+	case awaitingAck:
+	case connected:
+		sendTransferEndedMessage(0b0010, uploadClient);
+		break;
+	}
 	shouldTransferRun = false;
 	setState(disconnected);
 }

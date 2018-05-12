@@ -10,9 +10,11 @@ FileServer::FileServer(unsigned short port) : port(port),
 	this->cpQueue = new Queue<ReadMessage>();
 	this->clients = new unordered_map<unsigned int, FileClientConnection *>();
 	this->cleanupTimer = new Timer(true, 5000, this, 0);
+	this->clientsMutex = new std::mutex();
 }
 
-void FileServer::onTimerTick(int identifier) {
+void FileServer::onTimerTick(int identifier)
+{
 	cleanupClients();
 }
 
@@ -31,6 +33,45 @@ void FileServer::start()
 		cleanupTimer->start();
 		state = running;
 	}
+}
+
+void FileServer::onTransferEndedMessage(net::ReadMessage *msg)
+{
+	// Check if the checksum of the received message is valid else drop it:
+	if (!AbstractMessage::isChecksumValid(msg, TransferEndedMessage::CHECKSUM_OFFSET_BITS))
+	{
+		return;
+	}
+
+	unsigned int clientId = TransferEndedMessage::getClientIdFromMessage(msg->buffer);
+	std::unique_lock<std::mutex> mlock(*clientsMutex);
+	auto c = clients->find(clientId);
+	if (c != clients->end())
+	{
+		unsigned char flags = TransferEndedMessage::getFlagsFromMessage(msg->buffer);
+		// Transfer finished:
+		if ((flags & 0b0001) == 0b0001)
+		{
+			cout << "Client " << c->second->clientId << " finished transfer. Removing client." << endl;
+			disconnectClient(c->second);
+			clients->erase(c->second->clientId);
+		}
+		// Calceled by user:
+		else if ((flags & 0b0010) == 0b0010)
+		{
+			cout << "Client " << c->second->clientId << " canceled transfer. Removing client." << endl;
+			disconnectClient(c->second);
+			clients->erase(c->second->clientId);
+		}
+		// Error:
+		else
+		{
+			cout << "Client " << c->second->clientId << " transfer failed! Removing client." << endl;
+			disconnectClient(c->second);
+			clients->erase(c->second->clientId);
+		}
+	}
+	mlock.unlock();
 }
 
 void FileServer::startConsumerThread()
@@ -78,8 +119,9 @@ void FileServer::consumerTask()
 			onPingMessage(&msg);
 			break;
 
-			/*case 7:
-			break;*/
+		case 7:
+			onTransferEndedMessage(&msg);
+			break;
 
 		default:
 			cerr << "Unknown message type received: " << msg.msgType << endl;
@@ -97,6 +139,7 @@ void FileServer::onFileCreationMessage(ReadMessage *msg)
 	}
 
 	unsigned int clientId = FileCreationMessage::getClientIdFromMessage(msg->buffer);
+	std::unique_lock<std::mutex> mlock(*clientsMutex);
 	auto c = clients->find(clientId);
 	if (c != clients->end())
 	{
@@ -117,7 +160,7 @@ void FileServer::onFileCreationMessage(ReadMessage *msg)
 		switch (fileType)
 		{
 		case 1:
-			fCC->fS->genFolder(fidString);			
+			fCC->fS->genFolder(fidString);
 			cout << "Folder \"" << fidString << "\" generated." << endl;
 			break;
 
@@ -141,6 +184,7 @@ void FileServer::onFileCreationMessage(ReadMessage *msg)
 			break;
 		}
 	}
+	mlock.unlock();
 }
 
 void FileServer::onFileTransferMessage(ReadMessage *msg)
@@ -152,6 +196,7 @@ void FileServer::onFileTransferMessage(ReadMessage *msg)
 	}
 
 	unsigned int clientId = FileTransferMessage::getClientIdFromMessage(msg->buffer);
+	std::unique_lock<std::mutex> mlock(*clientsMutex);
 	auto c = clients->find(clientId);
 	if (c != clients->end())
 	{
@@ -171,8 +216,9 @@ void FileServer::onFileTransferMessage(ReadMessage *msg)
 			uint64_t contLength = FileTransferMessage::getContentLengthFromMessage(msg->buffer);
 			unsigned char *content = FileTransferMessage::getContentFromMessage(msg->buffer, contLength);
 			int result = fCC->fS->writeFilePart(fCC->curFID, (char *)content, partNumber, contLength);
-			cout << "Wrote file part: " << partNumber << ", length: " << contLength << " for file: \"" << fCC->curFID  << "\" with result: " << result << endl;
-			if((flags & 0b1000) == 0b1000) {
+			cout << "Wrote file part: " << partNumber << ", length: " << contLength << " for file: \"" << fCC->curFID << "\" with result: " << result << endl;
+			if ((flags & 0b1000) == 0b1000)
+			{
 				cout << "File ende received: " << fCC->curFID << endl;
 			}
 		}
@@ -181,6 +227,7 @@ void FileServer::onFileTransferMessage(ReadMessage *msg)
 			cerr << "Invalid FileTransferMessage flags received: " << (int)flags << endl;
 		}
 	}
+	mlock.unlock();
 }
 
 void FileServer::onAckMessage(ReadMessage *msg)
@@ -202,6 +249,7 @@ void FileServer::onPingMessage(ReadMessage *msg)
 	}
 
 	unsigned int clientId = PingMessage::getClientIdFromMessage(msg->buffer);
+	std::unique_lock<std::mutex> mlock(*clientsMutex);
 	auto c = clients->find(clientId);
 	if (c != clients->end())
 	{
@@ -211,31 +259,43 @@ void FileServer::onPingMessage(ReadMessage *msg)
 		cout << "Pong" << endl;
 		c->second->udpClient->send(&ack);
 	}
+	mlock.unlock();
 }
 
 void FileServer::cleanupClients()
 {
 	time_t now = time(NULL);
 
+	std::unique_lock<std::mutex> mlock(*clientsMutex);
 	auto i = clients->begin();
 	while (i != clients->end())
 	{
 		FileClientConnection *c = i->second;
-		if (difftime(now, c->lastMessageTime) > 10) {
+		if (c && difftime(now, c->lastMessageTime) > 10)
+		{
 			cout << "Removing client: " << c->clientId << " for inactivity." << endl;
-			if (c->fS)
-			{
-				c->fS->close();
-			}
-			if (c->udpServer)
-			{
-				c->udpServer->stop();
-			}
+			disconnectClient(c);
 			i = clients->erase(i);
+			cout << "111" << endl;
 		}
-		else {
+		else
+		{
 			i++;
 		}
+	}
+	mlock.unlock();
+}
+
+void FileServer::disconnectClient(FileClientConnection *client)
+{
+	client->state = c_disconnected;
+	if (client->fS)
+	{
+		client->fS->close();
+	}
+	if (client->udpServer)
+	{
+		client->udpServer->stop();
 	}
 }
 
@@ -256,11 +316,12 @@ void FileServer::onClientHelloMessage(ReadMessage *msg)
 	client->cpQueue = cpQueue;
 	client->udpClient = new Client(client->remoteIp, client->portRemote);
 	client->udpServer = new Server(client->portLocal, client->cpQueue);
-	client->fS = new FilesystemServer(to_string(client->clientId)+"/");
+	client->fS = new FilesystemServer(to_string(client->clientId) + "/");
 	client->curFID = "";
 	client->lastMessageTime = time(NULL);
 
 	// Check if client id is taken:
+	std::unique_lock<std::mutex> mlock(*clientsMutex);
 	auto c = clients->find(client->clientId);
 	if (c != clients->end())
 	{
@@ -268,15 +329,18 @@ void FileServer::onClientHelloMessage(ReadMessage *msg)
 		cout << "Client request declined! Reason: Client ID already taken!" << endl;
 		return;
 	}
+	else
+	{
+		// Insert client into clients map:
+		clients->insert(std::pair<int, FileClientConnection *>(client->clientId, client));
 
-	// Insert client into clients map:
-	clients->insert(std::pair<int, FileClientConnection *>(client->clientId, client));
+		client->udpServer->start();
+		sendServerHelloMessage(client, 1);
+		client->state = c_serverHello;
 
-	client->udpServer->start();
-	sendServerHelloMessage(client, 1);
-	client->state = c_serverHello;
-
-	cout << "New client with id: " << client->clientId << " accepted on port: " << client->portRemote << " and clientId: " << client->clientId << endl;
+		cout << "New client with id: " << client->clientId << " accepted on port: " << client->portRemote << " and clientId: " << client->clientId << endl;
+	}
+	mlock.unlock();
 }
 
 void FileServer::sendServerHelloMessage(FileClientConnection *client, unsigned char flags)
@@ -291,6 +355,7 @@ void FileServer::stop()
 	cleanupTimer->stop();
 
 	// Stop all clients:
+	std::unique_lock<std::mutex> mlock(*clientsMutex);
 	for (auto itr = clients->begin(); itr != clients->end(); itr++)
 	{
 		FileClientConnection *c = itr->second;
@@ -304,4 +369,5 @@ void FileServer::stop()
 			c->udpServer->stop();
 		}
 	}
+	mlock.unlock();
 }
