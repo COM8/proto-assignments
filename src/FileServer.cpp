@@ -283,9 +283,7 @@ void FileServer::cleanupClients()
 		{
 			cout << "Removing client: " << c->clientId << " for inactivity." << endl;
 			disconnectClient(c);
-			cout << "111" << endl;			
 			i = clients->erase(i);
-			cout << "222" << endl;
 		}
 		else
 		{
