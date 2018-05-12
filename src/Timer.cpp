@@ -43,7 +43,7 @@ void Timer::stop()
     }
 
     state = t_stop;
-    if (timerThread && timerThread->joinable())
+    if (timerThread && timerThread->joinable() && timerThread->get_id() != this_thread::get_id())
     {
         timerThread->join();
     }

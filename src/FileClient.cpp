@@ -160,7 +160,8 @@ void FileClient::onServerHelloMessage(ReadMessage *msg)
 
 	if (state == sendHandshake)
 	{
-		setState(connected);
+		stopHelloThread();
+
 		// Check if client ID was still available:
 		if (ServerHelloMessage::getFlagsFromMessage(msg->buffer) & 1 != 1)
 		{
@@ -174,8 +175,7 @@ void FileClient::onServerHelloMessage(ReadMessage *msg)
 		clientId = ServerHelloMessage::getClientIdFromMessage(msg->buffer);
 		unsigned short uploadPort = ServerHelloMessage::getPortFromMessage(msg->buffer);
 		uploadClient = new Client(*serverAddress, uploadPort);
-
-		setState(sendingFS);
+		setState(connected);
 	}
 }
 
@@ -194,7 +194,7 @@ void FileClient::setState(TransferState state)
 
 	switch (state)
 	{
-	case disconnected:
+	case disconnected:		
 		pingTimer->stop();
 		sendMessageTimer->stop();
 		sendMessageQueue->clear();
@@ -203,7 +203,9 @@ void FileClient::setState(TransferState state)
 		server->stop();
 		if(shouldTransferRun) {
 			startHelloThread();
-		}		
+			server->start();
+			startConsumerThread();
+		}
 		break;
 
 	case sendHandshake:
@@ -215,7 +217,7 @@ void FileClient::setState(TransferState state)
 		sendMessageTimer->start();
 		if (!transferFinished && shouldTransferRun)
 		{
-			startSendingFS();
+			setState(sendingFS);
 		}
 		break;
 
@@ -252,7 +254,6 @@ void FileClient::consumerTask()
 			break;
 
 		case 5:
-			cout << "Ack" << endl;
 			onAckMessage(&msg);
 			break;
 

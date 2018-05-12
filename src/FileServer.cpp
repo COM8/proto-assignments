@@ -283,8 +283,9 @@ void FileServer::cleanupClients()
 		{
 			cout << "Removing client: " << c->clientId << " for inactivity." << endl;
 			disconnectClient(c);
+			cout << "111" << endl;			
 			i = clients->erase(i);
-			cout << "111" << endl;
+			cout << "222" << endl;
 		}
 		else
 		{
@@ -331,7 +332,7 @@ void FileServer::onClientHelloMessage(ReadMessage *msg)
 	// Check if client id is taken:
 	std::unique_lock<std::mutex> mlock(*clientsMutex);
 	auto c = clients->find(client->clientId);
-	if (c != clients->end())
+	if (c != clients->end() && c->second && c->second->state != c_disconnected)
 	{
 		sendServerHelloMessage(client, 4);
 		cout << "Client request declined! Reason: Client ID already taken!" << endl;
