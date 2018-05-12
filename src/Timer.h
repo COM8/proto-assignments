@@ -6,6 +6,7 @@
 #include "TimerTickable.h"
 
 enum TimerState {
+    t_stoped,
     t_stop,
     t_run,
     t_reset,
@@ -16,7 +17,7 @@ class Timer {
 public:
     unsigned int wakeupIntervallMS;
 
-    Timer(bool tick, unsigned int intervallMS, TimerTickable *tT);
+    Timer(bool tick, unsigned int intervallMS, TimerTickable *tT, int identifier);
     ~Timer();
 
     void start();
@@ -30,6 +31,7 @@ private:
     TimerState state;
     std::thread* timerThread;
     TimerTickable *tT;
+    int identifier;
 
     void timerTask();
 

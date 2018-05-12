@@ -64,7 +64,7 @@ private:
 	void stopConsumerThread();
 	void consumerTask();
 	void cleanupClients();
-	void onTimerTick();
+	void onTimerTick(int identifier);
 	void sendServerHelloMessage(FileClientConnection *client, unsigned char flags);
 	void onClientHelloMessage(net::ReadMessage *msg);
 	void onPingMessage(net::ReadMessage *msg);

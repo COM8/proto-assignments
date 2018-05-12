@@ -22,6 +22,8 @@
 #include "TimerTickable.h"
 
 #define MAX_ACK_TIME_IN_S 1
+#define ACK_TIMER_IDENT 0
+#define PING_TIMER_IDENT 1
 
 enum TransferState
 {
@@ -42,7 +44,7 @@ public:
 	void restartSendingFS();
 	void pingServer();
 	void printToDo();
-	void onTimerTick();
+	void onTimerTick(int identifier);
 	TransferState getState();
 
 private:
@@ -66,11 +68,14 @@ private:
 	unsigned short listeningPort;
 	std::mutex* seqNumberMutex;
 	Timer *sendMessageTimer;
+	Timer *pingTimer;
+	bool transferFinished;
 
 	void startConsumerThread();
 	void stopConsumerThread();
 	void startHelloThread();
 	void stopHelloThread();
+	void setState(TransferState state);
 	unsigned int getNextSeqNumber();
 	void helloTask(unsigned short listenPort);
 	void consumerTask();

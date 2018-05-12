@@ -17,51 +17,72 @@ FileClient::FileClient(std::string *serverAddress, unsigned short serverPort, Fi
 	this->shouldHelloRun = false;
 	this->consumerThread = NULL;
 	this->seqNumber = 0;
-	srand (time(NULL));
+	srand(time(NULL));
 	this->clientId = rand();
 	this->listeningPort = 2000 + rand() % 63000;
 	this->server = NULL;
 	this->client = NULL;
 	this->uploadClient = NULL;
 	this->seqNumberMutex = new mutex();
-	this->sendMessageTimer = new Timer(true, 1000, this);
+	this->sendMessageTimer = new Timer(true, 1000, this, ACK_TIMER_IDENT);
 	this->sendMessageTimer->start();
+	this->pingTimer = new Timer(true, 1000, this, PING_TIMER_IDENT);
+	this->transferFinished = false;
 }
 
-void FileClient::onTimerTick() {
-	// cout << "Tick " << sendMessageQueue->size() << endl;
-	list<struct SendMessage> *msgs = new list<struct SendMessage>();
-	sendMessageQueue->popNotAckedMessages(MAX_ACK_TIME_IN_S, msgs);
+void FileClient::onTimerTick(int identifier)
+{
+	switch (identifier)
+	{
+	case ACK_TIMER_IDENT:
+	{
+		// cout << "Tick " << sendMessageQueue->size() << endl;
+		list<struct SendMessage> *msgs = new list<struct SendMessage>();
+		sendMessageQueue->popNotAckedMessages(MAX_ACK_TIME_IN_S, msgs);
 
-	if(state == disconnected) {
-		cout << "Discariding " << msgs->size() << "unacked messages!" << endl;
-		return;
-	}
-
-	for(struct SendMessage msg : *msgs) {
-		if(msg.sendCount >= 3) {
-			restartSendingFS();
-		}
-		else
+		if (state == disconnected)
 		{
-			// Resend message:
-			cout << "Resending message!" << endl;
-			uploadClient->send(msg.msg);
-			msg.sendCount++;
-			msg.sendTime = time(NULL);
-			sendMessageQueue->push(msg);
+			cout << "Discariding " << msgs->size() << "unacked messages!" << endl;
+			return;
 		}
+
+		for (struct SendMessage msg : *msgs)
+		{
+			if (msg.sendCount >= 3)
+			{
+				restartSendingFS();
+			}
+			else
+			{
+				// Resend message:
+				cout << "Resending message!" << endl;
+				uploadClient->send(msg.msg);
+				msg.sendCount++;
+				msg.sendTime = time(NULL);
+				sendMessageQueue->push(msg);
+			}
+		}
+	}
+	break;
+
+	case PING_TIMER_IDENT:
+		switch (state)
+		{
+		case connected:
+			setState(ping);
+			sendPingMessage(0, getNextSeqNumber(), uploadClient);
+			cout << "Keep alive ping send." << endl;
+			break;
+		}
+		break;
 	}
 }
 
-void FileClient::restartSendingFS() {
+void FileClient::restartSendingFS()
+{
 	cout << "Restarting file transfer." << endl;
 	// Stop:
-	state = disconnected;
-	stopConsumerThread();
-	sendMessageTimer->stop();
-	server->stop();
-	sendMessageQueue->clear();
+	setState(disconnected);
 
 	// Switch listen port to prevent binding problems:
 	listeningPort = 2000 + rand() % 63000;
@@ -71,7 +92,6 @@ void FileClient::restartSendingFS() {
 	server->start();
 	startConsumerThread();
 	startHelloThread();
-	sendMessageTimer->start();
 }
 
 void FileClient::startSendingFS()
@@ -84,7 +104,6 @@ void FileClient::startSendingFS()
 	server->start();
 	startConsumerThread();
 	startHelloThread();
-	sendMessageTimer->start();
 
 	printToDo();
 }
@@ -105,7 +124,7 @@ void FileClient::stopHelloThread()
 
 void FileClient::helloTask(unsigned short listenPort)
 {
-	state = sendHandshake;
+	setState(sendHandshake);
 	while (state < connected && shouldHelloRun)
 	{
 		sendClientHelloMessage(listenPort, client);
@@ -138,14 +157,13 @@ void FileClient::onServerHelloMessage(ReadMessage *msg)
 
 	if (state == sendHandshake)
 	{
-		state = connected;
+		setState(connected);
 		// Check if client ID was still available:
-		if(ServerHelloMessage::getFlagsFromMessage(msg->buffer) & 1 != 1) {
+		if (ServerHelloMessage::getFlagsFromMessage(msg->buffer) & 1 != 1)
+		{
 			cout << "Client ID already taken! Trying a new one." << endl;
-			stopHelloThread();
 			clientId = rand();
-			state = disconnected;
-			startHelloThread();
+			setState(disconnected);
 			return;
 		}
 
@@ -154,8 +172,61 @@ void FileClient::onServerHelloMessage(ReadMessage *msg)
 		unsigned short uploadPort = ServerHelloMessage::getPortFromMessage(msg->buffer);
 		uploadClient = new Client(*serverAddress, uploadPort);
 
-		state = sendingFS;
-		sendNextFilePart();
+		setState(sendingFS);
+	}
+}
+
+TransferState FileClient::getState()
+{
+	return state;
+}
+
+void FileClient::setState(TransferState state)
+{
+	if (this->state == state)
+	{
+		return;
+	}
+	this->state = state;
+
+	switch (state)
+	{
+	case disconnected:
+		pingTimer->stop();
+		sendMessageTimer->stop();
+		sendMessageQueue->clear();
+		stopConsumerThread();
+		stopHelloThread();
+		server->stop();
+		startHelloThread();
+		break;
+
+	case sendHandshake:
+		break;
+
+	case connected:
+		stopHelloThread();
+		pingTimer->start();
+		sendMessageTimer->start();
+		if (!transferFinished && shouldTransferRun)
+		{
+			startSendingFS();
+		}
+		break;
+
+	case sendingFS:
+		pingTimer->stop();
+		if (!transferFinished && shouldTransferRun)
+		{
+			sendNextFilePart();
+		}
+		break;
+
+	case awaitingAck:
+		break;
+
+	case ping:
+		break;
 	}
 }
 
@@ -172,6 +243,7 @@ void FileClient::consumerTask()
 			break;
 
 		case 5:
+			cout << "Ack"<< endl;
 			onAckMessage(&msg);
 			break;
 
@@ -197,6 +269,7 @@ void FileClient::onAckMessage(ReadMessage *msg)
 	unsigned int seqNumber = AckMessage::getSeqNumberFromMessage(msg->buffer);
 	if (sendMessageQueue->onSequenceNumberAck(seqNumber))
 	{
+		pingTimer->reset();
 		// cout << "Acked: " << seqNumber << endl;
 	}
 	else
@@ -204,17 +277,16 @@ void FileClient::onAckMessage(ReadMessage *msg)
 		cerr << "Sequence number not found: " << seqNumber << endl;
 	}
 
-	if (state != awaitingAck)
+	switch (state)
 	{
-		cerr << "Received ACK message but state is not awaitingAck!" << endl;
-		return;
+	case awaitingAck:
+		setState(sendingFS);
+		break;
+
+	case ping:
+		setState(connected);
+		break;
 	}
-
-	// Update state:
-	state = sendingFS;
-
-	sendNextFilePart();
-	// sendPingMessage(0, seqNumber++);
 }
 
 void FileClient::sendNextFilePart()
@@ -231,13 +303,15 @@ void FileClient::sendNextFilePart()
 	// Continue file transfer:
 	int curFilePartNr = curWorkingSet->getCurFilePartNr();
 	if (curFilePartNr >= 0)
-	{	
+	{
 		auto curFile = curWorkingSet->getCurFile();
+		setState(awaitingAck);
 		bool lastPartSend = sendNextFilePart(curFile->first, curFile->second, curFilePartNr, uploadClient);
 
 		curWorkingSet->setCurFilePartNr(++curFilePartNr);
 
-		if(lastPartSend) {
+		if (lastPartSend)
+		{
 			files->erase(curFile->first);
 			curWorkingSet->setCurFilePartNr(-1);
 		}
@@ -248,6 +322,7 @@ void FileClient::sendNextFilePart()
 	{
 		struct Folder *f = folders->front();
 		folders->pop_front();
+		setState(awaitingAck);
 		sendFolderCreationMessage(f, uploadClient);
 	}
 	// Transfer file:
@@ -256,8 +331,9 @@ void FileClient::sendNextFilePart()
 		pair<string, File *> *nextCurFile = new pair<string, File *>(files->begin()->first, files->begin()->second);
 		curWorkingSet->setCurFile(nextCurFile);
 		curWorkingSet->setCurFilePartNr(0);
-		
+
 		auto curFile = curWorkingSet->getCurFile();
+		setState(awaitingAck);
 		sendFileCreationMessage(curFile->first, curFile->second, uploadClient);
 		curWorkingSet->unlockCurFile();
 	}
@@ -265,27 +341,26 @@ void FileClient::sendNextFilePart()
 	{
 		curWorkingSet->unlockFiles();
 		curWorkingSet->unlockdelFolders();
+		transferFinished = true;
 		cout << "Transfer finished!" << endl;
-		state = connected;
+		setState(connected);
 		return;
 	}
 
 	curWorkingSet->unlockFiles();
-	curWorkingSet->unlockFolders();	
-
-	state = awaitingAck;
+	curWorkingSet->unlockFolders();
 }
 
 void FileClient::sendFolderCreationMessage(struct Folder *f, Client *client)
 {
 	const char *c = f->path.c_str();
 	uint64_t l = f->path.length();
-	int i = getNextSeqNumber();	
+	int i = getNextSeqNumber();
 	FileCreationMessage *msg = new FileCreationMessage(clientId, i, 1, NULL, l, (unsigned char *)c);
 	sendMessageQueue->pushSendMessage(i, msg);
 
 	client->send(msg);
-	cout << "Send folder creation: \"" << f->path << "\""<< endl;
+	cout << "Send folder creation: \"" << f->path << "\"" << endl;
 }
 
 void FileClient::sendFileCreationMessage(string fid, struct File *f, Client *client)
@@ -300,7 +375,8 @@ void FileClient::sendFileCreationMessage(string fid, struct File *f, Client *cli
 	cout << "Send file creation: " << fid << endl;
 }
 
-bool FileClient::sendNextFilePart(string fid, struct File *f, unsigned int nextPartNr, Client *client) {
+bool FileClient::sendNextFilePart(string fid, struct File *f, unsigned int nextPartNr, Client *client)
+{
 	char chunk[Filesystem::partLength];
 	bool isLastPart = false;
 	int readCount = fS->readFile(fid, chunk, nextPartNr, &isLastPart);
@@ -309,16 +385,18 @@ bool FileClient::sendNextFilePart(string fid, struct File *f, unsigned int nextP
 	char flags = 2;
 
 	// First file part:
-	if(nextPartNr == 0) {
+	if (nextPartNr == 0)
+	{
 		flags |= 1;
 	}
 	// Last file part:
-	else if(isLastPart){
+	else if (isLastPart)
+	{
 		flags |= 8;
 	}
 
 	int i = getNextSeqNumber();
-	FileTransferMessage *msg = new FileTransferMessage(clientId, i, flags, nextPartNr, (unsigned char *)f->hash, (uint64_t)readCount, (unsigned char*)chunk);
+	FileTransferMessage *msg = new FileTransferMessage(clientId, i, flags, nextPartNr, (unsigned char *)f->hash, (uint64_t)readCount, (unsigned char *)chunk);
 	sendMessageQueue->pushSendMessage(i, msg);
 
 	client->send(msg);
@@ -326,7 +404,8 @@ bool FileClient::sendNextFilePart(string fid, struct File *f, unsigned int nextP
 	return isLastPart;
 }
 
-unsigned int FileClient::getNextSeqNumber() {
+unsigned int FileClient::getNextSeqNumber()
+{
 	unique_lock<mutex> mlock(*seqNumberMutex);
 	unsigned int i = seqNumber++;
 	mlock.unlock();
@@ -366,6 +445,7 @@ void FileClient::pingServer()
 	case connected:
 	case awaitingAck:
 	case sendingFS:
+	case ping:
 		cout << "Ping" << endl;
 		sendPingMessage(0, getNextSeqNumber(), uploadClient);
 		break;
@@ -374,11 +454,6 @@ void FileClient::pingServer()
 		cerr << "Unable to ping server - not connected!" << endl;
 		break;
 	}
-}
-
-TransferState FileClient::getState()
-{
-	return state;
 }
 
 void FileClient::sendClientHelloMessage(unsigned short listeningPort, Client *client)
@@ -398,30 +473,32 @@ void FileClient::sendPingMessage(unsigned int plLength, unsigned int seqNumber, 
 void FileClient::stopSendingFS()
 {
 	shouldTransferRun = false;
-	stopConsumerThread();
-	stopHelloThread();
-	server->stop();
+	setState(disconnected);
 }
 
 void FileClient::printToDo()
 {
 	cout << "ToDo list:" << endl;
-	if(!curWorkingSet) {
+	if (!curWorkingSet)
+	{
 		cout << "Nothing to do!" << endl;
 	}
-	else {
+	else
+	{
 		cout << "Files: " << curWorkingSet->getFiles()->size() << endl;
 		cout << "Folders: " << curWorkingSet->getFolders()->size() << endl;
 		cout << "Delete files: " << curWorkingSet->getdelFiles()->size() << endl;
 		cout << "Delete folders: " << curWorkingSet->getdelFolders()->size() << endl;
 		cout << "Current file: ";
-		if(curWorkingSet->getCurFilePartNr() >= 0) {
+		if (curWorkingSet->getCurFilePartNr() >= 0)
+		{
 			cout << "FID: " << curWorkingSet->getCurFile()->first << ", Part: " << curWorkingSet->getCurFilePartNr() << endl;
 		}
-		else {
+		else
+		{
 			cout << "None" << endl;
 		}
-		
+
 		// Unlock workingset:
 		curWorkingSet->unlockCurFile();
 		curWorkingSet->unlockdelFiles();

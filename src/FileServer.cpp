@@ -9,10 +9,10 @@ FileServer::FileServer(unsigned short port) : port(port),
 {
 	this->cpQueue = new Queue<ReadMessage>();
 	this->clients = new unordered_map<unsigned int, FileClientConnection *>();
-	this->cleanupTimer = new Timer(true, 5000, this);
+	this->cleanupTimer = new Timer(true, 5000, this, 0);
 }
 
-void FileServer::onTimerTick() {
+void FileServer::onTimerTick(int identifier) {
 	cleanupClients();
 }
 

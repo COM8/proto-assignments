@@ -3,5 +3,5 @@
 class TimerTickable
 {
   public:
-    virtual void onTimerTick() {}
+    virtual void onTimerTick(int identifier) {}
 };
