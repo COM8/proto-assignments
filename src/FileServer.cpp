@@ -310,20 +310,27 @@ void FileServer::cleanupClients()
 	time_t now = time(NULL);
 
 	std::unique_lock<std::mutex> mlock(*clientsMutex);
-	auto i = clients->begin();
-	while (i != clients->end())
+	try
 	{
-		FileClientConnection *c = i->second;
-		if (c && difftime(now, c->lastMessageTime) > 10)
+		auto i = clients->begin();
+		while (i != clients->end())
 		{
-			cout << "Removing client: " << c->clientId << " for inactivity." << endl;
-			disconnectClient(c);
-			i = clients->erase(i);
+			FileClientConnection *c = i->second;
+			if (c && difftime(now, c->lastMessageTime) > 10)
+			{
+				cout << "Removing client: " << c->clientId << " for inactivity." << endl;
+
+				disconnectClient(c);
+				i = clients->erase(i);
+			}
+			else
+			{
+				i++;
+			}
 		}
-		else
-		{
-			i++;
-		}
+	}
+	catch (...)
+	{
 	}
 	mlock.unlock();
 }
