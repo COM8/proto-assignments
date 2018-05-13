@@ -16,6 +16,7 @@
 #include "net/TransferEndedMessage.h"
 #include "net/FileCreationMessage.h"
 #include "net/FileTransferMessage.h"
+#include "net/FileStatusMessage.h"
 #include "Queue.h"
 #include "WorkingSet.h"
 #include "Timer.h"
@@ -30,6 +31,7 @@ enum TransferState
 	disconnected,
 	sendHandshake,
 	connected,
+	sendFileStatus,
 	sendingFS,
 	awaitingAck,
 	ping
@@ -61,8 +63,10 @@ private:
 	bool shouldConsumerRun;
 	bool shouldTransferRun;
 	bool shouldHelloRun;
+	bool shouldFileStatusRun;
 	std::thread *consumerThread;
 	std::thread *helloThread;
+	std::thread *fileStatusThread;
 	unsigned int seqNumber;
 	unsigned int clientId;
 	unsigned short listeningPort;
@@ -70,6 +74,7 @@ private:
 	Timer *sendMessageTimer;
 	Timer *pingTimer;
 	bool transferFinished;
+	bool reconnecting;
 
 	void startConsumerThread();
 	void stopConsumerThread();
@@ -79,14 +84,19 @@ private:
 	unsigned int getNextSeqNumber();
 	void helloTask(unsigned short listenPort);
 	void consumerTask();
+	void fileStatusTask();
+	void startFileStatusThread();
+	void stopFileStatusThread();
 	void onServerHelloMessage(net::ReadMessage *msg);
 	void onAckMessage(net::ReadMessage *msg);
 	void onTransferEndedMessage(net::ReadMessage *msg);
+	void onFileStatusMessage(net::ReadMessage *msg);
 	void sendNextFilePart();
-	void sendClientHelloMessage(unsigned short listeningPort, net::Client *client);
+	void sendClientHelloMessage(unsigned short listeningPort, net::Client *client, unsigned char flags);
 	void sendPingMessage(unsigned int plLength, unsigned int seqNumber, net::Client *client);	
 	void sendFolderCreationMessage(struct Folder *f, net::Client *client);
 	void sendFileCreationMessage(std::string fid, struct File *f, net::Client *client);
 	bool sendNextFilePart(std::string fid, struct File *f, unsigned int nextPartNr, net::Client *client);
 	void sendTransferEndedMessage(unsigned char flags, net::Client *client);
+	void sendFileStatusMessage(unsigned char flags, net::Client *client);
 };

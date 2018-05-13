@@ -116,8 +116,9 @@ void FileServer::consumerTask()
 			onFileTransferMessage(&msg);
 			break;
 
-			/*case 4:
-			break;*/
+		case 4:
+			onFileStatusMessage(&msg);
+			break;
 
 		case 5:
 			onAckMessage(&msg);
@@ -136,6 +137,39 @@ void FileServer::consumerTask()
 			break;
 		}
 	}
+}
+
+void FileServer::onFileStatusMessage(ReadMessage *msg)
+{
+	// Check if the checksum of the received message is valid else drop it:
+	if (!AbstractMessage::isChecksumValid(msg, FileStatusMessage::CHECKSUM_OFFSET_BITS))
+	{
+		return;
+	}
+
+	unsigned char flags = FileStatusMessage::getFlagsFromMessage(msg->buffer);
+	if ((flags & 0b0001) != 0b0001)
+	{
+		cout << "Invalid flags for file status message received: " << (int)flags << endl;
+		return;
+	}
+
+	unsigned int clientId = FileStatusMessage::getClientIdFromMessage(msg->buffer);
+	std::unique_lock<std::mutex> mlock(*clientsMutex);
+	auto c = clients->find(clientId);
+	if (c != clients->end())
+	{
+		unsigned char flags = 0b0010;
+		if (c->second->isCurFIDFolder)
+		{
+			flags |= 0b1000;
+		}
+
+		FileStatusMessage *fSMsg = new FileStatusMessage(clientId, c->second->lastFIDPartNumber, flags, c->second->curFIDLength, (unsigned char *)c->second->curFID.c_str());
+		c->second->udpClient->send(fSMsg);
+	}
+
+	mlock.unlock();
 }
 
 void FileServer::onFileCreationMessage(ReadMessage *msg)
@@ -179,6 +213,7 @@ void FileServer::onFileCreationMessage(ReadMessage *msg)
 		case 4:
 			hash = FileCreationMessage::getFileHashFromMessage(msg->buffer);
 			fCC->curFID = fidString;
+			fCC->curFIDLength = fidLengt;
 			fCC->fS->genFile(fCC->curFID, (char *)hash);
 			cout << "File \"" << fid << "\" generated." << endl;
 			break;
@@ -314,6 +349,13 @@ void FileServer::onClientHelloMessage(ReadMessage *msg)
 		return;
 	}
 
+	unsigned char flags = ClientHelloMessage::getFlagsFromMessage(msg->buffer);
+	if ((flags & 0b0001) != 0b0001)
+	{
+		cout << "Client hello message without \"connect requested\" received: " << (int)flags << endl;
+		return;
+	}
+
 	FileClientConnection *client = new FileClientConnection{};
 	client->clientId = ClientHelloMessage::getClientIdFromMessage(msg->buffer);
 	client->state = c_clientHello;
@@ -326,27 +368,34 @@ void FileServer::onClientHelloMessage(ReadMessage *msg)
 	client->fS = new FilesystemServer(to_string(client->clientId) + "/");
 	client->curFID = "";
 	client->lastMessageTime = time(NULL);
+	client->lastFIDPartNumber = 0;
+	client->curFIDLength = 0;
 
 	// Check if client id is taken:
 	std::unique_lock<std::mutex> mlock(*clientsMutex);
 	auto c = clients->find(client->clientId);
-	if (c != clients->end() && c->second && c->second->state != c_disconnected)
+	if ((flags & 0b0010) == 0b0010 && c != clients->end())
+	{
+		cout << "Client reconnect request received." << endl;
+		if (c->second && c->second->state != c_disconnected)
+		{
+			disconnectClient(c->second);
+		}
+	}
+	else if (c != clients->end() && c->second && c->second->state != c_disconnected)
 	{
 		sendServerHelloMessage(client, 4);
 		cout << "Client request declined! Reason: Client ID already taken!" << endl;
 		return;
 	}
-	else
-	{
-		// Insert client into clients map:
-		clients->insert(std::pair<int, FileClientConnection *>(client->clientId, client));
 
-		client->udpServer->start();
-		sendServerHelloMessage(client, 1);
-		client->state = c_serverHello;
+	(*clients)[client->clientId] = client;
+	client->udpServer->start();
+	sendServerHelloMessage(client, 1);
+	client->state = c_serverHello;
 
-		cout << "New client with id: " << client->clientId << " accepted on port: " << client->portRemote << " and clientId: " << client->clientId << endl;
-	}
+	cout << "New client with id: " << client->clientId << " accepted on port: " << client->portRemote << endl;
+
 	mlock.unlock();
 }
 

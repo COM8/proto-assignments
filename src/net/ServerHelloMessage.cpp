@@ -17,7 +17,7 @@ void ServerHelloMessage::createBuffer(struct Message* msg) {
 	msg->buffer[0] |= type;
 
 	// Add flags:
-	setBufferValue(msg, &flags, 1, 4);
+	msg->buffer[0] |= flags;
 
 	// Add client id:
 	setBufferUnsignedInt(msg, clientId, 8);
@@ -30,8 +30,7 @@ void ServerHelloMessage::createBuffer(struct Message* msg) {
 }
 
 unsigned char ServerHelloMessage::getFlagsFromMessage(unsigned char* buffer) {
-	// Flags start at 4, but it is easier to get a byte and ignore the first 4 bit
-	return getByteWithOffset(buffer, 0) & 0xF; // Only the last 4 bit are the flag bits
+	return buffer[0] & 0xF; // 4 bit offset
 }
 
 unsigned int ServerHelloMessage::getClientIdFromMessage(unsigned char* buffer) {

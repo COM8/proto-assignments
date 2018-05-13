@@ -16,6 +16,7 @@
 #include "net/FileTransferMessage.h"
 #include "net/ClientHelloMessage.h"
 #include "net/TransferEndedMessage.h"
+#include "net/FileStatusMessage.h"
 #include "net/PingMessage.h"
 #include "net/AckMessage.h"
 #include "Filesystem.h"
@@ -41,8 +42,11 @@ struct FileClientConnection {
 	Queue<net::ReadMessage>* cpQueue;
 	FileClientConnectionState state = c_disconnected;
 	FilesystemServer *fS;
-	std::string curFID;
 	time_t lastMessageTime;
+	std::string curFID;
+	unsigned int lastFIDPartNumber;
+	std::uint64_t curFIDLength;
+	bool isCurFIDFolder;
 };
 
 class FileServer : public TimerTickable
@@ -76,4 +80,5 @@ private:
 	void onFileCreationMessage(net::ReadMessage *msg);
 	void onFileTransferMessage(net::ReadMessage *msg);
 	void onTransferEndedMessage(net::ReadMessage *msg);
+	void onFileStatusMessage(net::ReadMessage *msg);
 };

@@ -28,10 +28,15 @@ FileClient::FileClient(std::string *serverAddress, unsigned short serverPort, Fi
 	this->sendMessageTimer->start();
 	this->pingTimer = new Timer(true, 1000, this, PING_TIMER_IDENT);
 	this->transferFinished = false;
+	this->reconnecting = false;
+	this->fileStatusThread = NULL;
+	this->shouldFileStatusRun = false;
 }
 
 void FileClient::onTimerTick(int identifier)
 {
+	//cout << "Timer tick: "<< identifier << endl;
+
 	switch (identifier)
 	{
 	case ACK_TIMER_IDENT:
@@ -48,7 +53,7 @@ void FileClient::onTimerTick(int identifier)
 
 		for (struct SendMessage msg : *msgs)
 		{
-			if (msg.sendCount >= 3)
+			if (msg.sendCount > 3)
 			{
 				restartSendingFS();
 			}
@@ -83,6 +88,7 @@ void FileClient::restartSendingFS()
 	cout << "Restarting file transfer." << endl;
 	// Stop:
 	setState(disconnected);
+	reconnecting = true;
 
 	// Switch listen port to prevent binding problems:
 	listeningPort = 2000 + rand() % 63000;
@@ -113,12 +119,39 @@ void FileClient::startHelloThread()
 	shouldHelloRun = true;
 	helloThread = new thread(&FileClient::helloTask, this, listeningPort);
 }
+
 void FileClient::stopHelloThread()
 {
 	shouldHelloRun = false;
 	if (helloThread && helloThread->joinable() && helloThread->get_id() != this_thread::get_id())
 	{
 		helloThread->join();
+	}
+	cout << "Stopend hello thread." << endl;
+}
+
+void FileClient::startFileStatusThread()
+{
+	shouldFileStatusRun = true;
+	fileStatusThread = new thread(&FileClient::fileStatusTask, this);
+}
+
+void FileClient::stopFileStatusThread()
+{
+	shouldFileStatusRun = false;
+	if (fileStatusThread && fileStatusThread->joinable() && fileStatusThread->get_id() != this_thread::get_id())
+	{
+		fileStatusThread->join();
+	}
+	cout << "Stopend file status thread." << endl;
+}
+
+void FileClient::fileStatusTask()
+{
+	while (shouldFileStatusRun && state == sendFileStatus)
+	{
+		sendFileStatusMessage(0b0001, uploadClient);
+		sleep(1); // Sleep for 1 second
 	}
 }
 
@@ -127,7 +160,13 @@ void FileClient::helloTask(unsigned short listenPort)
 	setState(sendHandshake);
 	while (state < connected && shouldHelloRun)
 	{
-		sendClientHelloMessage(listenPort, client);
+		unsigned char flags = 0b0001;
+		if (reconnecting)
+		{
+			flags = 0b0011;
+		}
+		sendClientHelloMessage(listenPort, client, flags);
+		// cout << "Hello" << endl;
 		sleep(1); // Sleep for 1 second
 	}
 }
@@ -148,6 +187,7 @@ void FileClient::stopConsumerThread()
 		cpQueue->push(*msg);
 		consumerThread->join();
 	}
+	cout << "Stopend consumer thread." << endl;
 }
 
 void FileClient::onServerHelloMessage(ReadMessage *msg)
@@ -192,16 +232,20 @@ void FileClient::setState(TransferState state)
 	}
 	this->state = state;
 
+	// cout << "State: " << state << endl;
+
 	switch (state)
 	{
-	case disconnected:		
+	case disconnected:
 		pingTimer->stop();
 		sendMessageTimer->stop();
 		sendMessageQueue->clear();
 		stopConsumerThread();
 		stopHelloThread();
+		stopFileStatusThread();
 		server->stop();
-		if(shouldTransferRun) {
+		if (shouldTransferRun)
+		{
 			startHelloThread();
 			server->start();
 			startConsumerThread();
@@ -217,8 +261,19 @@ void FileClient::setState(TransferState state)
 		sendMessageTimer->start();
 		if (!transferFinished && shouldTransferRun)
 		{
-			setState(sendingFS);
+			if (reconnecting)
+			{
+				reconnecting = false;
+				startFileStatusThread();
+				setState(sendFileStatus);
+			}
+			else {
+				setState(sendingFS);
+			}
 		}
+		break;
+
+	case sendFileStatus:
 		break;
 
 	case sendingFS:
@@ -237,6 +292,13 @@ void FileClient::setState(TransferState state)
 	}
 }
 
+void FileClient::sendFileStatusMessage(unsigned char flags, Client *client)
+{
+	FileStatusMessage *msg = new FileStatusMessage(clientId, flags);
+
+	client->send(msg);
+}
+
 void FileClient::consumerTask()
 {
 	while (shouldConsumerRun)
@@ -253,6 +315,10 @@ void FileClient::consumerTask()
 			onServerHelloMessage(&msg);
 			break;
 
+		case 4:
+			onFileStatusMessage(&msg);
+			break;
+
 		case 5:
 			onAckMessage(&msg);
 			break;
@@ -265,6 +331,42 @@ void FileClient::consumerTask()
 			cerr << "Unknown message type received: " << msg.msgType << endl;
 			break;
 		}
+	}
+}
+
+void FileClient::onFileStatusMessage(ReadMessage *msg)
+{
+	// Check if the checksum of the received message is valid else drop it:
+	if (!AbstractMessage::isChecksumValid(msg, AckMessage::CHECKSUM_OFFSET_BITS))
+	{
+		return;
+	}
+
+	unsigned int flags = FileStatusMessage::getFlagsFromMessage(msg->buffer);
+	if ((flags & 0b0010) != 0b0010)
+	{
+		cout << "File status message with invalid flags received: " << flags << endl;
+		return;
+	}
+
+	cout << "File status message received. Continuing transfer!" << endl;
+	stopFileStatusThread();
+
+	if ((flags & 0b0100) != 0b0100)
+	{
+		// ToDo: Reset file transfer
+	}
+
+	// Last part was a folder:
+	if ((flags & 0b1000) != 0b1000)
+	{
+	}
+	// Last part was a file:
+	else
+	{
+		unsigned int lastFIDPartNumber = FileStatusMessage::getLastFIDPartNumberFromMessage(msg->buffer);
+		curWorkingSet->setCurFilePartNr(lastFIDPartNumber);
+		setState(sendingFS);
 	}
 }
 
@@ -473,9 +575,9 @@ void FileClient::pingServer()
 	}
 }
 
-void FileClient::sendClientHelloMessage(unsigned short listeningPort, Client *client)
+void FileClient::sendClientHelloMessage(unsigned short listeningPort, Client *client, unsigned char flags)
 {
-	ClientHelloMessage *msg = new ClientHelloMessage(listeningPort, clientId);
+	ClientHelloMessage *msg = new ClientHelloMessage(listeningPort, clientId, flags);
 	client->send(msg);
 }
 

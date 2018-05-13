@@ -3,6 +3,7 @@
 #include <iostream>
 #include <thread>
 #include <unistd.h>
+#include <mutex>
 #include "TimerTickable.h"
 
 enum TimerState {
@@ -32,6 +33,7 @@ private:
     std::thread* timerThread;
     TimerTickable *tT;
     int identifier;
+    std::mutex *stateMutex;
 
     void timerTask();
 

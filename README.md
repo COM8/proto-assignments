@@ -53,10 +53,20 @@ FID Part Number [32 Bit]:<br/>
 ### Client-Hello-Handshake:
 The initial connection message that gets send by the client.
 ```
-0      4      20          52         84       88
-+------+------+-----------+----------+--------+
-| Type | Port | Client ID | Checksum | UNUSED |
-+------+------+-----------+----------+--------+
+0      4       8      24          56         88
++------+-------+------+-----------+----------+
+| Type | Flags | Port | Client ID | Checksum |
++------+-------+------+-----------+----------+
+```
+
+Flags [4 Bit]:
+```
+0000
+||||
+|||+-> Connect requested
+||+--> Reconnect
+|+---> *UNUSED*
++----> *UNUSED*
 ```
 
 Port [16 Bit]:<br/>
@@ -150,7 +160,7 @@ Used for requesting and responding the current file status e.g. after a connecti
 ```
 0      4       8           40                     72         104         168
 +------+-------+-----------+----------------------+----------+-----------+-----+
-| Type | Flags | Client ID | Last Sequence Number | Checksum |FID Length | FID | 
+| Type | Flags | Client ID | Last FID Part Number | Checksum |FID Length | FID | 
 +------+-------+-----------+----------------------+----------+-----------+-----+
 ```
 
@@ -160,12 +170,12 @@ Flags [4 Bit]:
 ||||
 |||+-> Request status of FID
 ||+--> FID status response
-|+---> *UNUSED*
-+----> *UNUSED*
+|+---> Restart sending file system
++----> File = 0/Folder = 1 FID
 ```
 
-Last Sequence Number [32 Bit]:
-	The last acknowledged ```Sequence Number```. Ignored if ```Request status of FID``` is set.
+Last FID Part Number [32 Bit]:
+	The last received ```FID Part Number```. Ignored if ```Request status of FID``` is set.
 
 
 ### ACK:
