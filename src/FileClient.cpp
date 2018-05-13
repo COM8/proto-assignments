@@ -25,6 +25,7 @@ FileClient::FileClient(std::string *serverAddress, unsigned short serverPort, Fi
 	this->uploadClient = NULL;
 	this->seqNumberMutex = new mutex();
 	this->sendMessageTimer = new Timer(true, 1000, this, ACK_TIMER_IDENT);
+	this->sendMessageTimer->wakeupIntervallMS = 250;
 	this->sendMessageTimer->start();
 	this->pingTimer = new Timer(true, 1000, this, PING_TIMER_IDENT);
 	this->transferFinished = false;
@@ -53,19 +54,19 @@ void FileClient::onTimerTick(int identifier)
 
 		for (struct SendMessage msg : *msgs)
 		{
-			if (msg.sendCount > 3)
+			/*if (msg.sendCount > 3)
 			{
 				restartSendingFS();
 			}
 			else
-			{
+			{*/
 				// Resend message:
 				cout << "Resending message!" << endl;
 				uploadClient->send(msg.msg);
 				msg.sendCount++;
 				msg.sendTime = time(NULL);
 				sendMessageQueue->push(msg);
-			}
+			//}
 		}
 	}
 	break;
