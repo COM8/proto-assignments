@@ -3,7 +3,7 @@ BUILD_DIR=build
 
 default:
 	make clean
-	make compile
+	make debug
 
 init:
 	git submodule init
@@ -17,10 +17,13 @@ server:
 	make default
 	./$(BUILD_DIR)/csync -s -p 1234
 
+debug:
+	mkdir -p $(BUILD_DIR)
+	${G++_COMPILER} -g src/*.cpp src/net/*.cpp src/lib/zedwood/*.cpp -I src/ -I src/net/ -I src/lib/zedwood/ -o $(BUILD_DIR)/csync -lstdc++fs -std=c++17 -pthread
+
 compile:
 	# Create the build directory if it does not allready exist:
 	mkdir -p $(BUILD_DIR)
-
 	${G++_COMPILER} src/*.cpp src/net/*.cpp src/lib/zedwood/*.cpp -I src/ -I src/net/ -I src/lib/zedwood/ -o $(BUILD_DIR)/csync -lstdc++fs -std=c++17 -pthread
 
 clean:
