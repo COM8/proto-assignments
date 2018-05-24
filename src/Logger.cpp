@@ -2,11 +2,11 @@
 
 using namespace std;
 
-LogLevel Logger::logLevel = LogLevel::info;
+LogLevel Logger::logLevel = LogLevel::l_info;
 
 void Logger::debug(string msg)
 {
-    if ((int)logLevel >= (int)debug)
+    if ((int)logLevel >= (int)l_debug)
     {
         cout << "[DEBUG]: " << msg << endl;
     }
@@ -14,7 +14,7 @@ void Logger::debug(string msg)
 
 void Logger::info(string msg)
 {
-    if ((int)logLevel >= (int)debug)
+    if ((int)logLevel >= (int)l_info)
     {
         cout << "[INFO]: " << msg << endl;
     }
@@ -22,7 +22,7 @@ void Logger::info(string msg)
 
 void Logger::warn(string msg)
 {
-    if ((int)logLevel >= (int)debug)
+    if ((int)logLevel >= (int)l_warn)
     {
         cout << "[WARN]: " << msg << endl;
     }
@@ -30,7 +30,7 @@ void Logger::warn(string msg)
 
 void Logger::error(string msg)
 {
-    if ((int)logLevel >= (int)debug)
+    if ((int)logLevel >= (int)l_error)
     {
         cerr << "[ERROR]: " << msg << endl;
     }
