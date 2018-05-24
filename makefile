@@ -1,6 +1,7 @@
 G++_COMPILER=g++ # In mac I need to change this to g++-7 , so I made it a variable.
 BUILD_DIR=build
 DEBUG_DIR=debug
+SYNC_DIR=sync
 
 default:
 	make clean
@@ -32,7 +33,8 @@ compile:
 clean:
 	# Only remove the build folder if it exists:
 	if [ -d $(BUILD_DIR) ]; then rm -rf $(BUILD_DIR); fi
-	if [ -d $(DEBUG_DIR) ]; then	rm -rf $(DEBUG_DIR); fi
+	if [ -d $(DEBUG_DIR) ]; then rm -rf $(DEBUG_DIR); fi
+	if [ -d $(SYNC_DIR) ]; then rm -rf $(SYNC_DIR); fi
 
 test:
 	make compile

@@ -372,7 +372,7 @@ void FileServer::onClientHelloMessage(ReadMessage *msg)
 	client->cpQueue = cpQueue;
 	client->udpClient = new Client(client->remoteIp, client->portRemote);
 	client->udpServer = new Server(client->portLocal, client->cpQueue);
-	client->fS = new FilesystemServer(to_string(client->clientId) + "/");
+	client->fS = new FilesystemServer("sync/" + to_string(client->clientId) + "/");
 	client->curFID = "";
 	client->lastMessageTime = time(NULL);
 	client->lastFIDPartNumber = 0;

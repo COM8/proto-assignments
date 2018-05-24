@@ -387,3 +387,4 @@ sftp-config.json
 [Bb]uild/
 .vscode/
 [Db]ebug/
+sync/
