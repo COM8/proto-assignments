@@ -116,7 +116,6 @@ public:
 		std::unique_lock<std::mutex> mlock(*queueMutex);
 		time_t now = time(NULL);
 		auto i = queue.begin();
-		bool found = false;
 		while (i != queue.end())
 		{
 			if(difftime(now, i->sendTime) > maxMessageAgeInSec) {

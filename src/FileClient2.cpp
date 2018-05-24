@@ -305,6 +305,9 @@ void FileClient2::onTimerTick(int identifier)
             connect();
         }
         break;
+
+    default:
+        break;
     }
 }
 

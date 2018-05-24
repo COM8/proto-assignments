@@ -7,6 +7,10 @@ AbstractMessage::AbstractMessage(unsigned char type) {
 	this->type = type;
 }
 
+AbstractMessage::~AbstractMessage() {
+	
+}
+
 char AbstractMessage::getType() {
 	return type;
 }
@@ -88,12 +92,12 @@ void AbstractMessage::setByteWithOffset(unsigned char* buffer, unsigned char val
 	}
 	else {
 		// Reset bits:
-		buffer[byteIndex] &= (unsigned char)0xff << 8 - bitOffsetMod;
+		buffer[byteIndex] &= (unsigned char)0xff << (8 - bitOffsetMod);
 		buffer[byteIndex+1] &= (unsigned char)0xff >> bitOffsetMod;
 
 		// Set bits:
 		buffer[byteIndex] |= (value >> bitOffsetMod);
-		buffer[byteIndex+1] |= (value << 8 - bitOffsetMod);		
+		buffer[byteIndex+1] |= value << (8 - bitOffsetMod);
 	}
 }
 
@@ -146,7 +150,7 @@ unsigned char* AbstractMessage::getBytesWithOffset(unsigned char* buffer, int bi
 
 	int lengthMod = bitLength % 8;
 	if(lengthMod != 0) {
-		result[lengthBytes-1] &= (unsigned char)0xff << 8-lengthMod; 
+		result[lengthBytes-1] &= (unsigned char)0xff << (8-lengthMod); 
 	}
 
 	return result;
