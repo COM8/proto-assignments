@@ -384,5 +384,6 @@ ASALocalRun/
 # sftp configuration file
 sftp-config.json
 
-build/
+[Bb]uild/
 .vscode/
+[Db]ebug/
