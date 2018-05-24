@@ -22,7 +22,7 @@ Timer::~Timer()
 
 void Timer::start()
 {
-    cout << "Started Timer: " << identifier << endl;
+    Logger::debug("Started timer: " + to_string(identifier));
     std::unique_lock<std::mutex> mlock(*stateMutex);
     state = t_run;
     mlock.unlock();
@@ -50,7 +50,7 @@ void Timer::stop()
     state = t_stoped;
     timerThread = NULL;
     mlock.unlock();
-    cout << "Stoped Timer: " << identifier << endl;
+    Logger::debug("Stoped timer: " + to_string(identifier));
 }
 
 void Timer::reset()

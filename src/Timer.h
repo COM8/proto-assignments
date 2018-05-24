@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <mutex>
 #include "TimerTickable.h"
+#include "Logger.h"
 
 enum TimerState {
     t_stoped,
