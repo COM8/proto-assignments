@@ -14,6 +14,15 @@
 struct ServerFile {
     char *hash = new char[32];
     unsigned int last_part = 0;
+    ServerFile(char *hash, unsigned int last_part) {
+        this->hash = hash;
+        this->last_part = last_part;
+    }
+    ServerFile() {
+    }
+    static std::unique_ptr<ServerFile> genPointer(char *hash, unsigned int last_part) {
+        return std::make_unique<ServerFile>(ServerFile(hash, last_part));
+    }  
     };
 
 
@@ -52,7 +61,7 @@ class FilesystemServer: Filesystem {
 private:
     std::string path = "";
     std::unordered_map <std::string, bool> folders;
-    std::unordered_map <std::string, ServerFile*> files;
+    std::unordered_map <std::string, std::unique_ptr<ServerFile>> files;
     void createPath();
     void folderClean(std::string path);
     void fileClean(std::string file);
@@ -62,7 +71,6 @@ private:
     unsigned int charToInt(char* buffer);
     void saveFolderFile();
     void saveFileFile();
-    ServerFile* genServerFile(char* hash, unsigned int partNr);
 public:
     FilesystemServer(std::string path);
     void genFile(std::string FID, char* hash);

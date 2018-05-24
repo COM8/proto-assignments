@@ -291,7 +291,7 @@ void FilesystemServer::readFileFile()
 		int last_part = charToInt(length);
 		char *hash = new char[32];
 		tmp.read(hash, 32);
-		this->files[string(name)] = genServerFile(hash, last_part);
+		this->files[string(name)] = ServerFile::genPointer(hash, last_part);
 		currPosition += l + 40;
 	}
 	tmp.close();
@@ -333,8 +333,8 @@ void FilesystemServer::saveFileFile()
 	{
 		tmp.write(intToArray(ent1.first.length()), 4);
 		tmp.write(ent1.first.c_str(), ent1.first.length());
-		tmp.write(intToArray(ent1.second->last_part), 4);
-		tmp.write(ent1.second->hash, 32);
+		tmp.write(intToArray(ent1.second.get()->last_part), 4);
+		tmp.write(ent1.second.get()->hash, 32);
 	}
 	tmp.close();
 }
@@ -396,7 +396,7 @@ void FilesystemServer::genFile(std::string FID, char *hash)
 {
 	if (this->files[(this->path + FID)] == 0)
 	{
-		this->files[(this->path + FID)] = genServerFile(hash, 0);
+		this->files[(this->path + FID)] = ServerFile::genPointer(hash, 0);
 	}
 	fstream tmp((this->path + FID), fstream::out);
 	tmp.close();
@@ -443,7 +443,7 @@ int FilesystemServer::writeFilePart(string FID, char *buffer, unsigned int partN
 		tmp.seekp(partNr * partLength, tmp.beg);
 		tmp.write(buffer, length > partLength ? partLength: length);
 		tmp.close();
-		if (this->files[this->path + FID]->last_part + 1 == partNr)
+		if (this->files[this->path + FID].get()->last_part + 1 == partNr)
 		{
 			//this->files[this->path + FID]->last_part = this->files[this->path + FID]->last_part + 1;
 		}
@@ -455,13 +455,6 @@ int FilesystemServer::writeFilePart(string FID, char *buffer, unsigned int partN
 	}
 }
 
-ServerFile *FilesystemServer::genServerFile(char *hash, unsigned int partNr)
-{
-	ServerFile *ret = new ServerFile();
-	ret->hash = hash;
-	ret->last_part = partNr;
-	return ret;
-}
 
 void FilesystemServer::close()
 {
