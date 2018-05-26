@@ -25,18 +25,22 @@ debugServer:
 debugClient:
 	make debug
 	gdb --args ./$(DEBUG_DIR)/csync "-h" "localhost" "-p" "1234" "-f" "$(DEBUG_DIR)"
+	
 client:
 	make default
 	make runClient
+
 server:
 	make default
 	make runServer
+
 debug:
 	mkdir -p $(DEBUG_DIR)
 	${G++_COMPILER} -g src/*.cpp src/net/*.cpp src/lib/zedwood/*.cpp -I src/ -I src/net/ -I src/lib/zedwood/ -o $(DEBUG_DIR)/csync -lstdc++fs -std=c++17 -pthread
 
 release:
 	make compile
+
 compile:
 	# Create the build directory if it does not allready exist:
 	mkdir -p $(BUILD_DIR)
