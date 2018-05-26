@@ -388,3 +388,8 @@ sftp-config.json
 .vscode/
 [Db]ebug/
 sync/
+.cquery
+[tT]est/
+.sublime-project
+PD-ASS-1.sublime-project
+PD-ASS-1.sublime-workspace

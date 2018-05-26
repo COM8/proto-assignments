@@ -21,7 +21,7 @@ server:
 
 debug:
 	mkdir -p $(DEBUG_DIR)
-	${G++_COMPILER} -g -Wall src/*.cpp src/net/*.cpp src/lib/zedwood/*.cpp -I src/ -I src/net/ -I src/lib/zedwood/ -o $(DEBUG_DIR)/csync -lstdc++fs -std=c++17 -pthread
+	${G++_COMPILER} -g src/*.cpp src/net/*.cpp src/lib/zedwood/*.cpp -I src/ -I src/net/ -I src/lib/zedwood/ -o $(DEBUG_DIR)/csync -lstdc++fs -std=c++17 -pthread
 
 release:
 	make compile
