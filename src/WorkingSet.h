@@ -118,10 +118,6 @@ class WorkingSet
         return &deleteFolder;
     }
 
-    bool isEmpty()
-    {
-        return true;
-    }
 
     void unlockdelFolders()
     {
