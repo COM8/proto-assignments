@@ -455,6 +455,15 @@ int FilesystemServer::writeFilePart(string FID, char *buffer, unsigned int partN
 	}
 }
 
+unsigned int FilesystemServer::getLastPart(string FID) {
+	if(this->files[this->path + FID] == 0) {
+		return 0;
+	}else {
+		return this->files[this->path + FID].get()->last_part;
+	}
+	
+}
+
 
 void FilesystemServer::close()
 {

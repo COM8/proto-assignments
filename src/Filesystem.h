@@ -77,6 +77,7 @@ public:
     void genFolder(std::string path);
     void delFolder(std::string path);
     void delFile(std::string FID);
+    unsigned int getLastPart(std::string FID);
     int writeFilePart(std::string FID, char* buffer, unsigned int partNr, unsigned int length);
     void clearDirecotry();
     void close();
