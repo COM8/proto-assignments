@@ -51,7 +51,7 @@ class WorkingSet
         if(!this->files.size() == 0) {
             return false;
         }
-        if(!this->folders.size() == 0) {
+        if(this->folders.size() != 1) {
             return false;
         }
         if(!this->deleteFile.size() == 0){

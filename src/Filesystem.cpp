@@ -445,7 +445,7 @@ int FilesystemServer::writeFilePart(string FID, char *buffer, unsigned int partN
 		tmp.close();
 		if (this->files[this->path + FID].get()->last_part + 1 == partNr)
 		{
-			//this->files[this->path + FID]->last_part = this->files[this->path + FID]->last_part + 1;
+			this->files[this->path + FID].get()->last_part = this->files[this->path + FID].get()->last_part + 1;
 		}
 		return 0;
 	}
