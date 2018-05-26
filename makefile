@@ -11,14 +11,26 @@ init:
 	git submodule init
 	git submodule update
 
-client:
-	make default
+runClient:
 	./$(DEBUG_DIR)/csync -h localhost -p 1234 -f $(DEBUG_DIR)
 
-server:
-	make default
+runServer:
 	./$(DEBUG_DIR)/csync -s -p 1234
 
+debugServer:
+	make clean
+	make debug
+	gdb --args ./$(DEBUG_DIR)/csync "-s" "-p" "1234"
+
+debugClient:
+	make debug
+	gdb --args ./$(DEBUG_DIR)/csync "-h" "localhost" "-p" "1234" "-f" "$(DEBUG_DIR)"
+client:
+	make default
+	make runClient
+server:
+	make default
+	make runServer
 debug:
 	mkdir -p $(DEBUG_DIR)
 	${G++_COMPILER} -g src/*.cpp src/net/*.cpp src/lib/zedwood/*.cpp -I src/ -I src/net/ -I src/lib/zedwood/ -o $(DEBUG_DIR)/csync -lstdc++fs -std=c++17 -pthread
