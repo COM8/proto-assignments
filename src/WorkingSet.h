@@ -47,6 +47,22 @@ class WorkingSet
         this->deleteFolder = deleteFolder;
     }
 
+    bool isEmpty() {
+        if(!this->files.size() == 0) {
+            return false;
+        }
+        if(!this->folders.size() == 0) {
+            return false;
+        }
+        if(!this->deleteFile.size() == 0){
+            return false;
+        }
+        if(!this->deleteFolder.size() == 0) {
+            return false;
+        }
+        return true;
+    }
+
     void addDeleteFolder(std::string path)
     {
         delFolderMutex.lock();
