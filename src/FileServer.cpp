@@ -262,7 +262,7 @@ void FileServer::onFileTransferMessage(ReadMessage *msg)
 			cout << "Wrote file part: " << partNumber << ", length: " << contLength << " for file: \"" << fCC->curFID << "\" with result: " << result << endl;
 			if ((flags & 0b1000) == 0b1000)
 			{
-				cout << "File ende received: " << fCC->curFID << endl;
+				cout << "Last filepart recieved: " << fCC->curFID << endl;
 			}
 		}
 		else
