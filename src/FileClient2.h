@@ -20,6 +20,10 @@
 #include "TimerTickable.h"
 #include "Logger.h"
 
+#define MAX_ACK_TIME_IN_S 1
+#define TIMER_TICK_INTERVALL_MS 1000
+#define MAX_MESSAGE_SEND_TRIES 15
+
 enum FileClient2State
 {
     disconnected = 0,
@@ -82,6 +86,8 @@ class FileClient2 : public TimerTickable
     void startConsumerThread();
     void consumerTask();
     void sendNextFilePart();
+    void sendFolderDeletionMessage(std::string folder, net::Client *client);
+    void sendFileDeletionMessage(std::string file, net::Client *client);
     void sendTransferEndedMessage(unsigned char flags, net::Client *client);
     void sendFolderCreationMessage(struct Folder *f, net::Client *client);
     void sendFileCreationMessage(std::string fid, struct File *f, net::Client *client);

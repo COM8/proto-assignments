@@ -27,7 +27,7 @@ FileClient2::FileClient2(string serverAddress, unsigned short serverPort, unsign
     this->reconnect = false;
     this->msgTimeoutCount = 0;
     this->uploadPort = 0;
-    this->tTimer = new Timer(true, 1000, this, 1);
+    this->tTimer = new Timer(true, TIMER_TICK_INTERVALL_MS, this, 1);
     this->clientId = clientId;
     this->clientPassword = clientPassword;
     this->curWorkingSet = fS->getWorkingSet();
@@ -141,6 +141,10 @@ void FileClient2::sendNextFilePart()
 {
     auto folders = curWorkingSet->getFolders();
     auto files = curWorkingSet->getFiles();
+    auto delFolders = curWorkingSet->getDelFolders();
+    auto delFiles = curWorkingSet->getDelFiles();
+
+    bool repeat = false;
 
     // Continue file transfer:
     int curFilePartNr = curWorkingSet->getCurFilePartNr();
@@ -158,6 +162,22 @@ void FileClient2::sendNextFilePart()
             curWorkingSet->setCurFilePartNr(-1);
         }
         curWorkingSet->unlockCurFile();
+    }
+    // Delete file:
+    else if (!delFiles->empty())
+    {
+        string filePath = delFiles->front();
+        delFiles->pop_front();
+        setState(awaitingAck);
+        sendFileDeletionMessage(filePath, uploadClient);
+    }
+    // Delete folder:
+    else if (!delFolders->empty())
+    {
+        string folderPath = delFolders->front();
+        delFolders->pop_front();
+        setState(awaitingAck);
+        sendFileDeletionMessage(folderPath, uploadClient);
     }
     // Trasfer folder:
     else if (!folders->empty())
@@ -181,26 +201,34 @@ void FileClient2::sendNextFilePart()
     }
     else
     {
-        curWorkingSet->unlockFiles();
-        curWorkingSet->unlockdelFolders();
-
+        repeat = true;
         if (curWorkingSet->isEmpty())
         {
+            delete curWorkingSet;
             curWorkingSet = fS->getWorkingSet();
             if (curWorkingSet->isEmpty())
             {
+                repeat = false;
                 sendTransferEndedMessage(0b0001, uploadClient);
                 transferFinished = true;
                 Logger::info("Transfer finished!");
                 setState(connected);
             }
+            else {
+                printToDo();
+            }
         }
-
-        return;
+        
     }
 
     curWorkingSet->unlockFiles();
     curWorkingSet->unlockFolders();
+    curWorkingSet->unlockdelFiles();
+    curWorkingSet->unlockdelFolders();
+
+    if(repeat) {
+        sendNextFilePart();
+    }
 }
 
 void FileClient2::sendTransferEndedMessage(unsigned char flags, Client *client)
@@ -219,6 +247,30 @@ void FileClient2::sendFolderCreationMessage(struct Folder *f, Client *client)
 
     client->send(msg);
     Logger::info("Send folder creation for: \"" + f->path + "\"");
+}
+
+void FileClient2::sendFolderDeletionMessage(string folderPath, Client *client)
+{
+    const char *c = folderPath.c_str();
+    uint64_t l = folderPath.length();
+    int i = getNextSeqNumber();
+    FileCreationMessage *msg = new FileCreationMessage(clientId, i, 2, NULL, l, (unsigned char *)c);
+    sendMessageQueue->pushSendMessage(i, msg);
+
+    client->send(msg);
+    Logger::info("Send folder deletion for: \"" + folderPath + "\"");
+}
+
+void FileClient2::sendFileDeletionMessage(string filePath, Client *client)
+{
+    const char *c = filePath.c_str();
+    uint64_t l = filePath.length();
+    int i = getNextSeqNumber();
+    FileCreationMessage *msg = new FileCreationMessage(clientId, i, 8, NULL, l, (unsigned char *)c);
+    sendMessageQueue->pushSendMessage(i, msg);
+
+    client->send(msg);
+    Logger::info("Send file deletion for: \"" + filePath + "\"");
 }
 
 void FileClient2::sendFileCreationMessage(string fid, struct File *f, Client *client)
@@ -431,6 +483,32 @@ void FileClient2::onTimerTick(int identifier)
         setState(ping);
         break;
 
+    case awaitingAck:
+    {
+        Logger::info("sadsad");
+        list<struct SendMessage> *msgs = new list<struct SendMessage>();
+        sendMessageQueue->popNotAckedMessages(MAX_ACK_TIME_IN_S, msgs);
+
+        for (struct SendMessage msg : *msgs)
+        {
+            if (msg.sendCount > MAX_MESSAGE_SEND_TRIES)
+            {
+                Logger::error("Failed to send messge " + to_string(MAX_MESSAGE_SEND_TRIES) + " times!");
+            }
+            else
+            {
+                // Resend message:
+                cout << "Resending message!" << endl;
+                uploadClient->send(msg.msg);
+                msg.sendCount++;
+                msg.sendTime = time(NULL);
+                sendMessageQueue->push(msg);
+            }
+        }
+        delete msgs;
+    }
+    break;
+
     case ping:
         sendMessageQueue->clear();
         msgTimeoutCount++;
@@ -477,7 +555,8 @@ void FileClient2::onAckMessage(ReadMessage *msg)
     {
         Logger::error("Unable to ACK sequence number: " + to_string(seqNumber) + ". Sequence number was not found!");
     }
-    else{
+    else
+    {
         Logger::debug("Acked sequence number: " + to_string(seqNumber));
     }
 
