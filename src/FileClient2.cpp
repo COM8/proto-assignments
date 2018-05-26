@@ -9,6 +9,8 @@ FileClient2::FileClient2(string serverAddress, unsigned short serverPort, unsign
     this->serverPort = serverPort;
     this->fS = fS;
 
+    srand(time(NULL));
+
     this->state = disconnected;
     this->stateMutex = new mutex();
     this->seqNumberMutex = new mutex();
@@ -28,6 +30,8 @@ FileClient2::FileClient2(string serverAddress, unsigned short serverPort, unsign
     this->tTimer = new Timer(true, 1000, this, 1);
     this->clientId = clientId;
     this->clientPassword = clientPassword;
+    this->curWorkingSet = fS->getWorkingSet();
+    this->transferFinished = false;
 }
 
 FileClient2::~FileClient2()
@@ -40,6 +44,8 @@ FileClient2::~FileClient2()
     delete server;
     delete cpQueue;
     delete sendMessageQueue;
+    delete curWorkingSet;
+    delete tTimer;
 }
 
 unsigned int FileClient2::getNextSeqNumber()
@@ -94,11 +100,21 @@ void FileClient2::setState(FileClient2State state)
         break;
 
     case connected:
+        if (!transferFinished)
+        {
+            if (reconnect)
+            {
+            }
+            else
+            {
+                startSendingFS();
+            }
+        }
         tTimer->start();
         break;
 
     case ping:
-        tTimer->stop();
+        tTimer->reset();
         sendPingMessage(0, getNextSeqNumber(), uploadClient);
         break;
 
@@ -108,6 +124,7 @@ void FileClient2::setState(FileClient2State state)
 
     case sendingFS:
         tTimer->stop();
+        sendNextFilePart();
         break;
 
     case awaitingAck:
@@ -118,6 +135,131 @@ void FileClient2::setState(FileClient2State state)
         tTimer->stop();
         break;
     }
+}
+
+void FileClient2::sendNextFilePart()
+{
+    auto folders = curWorkingSet->getFolders();
+    auto files = curWorkingSet->getFiles();
+
+    // Continue file transfer:
+    int curFilePartNr = curWorkingSet->getCurFilePartNr();
+    if (curFilePartNr >= 0)
+    {
+        auto curFile = curWorkingSet->getCurFile();
+        setState(awaitingAck);
+        bool lastPartSend = sendFilePartMessage(curFile->first, curFile->second, curFilePartNr, uploadClient);
+
+        curWorkingSet->setCurFilePartNr(++curFilePartNr);
+
+        if (lastPartSend)
+        {
+            files->erase(curFile->first);
+            curWorkingSet->setCurFilePartNr(-1);
+        }
+        curWorkingSet->unlockCurFile();
+    }
+    // Trasfer folder:
+    else if (!folders->empty())
+    {
+        struct Folder *f = folders->front();
+        folders->pop_front();
+        setState(awaitingAck);
+        sendFolderCreationMessage(f, uploadClient);
+    }
+    // Transfer file:
+    else if (!files->empty())
+    {
+        pair<string, File *> *nextCurFile = new pair<string, File *>(files->begin()->first, files->begin()->second);
+        curWorkingSet->setCurFile(nextCurFile);
+        curWorkingSet->setCurFilePartNr(0);
+
+        auto curFile = curWorkingSet->getCurFile();
+        setState(awaitingAck);
+        sendFileCreationMessage(curFile->first, curFile->second, uploadClient);
+        curWorkingSet->unlockCurFile();
+    }
+    else
+    {
+        curWorkingSet->unlockFiles();
+        curWorkingSet->unlockdelFolders();
+
+        if (curWorkingSet->isEmpty())
+        {
+            curWorkingSet = fS->getWorkingSet();
+            if (curWorkingSet->isEmpty())
+            {
+                sendTransferEndedMessage(0b0001, uploadClient);
+                transferFinished = true;
+                Logger::info("Transfer finished!");
+                setState(connected);
+            }
+        }
+
+        return;
+    }
+
+    curWorkingSet->unlockFiles();
+    curWorkingSet->unlockFolders();
+}
+
+void FileClient2::sendTransferEndedMessage(unsigned char flags, Client *client)
+{
+    TransferEndedMessage *msg = new TransferEndedMessage(clientId, flags);
+    client->send(msg);
+}
+
+void FileClient2::sendFolderCreationMessage(struct Folder *f, Client *client)
+{
+    const char *c = f->path.c_str();
+    uint64_t l = f->path.length();
+    int i = getNextSeqNumber();
+    FileCreationMessage *msg = new FileCreationMessage(clientId, i, 1, NULL, l, (unsigned char *)c);
+    sendMessageQueue->pushSendMessage(i, msg);
+
+    client->send(msg);
+    Logger::info("Send folder creation for: \"" + f->path + "\"");
+}
+
+void FileClient2::sendFileCreationMessage(string fid, struct File *f, Client *client)
+{
+    const char *c = fid.c_str();
+    uint64_t l = fid.length();
+    int i = getNextSeqNumber();
+    FileCreationMessage *msg = new FileCreationMessage(clientId, i, 4, (unsigned char *)f->hash, l, (unsigned char *)c);
+    sendMessageQueue->pushSendMessage(i, msg);
+
+    client->send(msg);
+    cout << "Send file creation: " << fid << endl;
+}
+
+bool FileClient2::sendFilePartMessage(string fid, struct File *f, unsigned int nextPartNr, Client *client)
+{
+    char chunk[Filesystem::partLength];
+    bool isLastPart = false;
+    int readCount = fS->readFile(fid, chunk, nextPartNr, &isLastPart);
+
+    // File part:
+    char flags = 2;
+
+    // First file part:
+    if (nextPartNr == 0)
+    {
+        flags |= 1;
+    }
+    // Last file part:
+    else if (isLastPart)
+    {
+        flags |= 8;
+    }
+
+    unsigned int i = getNextSeqNumber();
+    FileTransferMessage *msg = new FileTransferMessage(clientId, i, flags, nextPartNr, (unsigned char *)f->hash, (uint64_t)readCount, (unsigned char *)chunk);
+    sendMessageQueue->pushSendMessage(i, msg);
+
+    client->send(msg);
+    Logger::info("Send file part " + to_string(nextPartNr) + ", length: " + to_string(readCount) + " for file: " + fid);
+    return isLastPart;
 }
 
 void FileClient2::connect()
@@ -143,6 +285,7 @@ void FileClient2::startSendingFS()
     FileClient2State state = getState();
     if (state == connected)
     {
+        printToDo();
         setState(sendingFS);
     }
     else
@@ -291,8 +434,8 @@ void FileClient2::onTimerTick(int identifier)
     case ping:
         sendMessageQueue->clear();
         msgTimeoutCount++;
-        Logger::warn("Ping timeout " + to_string(msgTimeoutCount));
-        if (msgTimeoutCount > 3)
+        Logger::warn("Ping timeout, msgTimeoutCount: " + to_string(msgTimeoutCount));
+        if (msgTimeoutCount < 3)
         {
             Logger::warn("Resending ping");
             sendPingMessage(0, getNextSeqNumber(), uploadClient);
@@ -334,6 +477,9 @@ void FileClient2::onAckMessage(ReadMessage *msg)
     {
         Logger::error("Unable to ACK sequence number: " + to_string(seqNumber) + ". Sequence number was not found!");
     }
+    else{
+        Logger::debug("Acked sequence number: " + to_string(seqNumber));
+    }
 
     switch (getState())
     {
@@ -345,5 +491,40 @@ void FileClient2::onAckMessage(ReadMessage *msg)
         Logger::debug("Pong");
         setState(connected);
         break;
+
+    default:
+        break;
+    }
+}
+
+void FileClient2::printToDo()
+{
+    cout << "ToDo list:" << endl;
+    if (!curWorkingSet)
+    {
+        cout << "Nothing to do!" << endl;
+    }
+    else
+    {
+        cout << "Files: " << curWorkingSet->getFiles()->size() << endl;
+        cout << "Folders: " << curWorkingSet->getFolders()->size() << endl;
+        cout << "Delete files: " << curWorkingSet->getDelFiles()->size() << endl;
+        cout << "Delete folders: " << curWorkingSet->getDelFolders()->size() << endl;
+        cout << "Current file: ";
+        if (curWorkingSet->getCurFilePartNr() >= 0)
+        {
+            cout << "FID: " << curWorkingSet->getCurFile()->first << ", Part: " << curWorkingSet->getCurFilePartNr() << endl;
+        }
+        else
+        {
+            cout << "None" << endl;
+        }
+
+        // Unlock workingset:
+        curWorkingSet->unlockCurFile();
+        curWorkingSet->unlockdelFiles();
+        curWorkingSet->unlockdelFolders();
+        curWorkingSet->unlockFiles();
+        curWorkingSet->unlockFolders();
     }
 }

@@ -86,8 +86,8 @@ void printClientHelp() {
 
 void launchClient(unsigned int port, string host, string dir) {
 	FilesystemClient *fS = new FilesystemClient(dir);
-	FileClient *fC = new FileClient(&host, (unsigned short)port, fS);
-	fC->startSendingFS();
+	FileClient2 *fC = new FileClient2(host, (unsigned short)port, 42, "66--666--999!", fS);
+	fC->connect();
 	
 
 	cout << "Client console type \"stop\" to stop the server or \"help\" for a list of all commands." << endl;
@@ -98,7 +98,7 @@ void launchClient(unsigned int port, string host, string dir) {
 
 		if(!s.compare("stop")) {
 			cout << "Stopping client..." << endl;
-			fC->stopSendingFS();
+			fC->disconnect();
 			fS->close();
 			cout << "Stopped client!" << endl;
 			break;
@@ -107,7 +107,7 @@ void launchClient(unsigned int port, string host, string dir) {
 			printClientHelp();
 		}
 		else if(!s.compare("ping")) {
-			fC->pingServer();
+			// fC->pingServer();
 		}
 		else if(!s.compare("todo")) {
 			fC->printToDo();

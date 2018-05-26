@@ -60,14 +60,14 @@ class WorkingSet
         this->deleteFile.push_back(FID);
         delFileMutex.unlock();
     }
-    
+
     void addFolder(Folder *f)
     {
         foldersMutex.lock();
         this->folders.push_back(f);
         foldersMutex.unlock();
     }
-    
+
     void addFile(std::string FID, File *f)
     {
         filesMutex.lock();
@@ -79,70 +79,75 @@ class WorkingSet
         filesMutex.lock();
         return &this->files;
     }
-    
+
     void unlockFiles()
     {
         filesMutex.unlock();
     }
-    
+
     std::list<Folder *> *getFolders()
     {
         foldersMutex.lock();
         return &this->folders;
     }
-    
+
     void unlockFolders()
     {
         foldersMutex.unlock();
     }
-    
-    std::list<std::string> *getdelFolders()
+
+    std::list<std::string> *getDelFolders()
     {
         delFolderMutex.lock();
         return &deleteFolder;
     }
-    
+
+    bool isEmpty()
+    {
+        return true;
+    }
+
     void unlockdelFolders()
     {
         delFolderMutex.unlock();
     }
-    
-    std::list<std::string> *getdelFiles()
+
+    std::list<std::string> *getDelFiles()
     {
         delFileMutex.lock();
         return &deleteFile;
     }
-    
+
     void unlockdelFiles()
     {
         delFileMutex.unlock();
     }
-    
+
     void setCurFile(std::pair<std::string, File *> *in)
     {
         curFileMutex.lock();
         this->curFile = in;
         curFileMutex.unlock();
     }
-    
+
     std::pair<std::string, File *> *getCurFile()
     {
         curFileMutex.lock();
         return curFile;
     }
-    
+
     void unlockCurFile()
     {
         curFileMutex.unlock();
     }
-    
+
     void setCurFilePartNr(int i)
     {
         curFileParMutex.lock();
         curFilePartNr = i;
         curFileParMutex.unlock();
     }
-    
+
     int getCurFilePartNr()
     {
         curFileParMutex.lock();

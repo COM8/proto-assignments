@@ -1,14 +1,13 @@
 #pragma once
 
-#include <iostream>
-#include <thread>
-#include <unistd.h>
 #include <mutex>
+#include <thread>
+#include <chrono>
+#include <atomic>
 #include "TimerTickable.h"
 #include "Logger.h"
 
 enum TimerState {
-    t_stoped,
     t_stop,
     t_run,
     t_reset,
@@ -17,8 +16,6 @@ enum TimerState {
 class Timer {
 
 public:
-    unsigned int wakeupIntervallMS;
-
     Timer(bool tick, unsigned int intervallMS, TimerTickable *tT, int identifier);
     ~Timer();
 
@@ -29,13 +26,17 @@ public:
 private:
     bool tick;
     unsigned int intervallMS;
-    unsigned int elapsedMS;
     TimerState state;
     std::thread* timerThread;
     TimerTickable *tT;
     int identifier;
     std::mutex *stateMutex;
+    std::timed_mutex mut;
+    std::atomic_bool locked;
 
     void timerTask();
-
+    void lock();
+    void unlock();
+    void sleepFor(const unsigned int ms);
+    void wakeup();
 };

@@ -43,6 +43,7 @@ class FileClient2 : public TimerTickable
     void disconnect();
     void onTimerTick(int identifier);
     FileClient2State getState();
+    void printToDo();
 
   private:
     FileClient2State state;
@@ -67,7 +68,9 @@ class FileClient2 : public TimerTickable
     SendMessageQueue *sendMessageQueue;
     bool reconnect;
     unsigned int msgTimeoutCount;
-	Timer *tTimer;    
+	Timer *tTimer;
+    WorkingSet *curWorkingSet;
+    bool transferFinished;
 
     void setState(FileClient2State state);
     void startSendingFS();
@@ -78,6 +81,11 @@ class FileClient2 : public TimerTickable
     void stopConsumerThread();
     void startConsumerThread();
     void consumerTask();
+    void sendNextFilePart();
+    void sendTransferEndedMessage(unsigned char flags, net::Client *client);
+    void sendFolderCreationMessage(struct Folder *f, net::Client *client);
+    void sendFileCreationMessage(std::string fid, struct File *f, net::Client *client);
+    bool sendFilePartMessage(std::string fid, struct File *f, unsigned int nextPartNr, net::Client *client);
     void sendClientHelloMessage(unsigned short listenPort, net::Client *client, unsigned char flags);
     void sendPingMessage(unsigned int plLength, unsigned int seqNumber, net::Client *client);
     void onServerHelloMessage(net::ReadMessage *msg);

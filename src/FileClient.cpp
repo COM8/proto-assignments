@@ -25,7 +25,6 @@ FileClient::FileClient(std::string *serverAddress, unsigned short serverPort, Fi
 	this->uploadClient = NULL;
 	this->seqNumberMutex = new mutex();
 	this->sendMessageTimer = new Timer(true, 1000, this, ACK_TIMER_IDENT);
-	this->sendMessageTimer->wakeupIntervallMS = 250;
 	this->sendMessageTimer->start();
 	this->pingTimer = new Timer(true, 1000, this, PING_TIMER_IDENT);
 	this->transferFinished = false;
@@ -615,8 +614,8 @@ void FileClient::printToDo()
 	{
 		cout << "Files: " << curWorkingSet->getFiles()->size() << endl;
 		cout << "Folders: " << curWorkingSet->getFolders()->size() << endl;
-		cout << "Delete files: " << curWorkingSet->getdelFiles()->size() << endl;
-		cout << "Delete folders: " << curWorkingSet->getdelFolders()->size() << endl;
+		cout << "Delete files: " << curWorkingSet->getDelFiles()->size() << endl;
+		cout << "Delete folders: " << curWorkingSet->getDelFolders()->size() << endl;
 		cout << "Current file: ";
 		if (curWorkingSet->getCurFilePartNr() >= 0)
 		{
