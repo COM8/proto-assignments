@@ -452,7 +452,7 @@ void FileClient::sendNextFilePart()
 	else
 	{
 		curWorkingSet->unlockFiles();
-		curWorkingSet->unlockdelFolders();
+		curWorkingSet->unlockDelFolders();
 		sendTransferEndedMessage(0b0001, uploadClient);
 		transferFinished = true;
 		cout << "Transfer finished!" << endl;
@@ -628,8 +628,8 @@ void FileClient::printToDo()
 
 		// Unlock workingset:
 		curWorkingSet->unlockCurFile();
-		curWorkingSet->unlockdelFiles();
-		curWorkingSet->unlockdelFolders();
+		curWorkingSet->unlockDelFiles();
+		curWorkingSet->unlockDelFolders();
 		curWorkingSet->unlockFiles();
 		curWorkingSet->unlockFolders();
 	}

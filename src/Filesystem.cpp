@@ -24,7 +24,8 @@ void Filesystem::calcSHA256(const string FID, char *buffer)
 {
 	MD5 m = MD5();
 	ifstream file(FID, ifstream::binary);
-	if(file) {
+	if (file)
+	{
 		file.seekg(0, file.beg);
 		int length = file.tellg();
 		char *b = new char[length];
@@ -34,14 +35,15 @@ void Filesystem::calcSHA256(const string FID, char *buffer)
 		m.finalize();
 		//cout << FID << ": " << m.hexdigest()<< endl;
 		strcpy(buffer, m.hexdigest().c_str());
-	}else {
+	}
+	else
+	{
 		cerr << "error opening " << FID << "for hashing using empty hash" << endl;
 		for (int i = 0; i < 32; i++)
 		{
 			buffer[i] = '\0';
 		}
 	}
-
 }
 
 long unsigned int Filesystem::filesize(const string FID)
@@ -59,6 +61,13 @@ WorkingSet *FilesystemClient::getWorkingSet()
 	list<std::string> deleteFile;
 	list<Folder *> folders;
 	genMap(this->path, &files, &folders, &deleteFile, &deleteFolder);
+
+	// Only add the folder if it contains files:
+	if (!this->files.empty() || !this->folders.empty())
+	{
+		Folder *f = genFolder(path);
+		this->folders.push_back(f);
+	}
 
 	for (Folder *f : this->folders)
 	{
@@ -83,11 +92,6 @@ int FilesystemClient::genMap(string path, unordered_map<std::string, File *> *fi
 {
 	if (Filesystem::exists(path))
 	{
-		// Gethofix to add sync folder to folders list:
-		Folder *f = genFolder(path);
-		folders->push_back(f);
-		this->folders.push_back(f);
-		
 		for (auto const &p : fs::directory_iterator(path))
 		{
 			if (fs::is_directory(p))
@@ -215,7 +219,7 @@ File *Filesystem::genFile(string FID)
 	File *f = new File();
 	f->name = FID;
 	f->size = filesize(FID);
-	char* buffer = new char[32];
+	char *buffer = new char[32];
 	calcSHA256(FID, buffer);
 	f->hash = buffer;
 	return f;
@@ -241,9 +245,11 @@ string FilesystemClient::filesToString()
 	return temp;
 }
 
-string FilesystemClient::foldersToString() {
+string FilesystemClient::foldersToString()
+{
 	string temp = "";
-	for (auto const &ent1 : this->folders) {
+	for (auto const &ent1 : this->folders)
+	{
 		temp = temp + ent1->path + "\n";
 	}
 	return temp;
@@ -441,7 +447,7 @@ int FilesystemServer::writeFilePart(string FID, char *buffer, unsigned int partN
 	if (tmp)
 	{
 		tmp.seekp(partNr * partLength, tmp.beg);
-		tmp.write(buffer, length > partLength ? partLength: length);
+		tmp.write(buffer, length > partLength ? partLength : length);
 		tmp.close();
 		if (this->files[this->path + FID].get()->last_part + 1 == partNr)
 		{
@@ -455,15 +461,17 @@ int FilesystemServer::writeFilePart(string FID, char *buffer, unsigned int partN
 	}
 }
 
-unsigned int FilesystemServer::getLastPart(string FID) {
-	if(this->files[this->path + FID] == 0) {
+unsigned int FilesystemServer::getLastPart(string FID)
+{
+	if (this->files[this->path + FID] == 0)
+	{
 		return 0;
-	}else {
+	}
+	else
+	{
 		return this->files[this->path + FID].get()->last_part;
 	}
-	
 }
-
 
 void FilesystemServer::close()
 {

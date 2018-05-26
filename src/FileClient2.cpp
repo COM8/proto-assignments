@@ -144,8 +144,6 @@ void FileClient2::sendNextFilePart()
     auto delFolders = curWorkingSet->getDelFolders();
     auto delFiles = curWorkingSet->getDelFiles();
 
-    bool repeat = false;
-
     // Continue file transfer:
     int curFilePartNr = curWorkingSet->getCurFilePartNr();
     if (curFilePartNr >= 0)
@@ -201,34 +199,33 @@ void FileClient2::sendNextFilePart()
     }
     else
     {
-        repeat = true;
+        curWorkingSet->unlockFiles();
+        curWorkingSet->unlockFolders();
+        curWorkingSet->unlockDelFiles();
+        curWorkingSet->unlockDelFolders();
+
         if (curWorkingSet->isEmpty())
         {
             delete curWorkingSet;
             curWorkingSet = fS->getWorkingSet();
             if (curWorkingSet->isEmpty())
             {
-                repeat = false;
                 sendTransferEndedMessage(0b0001, uploadClient);
                 transferFinished = true;
                 Logger::info("Transfer finished!");
                 setState(connected);
-            }
-            else {
-                printToDo();
+                return;
             }
         }
-        
+        Logger::warn("111");
+        sendNextFilePart();
+        return;
     }
 
     curWorkingSet->unlockFiles();
     curWorkingSet->unlockFolders();
-    curWorkingSet->unlockdelFiles();
-    curWorkingSet->unlockdelFolders();
-
-    if(repeat) {
-        sendNextFilePart();
-    }
+    curWorkingSet->unlockDelFiles();
+    curWorkingSet->unlockDelFolders();
 }
 
 void FileClient2::sendTransferEndedMessage(unsigned char flags, Client *client)
@@ -485,7 +482,6 @@ void FileClient2::onTimerTick(int identifier)
 
     case awaitingAck:
     {
-        Logger::info("sadsad");
         list<struct SendMessage> *msgs = new list<struct SendMessage>();
         sendMessageQueue->popNotAckedMessages(MAX_ACK_TIME_IN_S, msgs);
 
@@ -498,11 +494,11 @@ void FileClient2::onTimerTick(int identifier)
             else
             {
                 // Resend message:
-                cout << "Resending message!" << endl;
                 uploadClient->send(msg.msg);
                 msg.sendCount++;
                 msg.sendTime = time(NULL);
                 sendMessageQueue->push(msg);
+                Logger::info("Resending message.");
             }
         }
         delete msgs;
@@ -601,8 +597,8 @@ void FileClient2::printToDo()
 
         // Unlock workingset:
         curWorkingSet->unlockCurFile();
-        curWorkingSet->unlockdelFiles();
-        curWorkingSet->unlockdelFolders();
+        curWorkingSet->unlockDelFiles();
+        curWorkingSet->unlockDelFolders();
         curWorkingSet->unlockFiles();
         curWorkingSet->unlockFolders();
     }

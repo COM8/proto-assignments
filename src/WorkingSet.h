@@ -47,19 +47,39 @@ class WorkingSet
         this->deleteFolder = deleteFolder;
     }
 
-    bool isEmpty() {
-        if(!this->files.size() == 0) {
+    bool isEmpty()
+    {
+        filesMutex.lock();
+        if (!this->files.empty())
+        {
+            filesMutex.unlock();
             return false;
         }
-        if(this->folders.size() != 1) {
+        filesMutex.unlock();
+
+        foldersMutex.lock();
+        if (!this->folders.empty())
+        {
+            foldersMutex.unlock();
             return false;
         }
-        if(!this->deleteFile.size() == 0){
+        foldersMutex.unlock();
+
+        delFileMutex.lock();
+        if (!this->deleteFile.empty())
+        {
+            delFileMutex.unlock();
             return false;
         }
-        if(!this->deleteFolder.size() == 0) {
+        delFileMutex.unlock();
+
+        delFolderMutex.lock();
+        if (!this->deleteFolder.empty())
+        {
+            delFolderMutex.unlock();
             return false;
         }
+        delFolderMutex.unlock();
         return true;
     }
 
@@ -118,8 +138,7 @@ class WorkingSet
         return &deleteFolder;
     }
 
-
-    void unlockdelFolders()
+    void unlockDelFolders()
     {
         delFolderMutex.unlock();
     }
@@ -130,7 +149,7 @@ class WorkingSet
         return &deleteFile;
     }
 
-    void unlockdelFiles()
+    void unlockDelFiles()
     {
         delFileMutex.unlock();
     }
