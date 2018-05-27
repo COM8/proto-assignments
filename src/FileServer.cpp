@@ -159,13 +159,17 @@ void FileServer::onFileStatusMessage(ReadMessage *msg)
 	auto c = clients->find(clientId);
 	if (c != clients->end())
 	{
-		unsigned char flags = 0b0010;
-		if (c->second->isCurFIDFolder)
-		{
-			flags |= 0b1000;
-		}
+		uint64_t fidLengt = FileStatusMessage::getFIDLengthFromMessage(msg->buffer);
+		unsigned char *fid = FileStatusMessage::getFIDFromMessage(msg->buffer, fidLengt);
+		string fidString = string((char *)fid, fidLengt);
+		unsigned int lastPart = c->second->fS->getLastPart(fidString);
+		unsigned int seqNumber = FileStatusMessage::getSeqNumberFromMessage(msg->buffer);
 
-		FileStatusMessage *fSMsg = new FileStatusMessage(clientId, c->second->lastFIDPartNumber, flags, c->second->curFIDLength, (unsigned char *)c->second->curFID.c_str());
+		unsigned char recFlags = FileStatusMessage::getFlagsFromMessage(msg->buffer);
+		unsigned char flags = 0b0010;
+		flags |= (recFlags & 0b1000);
+
+		FileStatusMessage *fSMsg = new FileStatusMessage(clientId, seqNumber, lastPart, flags, c->second->curFIDLength, (unsigned char *)c->second->curFID.c_str());
 		c->second->udpClient->send(fSMsg);
 	}
 

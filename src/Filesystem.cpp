@@ -63,9 +63,10 @@ WorkingSet *FilesystemClient::getWorkingSet()
 	genMap(this->path, &files, &folders, &deleteFile, &deleteFolder);
 
 	// Only add the folder if it contains files:
-	if (!this->files.empty() || !this->folders.empty())
+	if (!files.empty() || !folders.empty())
 	{
 		Folder *f = genFolder(path);
+		folders.push_back(f);
 		this->folders.push_back(f);
 	}
 

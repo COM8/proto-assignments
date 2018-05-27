@@ -294,9 +294,9 @@ void FileClient::setState(TransferState state)
 
 void FileClient::sendFileStatusMessage(unsigned char flags, Client *client)
 {
-	FileStatusMessage *msg = new FileStatusMessage(clientId, flags);
+	/*FileStatusMessage *msg = new FileStatusMessage(clientId, flags);
 
-	client->send(msg);
+	client->send(msg);*/
 }
 
 void FileClient::consumerTask()

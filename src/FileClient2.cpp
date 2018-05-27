@@ -193,9 +193,9 @@ void FileClient2::sendNextFilePart()
         curWorkingSet->setCurFilePartNr(0);
 
         auto curFile = curWorkingSet->getCurFile();
-        setState(awaitingAck);
-        sendFileCreationMessage(curFile->first, curFile->second, uploadClient);
         curWorkingSet->unlockCurFile();
+        setState(reqestedFileStatus);
+        sendFileStatusMessage(curFile->first, curFile->second, uploadClient);
     }
     else
     {
@@ -217,7 +217,6 @@ void FileClient2::sendNextFilePart()
                 return;
             }
         }
-        Logger::warn("111");
         sendNextFilePart();
         return;
     }
@@ -274,12 +273,24 @@ void FileClient2::sendFileCreationMessage(string fid, struct File *f, Client *cl
 {
     const char *c = fid.c_str();
     uint64_t l = fid.length();
-    int i = getNextSeqNumber();
+    unsigned int i = getNextSeqNumber();
     FileCreationMessage *msg = new FileCreationMessage(clientId, i, 4, (unsigned char *)f->hash, l, (unsigned char *)c);
     sendMessageQueue->pushSendMessage(i, msg);
 
     client->send(msg);
-    cout << "Send file creation: " << fid << endl;
+    Logger::info("Send file creation: " + fid);
+}
+
+void FileClient2::sendFileStatusMessage(string fid, struct File *f, Client *client)
+{
+    const char *c = fid.c_str();
+    uint64_t l = fid.length();
+    unsigned int i = getNextSeqNumber();
+    FileStatusMessage *msg = new FileStatusMessage(clientId, i, 9, l, (unsigned char *)c);
+    sendMessageQueue->pushSendMessage(i, msg);
+
+    client->send(msg);
+    Logger::info("Requested file status for: " + fid);
 }
 
 bool FileClient2::sendFilePartMessage(string fid, struct File *f, unsigned int nextPartNr, Client *client)
@@ -399,6 +410,55 @@ void FileClient2::stopConsumerThread()
     }
 }
 
+void FileClient2::onFileStatusMessage(net::ReadMessage *msg)
+{
+    if (getState() != reqestedFileStatus)
+    {
+        Logger::error("FileClient2::onFileStatusMessage invalid state: " + to_string(state));
+        return;
+    }
+
+    // Check if checksum is valid:
+    if (!AbstractMessage::isChecksumValid(msg, FileStatusMessage::CHECKSUM_OFFSET_BITS))
+    {
+        return;
+    }
+
+    // Check sequence number:
+    unsigned int seqNumber = FileStatusMessage::getSeqNumberFromMessage(msg->buffer);
+    if (!sendMessageQueue->onSequenceNumberAck(seqNumber))
+    {
+        Logger::error("Invalid sequence number in FileStatusMessage received: " + to_string(seqNumber) + ". Sequence number was not found!");
+        return;
+    }
+    else
+    {
+        Logger::debug("Acked sequence number in FileStatusMessage: " + to_string(seqNumber));
+    }
+
+    // Check flags:
+    unsigned char flags = FileStatusMessage::getFlagsFromMessage(msg->buffer);
+    if((flags & 0b0010) != 0b0010) {
+        Logger::warn("Received invalid flags for FileStatusMessage: " + to_string(flags) + " " + to_string((flags & 0b0010)));
+        return;
+    }
+
+    unsigned int lastFIDPartNumber = FileStatusMessage::getLastFIDPartNumberFromMessage(msg->buffer);
+
+    if (lastFIDPartNumber <= 0)
+    {
+        auto curFile = curWorkingSet->getCurFile();
+        curWorkingSet->unlockCurFile();
+        setState(awaitingAck);
+        sendFileCreationMessage(curFile->first, curFile->second, uploadClient);
+    }
+    else
+    {
+        curWorkingSet->setCurFilePartNr(lastFIDPartNumber);
+        setState(sendingFS);
+    }
+}
+
 void FileClient2::consumerTask()
 {
     Logger::debug("Stopped consumer thread.");
@@ -417,7 +477,7 @@ void FileClient2::consumerTask()
             break;
 
         case 4:
-            // onFileStatusMessage(&msg);
+            onFileStatusMessage(&msg);
             break;
 
         case 5:
@@ -480,6 +540,7 @@ void FileClient2::onTimerTick(int identifier)
         setState(ping);
         break;
 
+    case reqestedFileStatus:
     case awaitingAck:
     {
         list<struct SendMessage> *msgs = new list<struct SendMessage>();
@@ -489,7 +550,10 @@ void FileClient2::onTimerTick(int identifier)
         {
             if (msg.sendCount > MAX_MESSAGE_SEND_TRIES)
             {
-                Logger::error("Failed to send messge " + to_string(MAX_MESSAGE_SEND_TRIES) + " times!");
+                Logger::error("Failed to send messge " + to_string(msg.sendCount) + " times - reconnecting!");
+                disconnect();
+                reconnect = true;
+                connect();
             }
             else
             {
@@ -519,6 +583,7 @@ void FileClient2::onTimerTick(int identifier)
         {
             Logger::error("Server timed out - reconnecting...");
             disconnect();
+            reconnect = true;
             connect();
         }
         break;
@@ -550,6 +615,7 @@ void FileClient2::onAckMessage(ReadMessage *msg)
     if (!sendMessageQueue->onSequenceNumberAck(seqNumber))
     {
         Logger::error("Unable to ACK sequence number: " + to_string(seqNumber) + ". Sequence number was not found!");
+        return;
     }
     else
     {
