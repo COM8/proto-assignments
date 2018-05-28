@@ -36,7 +36,7 @@ server:
 
 debug:
 	mkdir -p $(DEBUG_DIR)
-	${G++_COMPILER} -g src/*.cpp src/net/*.cpp src/lib/zedwood/*.cpp -I src/ -I src/net/ -I src/lib/zedwood/ -o $(DEBUG_DIR)/csync -lstdc++fs -std=c++17 -pthread
+	${G++_COMPILER} -g src/*.cpp src/net/*.cpp src/lib/hash-library/md5.cpp -I src/ -I src/net/ -I src/lib/hash-library/ -o $(DEBUG_DIR)/csync -lstdc++fs -std=c++17 -pthread
 
 release:
 	make compile
@@ -44,7 +44,7 @@ release:
 compile:
 	# Create the build directory if it does not allready exist:
 	mkdir -p $(BUILD_DIR)
-	${G++_COMPILER} src/*.cpp src/net/*.cpp src/lib/zedwood/*.cpp -I src/ -I src/net/ -I src/lib/zedwood/ -o $(BUILD_DIR)/csync -lstdc++fs -std=c++17 -pthread
+	${G++_COMPILER} src/*.cpp src/net/*.cpp src/lib/hash-library/md5.cpp -I src/ -I src/net/ -I src/lib/hash-library/ -o $(BUILD_DIR)/csync -lstdc++fs -std=c++17 -pthread
 
 clean:
 	# Only remove the build folder if it exists:
