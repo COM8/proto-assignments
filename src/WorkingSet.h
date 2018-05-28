@@ -60,7 +60,7 @@ class WorkingSet
     std::unordered_map<std::string, std::shared_ptr<File>> files;
     std::list<std::string> deleteFolder;
     std::list<std::string> deleteFile;
-    std::shared_ptr<std::pair<std::string, std::shared_ptr<File>>> curFile;
+    std::unique_ptr<std::pair<std::string, std::shared_ptr<File>>> curFile;
     int curFilePartNr = -1;
 
   public:
@@ -182,14 +182,21 @@ class WorkingSet
     void setCurFile(std::string FID, std::shared_ptr<File>f)
     {
         curFileMutex.lock();
-        this->curFile = std::make_shared<std::pair<std::string, std::shared_ptr<File>>>(std::pair<std::string, std::shared_ptr<File>>(FID,f));
+        this->curFile = std::make_unique<std::pair<std::string, std::shared_ptr<File>>>(std::pair<std::string, std::shared_ptr<File>>(FID,f));
         curFileMutex.unlock();
     }
 
-    std::shared_ptr<std::pair<std::string, std::shared_ptr<File>>> getCurFile()
-    {
+    std::string getCurFID() {
         curFileMutex.lock();
-        return curFile;
+        std::string temp = this->curFile->first;
+        curFileMutex.unlock();
+        return temp;
+    }
+
+    std::shared_ptr<File> getCurFile() {
+        curFileMutex.lock();
+        std::shared_ptr<File> t = curFile->second;
+        return t;
     }
 
     void unlockCurFile()

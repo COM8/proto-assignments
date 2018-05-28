@@ -150,13 +150,13 @@ void FileClient2::sendNextFilePart()
     {
         auto curFile = curWorkingSet->getCurFile();
         setState(awaitingAck);
-        bool lastPartSend = sendFilePartMessage(curFile->first, curFile->second, curFilePartNr, uploadClient);
+        bool lastPartSend = sendFilePartMessage(curWorkingSet->getCurFID(), curWorkingSet->getCurFile(), curFilePartNr, uploadClient);
 
         curWorkingSet->setCurFilePartNr(++curFilePartNr);
 
         if (lastPartSend)
         {
-            files->erase(curFile->first);
+            files->erase(curWorkingSet->getCurFID());
             curWorkingSet->setCurFilePartNr(-1);
         }
         curWorkingSet->unlockCurFile();
@@ -194,7 +194,7 @@ void FileClient2::sendNextFilePart()
         auto curFile = curWorkingSet->getCurFile();
         curWorkingSet->unlockCurFile();
         setState(reqestedFileStatus);
-        sendFileStatusMessage(curFile->first, curFile->second, uploadClient);
+        sendFileStatusMessage(curWorkingSet->getCurFID(), curWorkingSet->getCurFile(), uploadClient);
     }
     else
     {
@@ -449,7 +449,7 @@ void FileClient2::onFileStatusMessage(net::ReadMessage *msg)
         auto curFile = curWorkingSet->getCurFile();
         curWorkingSet->unlockCurFile();
         setState(awaitingAck);
-        sendFileCreationMessage(curFile->first, curFile->second, uploadClient);
+        sendFileCreationMessage(curWorkingSet->getCurFID(), curWorkingSet->getCurFile(), uploadClient);
     }
     else
     {
@@ -653,7 +653,7 @@ void FileClient2::printToDo()
         cout << "Current file: ";
         if (curWorkingSet->getCurFilePartNr() >= 0)
         {
-            cout << "FID: " << curWorkingSet->getCurFile()->first << ", Part: " << curWorkingSet->getCurFilePartNr() << endl;
+            cout << "FID: " << curWorkingSet->getCurFID() << ", Part: " << curWorkingSet->getCurFilePartNr() << endl;
         }
         else
         {
