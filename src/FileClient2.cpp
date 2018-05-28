@@ -148,9 +148,11 @@ void FileClient2::sendNextFilePart()
     int curFilePartNr = curWorkingSet->getCurFilePartNr();
     if (curFilePartNr >= 0)
     {
-        auto curFile = curWorkingSet->getCurFile();
+        string fid = curWorkingSet->getCurFID();
+        shared_ptr<File> curFile = curWorkingSet->getCurFileFile();
         setState(awaitingAck);
-        bool lastPartSend = sendFilePartMessage(curWorkingSet->getCurFID(), curWorkingSet->getCurFile(), curFilePartNr, uploadClient);
+        bool lastPartSend = sendFilePartMessage(fid, curFile, curFilePartNr, uploadClient);
+        curWorkingSet->unlockCurFile();
 
         curWorkingSet->setCurFilePartNr(++curFilePartNr);
 
@@ -159,7 +161,6 @@ void FileClient2::sendNextFilePart()
             files->erase(curWorkingSet->getCurFID());
             curWorkingSet->setCurFilePartNr(-1);
         }
-        curWorkingSet->unlockCurFile();
     }
     // Delete file:
     else if (!delFiles->empty())
@@ -191,10 +192,11 @@ void FileClient2::sendNextFilePart()
         curWorkingSet->setCurFile(files->begin()->first, files->begin()->second);
         curWorkingSet->setCurFilePartNr(0);
 
-        auto curFile = curWorkingSet->getCurFile();
-        curWorkingSet->unlockCurFile();
+        string fid = curWorkingSet->getCurFID();
+        shared_ptr<File> curFile = curWorkingSet->getCurFileFile();
         setState(reqestedFileStatus);
-        sendFileStatusMessage(curWorkingSet->getCurFID(), curWorkingSet->getCurFile(), uploadClient);
+        sendFileStatusMessage(fid, curFile, uploadClient);
+        curWorkingSet->unlockCurFile();
     }
     else
     {
@@ -268,7 +270,7 @@ void FileClient2::sendFileDeletionMessage(string filePath, Client *client)
     Logger::info("Send file deletion for: \"" + filePath + "\"");
 }
 
-void FileClient2::sendFileCreationMessage(string fid,std::shared_ptr<File> f, Client *client)
+void FileClient2::sendFileCreationMessage(string fid, std::shared_ptr<File> f, Client *client)
 {
     const char *c = fid.c_str();
     uint64_t l = fid.length();
@@ -437,7 +439,8 @@ void FileClient2::onFileStatusMessage(net::ReadMessage *msg)
 
     // Check flags:
     unsigned char flags = FileStatusMessage::getFlagsFromMessage(msg->buffer);
-    if((flags & 0b0010) != 0b0010) {
+    if ((flags & 0b0010) != 0b0010)
+    {
         Logger::warn("Received invalid flags for FileStatusMessage: " + to_string(flags) + " " + to_string((flags & 0b0010)));
         return;
     }
@@ -446,10 +449,11 @@ void FileClient2::onFileStatusMessage(net::ReadMessage *msg)
 
     if (lastFIDPartNumber <= 0)
     {
-        auto curFile = curWorkingSet->getCurFile();
-        curWorkingSet->unlockCurFile();
+        string fid = curWorkingSet->getCurFID();
+        shared_ptr<File> curFile = curWorkingSet->getCurFileFile();
         setState(awaitingAck);
-        sendFileCreationMessage(curWorkingSet->getCurFID(), curWorkingSet->getCurFile(), uploadClient);
+        sendFileCreationMessage(fid, curFile, uploadClient);
+        curWorkingSet->unlockCurFile();
     }
     else
     {

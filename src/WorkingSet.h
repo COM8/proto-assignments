@@ -4,6 +4,7 @@
 #include <fstream>
 #include <mutex>
 #include <memory>
+#include <Logger.h>
 
 #pragma once
 
@@ -193,7 +194,7 @@ class WorkingSet
         return temp;
     }
 
-    std::shared_ptr<File> getCurFile() {
+    std::shared_ptr<File> getCurFileFile() {
         curFileMutex.lock();
         std::shared_ptr<File> t = curFile->second;
         return t;
