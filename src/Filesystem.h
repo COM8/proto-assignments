@@ -20,16 +20,15 @@ struct ServerFile {
     }
     ServerFile() {
     }
-    static std::unique_ptr<ServerFile> genPointer(char *hash, unsigned int last_part) {
-        return std::make_unique<ServerFile>(ServerFile(hash, last_part));
+    static std::unique_ptr<struct ServerFile> genPointer(char *hash, unsigned int last_part) {
+        return std::make_unique<struct ServerFile>(ServerFile(hash, last_part));
     }  
     };
 
 
 class Filesystem {
 protected:
-    static Folder* genFolder(std::string path);
-    static File* genFile(std::string FID);
+    static std::shared_ptr<File> genFile(std::string FID);
 public:
     const unsigned static int partLength = 900;
     static long unsigned int filesize(const std::string FID);
@@ -39,17 +38,17 @@ public:
 
 class FilesystemClient: Filesystem {
 private:
-    std::list<Folder*> folders;
+    std::list<std::shared_ptr<Folder>> folders;
     std::string path;
     bool isInFolders(std::string path);
 
 public:
     FilesystemClient(std::string p);
     static bool exists(std::string path);
-    std::unordered_map <std::string, File*> files;
+    std::unordered_map <std::string, std::shared_ptr<File>> files;
     int genMap();
     int genMap(std::string path);
-    int genMap(std::string path, std::unordered_map <std::string, File*> *files, std::list<Folder*> *folders, std::list<std::string> *deleteFile, std::list<std::string> *deleteFolder);
+    int genMap(std::string path, std::unordered_map <std::string, std::shared_ptr<File>> *files, std::list<std::shared_ptr<Folder>> *folders, std::list<std::string> *deleteFile, std::list<std::string> *deleteFolder);
     int readFile(std::string FID, char *buffer, unsigned int partNr, bool *isLastPart);
     void close();
     WorkingSet* getWorkingSet();

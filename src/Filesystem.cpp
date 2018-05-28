@@ -56,20 +56,19 @@ long unsigned int Filesystem::filesize(const string FID)
 
 WorkingSet *FilesystemClient::getWorkingSet()
 {
-	unordered_map<std::string, File *> files;
-	list<std::string> deleteFolder;
-	list<std::string> deleteFile;
-	list<Folder *> folders;
+	unordered_map<string, shared_ptr<File>> files;
+	list<string> deleteFolder;
+	list<string> deleteFile;
+	list<shared_ptr<Folder>> folders;
 	genMap(this->path, &files, &folders, &deleteFile, &deleteFolder);
 
 	// Only add the folder if it contains files:
 	if (!this->files.empty() || !this->folders.empty())
 	{
-		Folder *f = genFolder(path);
-		this->folders.push_back(f);
+		this->folders.push_back(Folder::genPointer(path));
 	}
 
-	for (Folder *f : this->folders)
+	for (shared_ptr<Folder> f : this->folders)
 	{
 		if (!Filesystem::exists(f->path))
 		{
@@ -88,7 +87,7 @@ WorkingSet *FilesystemClient::getWorkingSet()
 	return new WorkingSet(files, folders, deleteFile, deleteFolder);
 }
 
-int FilesystemClient::genMap(string path, unordered_map<std::string, File *> *files, list<Folder *> *folders, list<std::string> *deleteFile, std::list<std::string> *deleteFolder)
+int FilesystemClient::genMap(string path, unordered_map <string, shared_ptr<File>> *files, list<shared_ptr<Folder>> *folders, list<string> *deleteFile, list<string> *deleteFolder)
 {
 	if (Filesystem::exists(path))
 	{
@@ -98,7 +97,7 @@ int FilesystemClient::genMap(string path, unordered_map<std::string, File *> *fi
 			{
 				if (!isInFolders(p.path().string()))
 				{
-					Folder *f = genFolder(p.path().string());
+					shared_ptr<Folder> f = Folder::genPointer(p.path().string());
 					folders->push_back(f);
 					this->folders.push_back(f);
 				}
@@ -115,14 +114,14 @@ int FilesystemClient::genMap(string path, unordered_map<std::string, File *> *fi
 					{
 						deleteFile->push_back(temp);
 						this->files.erase(temp);
-						File *f = genFile(temp);
+						shared_ptr<File> f = genFile(temp);
 						this->files[temp] = f;
 						(*files)[temp] = f;
 					}
 				}
 				else
 				{
-					File *f = genFile(temp);
+					shared_ptr<File> f = genFile(temp);
 					this->files[temp] = f;
 					(*files)[temp] = f;
 				}
@@ -193,7 +192,7 @@ int FilesystemClient::genMap(string path)
 		{
 			if (fs::is_directory(p))
 			{
-				this->folders.push_back(genFolder(p.path().string()));
+				this->folders.push_back(Folder::genPointer(p.path().string()));
 				genMap(p.path().string());
 			}
 			else
@@ -207,17 +206,10 @@ int FilesystemClient::genMap(string path)
 	return 0;
 }
 
-Folder *Filesystem::genFolder(string path)
-{
-	Folder *f = new Folder();
-	f->path = path;
-	return f;
-}
 
-File *Filesystem::genFile(string FID)
+shared_ptr<File> Filesystem::genFile(string FID)
 {
-	File *f = new File();
-	f->name = FID;
+	shared_ptr<File> f= File::genPointer(FID);
 	f->size = filesize(FID);
 	char *buffer = new char[32];
 	calcSHA256(FID, buffer);
@@ -229,7 +221,7 @@ void FilesystemClient::close()
 {
 	for (auto const &ent1 : this->files)
 	{
-		File *t = ent1.second;
+		shared_ptr<File> t = ent1.second;
 		t->fd.close();
 	}
 }
@@ -239,7 +231,7 @@ string FilesystemClient::filesToString()
 	string temp = "";
 	for (auto const &ent1 : this->files)
 	{
-		File *t = ent1.second;
+		shared_ptr<File> t = ent1.second;
 		temp = temp + ent1.first + ": " + to_string(t->size) + " Bytes" + "\n";
 	}
 	return temp;

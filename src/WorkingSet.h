@@ -1,15 +1,24 @@
-#pragma once
-
 #include <unordered_map>
 #include <list>
 #include <string>
 #include <fstream>
 #include <mutex>
+#include <memory>
+
+#pragma once
 
 struct Folder
 {
     std::string path = "";
     bool isCreated = false;
+    Folder(std::string path) {
+        this->path = path;
+        isCreated = false;
+    }
+    Folder(){}
+    static std::shared_ptr<struct Folder> genPointer(std::string path) {
+        return std::make_shared<struct Folder>(Folder(path));
+    }
 };
 
 struct File
@@ -17,9 +26,25 @@ struct File
     std::string name;
     char *hash = new char[32];
     bool isOpen = false;
-    unsigned int size = 0;
+    unsigned int size;
     std::ifstream fd;
-    unsigned last_part = 0;
+    unsigned last_part;
+    File(std::string name, char *hash, unsigned int size){
+        this->name = name;
+        this->hash = hash;
+        this->size = size;
+    }
+    File(){}
+    File(std::string FID) {
+        this->name = FID;
+
+    }
+    static std::shared_ptr<struct File> genPointer(std::string name, char *hash, unsigned int size) {
+        return std::make_shared<struct File>(File(name, hash, size));
+    }
+    static std::shared_ptr<struct File> genPointer(std::string name) {
+        return std::make_shared<struct File>(File(name));
+    }
 };
 
 class WorkingSet
@@ -31,15 +56,15 @@ class WorkingSet
     std::mutex delFileMutex;
     std::mutex curFileMutex;
     std::mutex curFileParMutex;
-    std::list<Folder *> folders;
-    std::unordered_map<std::string, File *> files;
+    std::list<std::shared_ptr<Folder>> folders;
+    std::unordered_map<std::string, std::shared_ptr<File>> files;
     std::list<std::string> deleteFolder;
     std::list<std::string> deleteFile;
     std::pair<std::string, File *> *curFile;
     int curFilePartNr = -1;
 
   public:
-    WorkingSet(std::unordered_map<std::string, File *> files, std::list<Folder *> folders, std::list<std::string> deleteFile, std::list<std::string> deleteFolder)
+    WorkingSet(std::unordered_map<std::string, std::shared_ptr<File>> files, std::list<std::shared_ptr<Folder>> folders, std::list<std::string> deleteFile, std::list<std::string> deleteFolder)
     {
         this->files = files;
         this->folders = folders;
@@ -97,20 +122,20 @@ class WorkingSet
         delFileMutex.unlock();
     }
 
-    void addFolder(Folder *f)
+    void addFolder(std::shared_ptr<Folder> f)
     {
         foldersMutex.lock();
         this->folders.push_back(f);
         foldersMutex.unlock();
     }
 
-    void addFile(std::string FID, File *f)
+    void addFile(std::string FID, std::shared_ptr<File> f)
     {
         filesMutex.lock();
         this->files[FID] = f;
     }
 
-    std::unordered_map<std::string, File *> *getFiles()
+    std::unordered_map<std::string, std::shared_ptr<File>> *getFiles()
     {
         filesMutex.lock();
         return &this->files;
@@ -121,7 +146,7 @@ class WorkingSet
         filesMutex.unlock();
     }
 
-    std::list<Folder *> *getFolders()
+    std::list<std::shared_ptr<Folder>> *getFolders()
     {
         foldersMutex.lock();
         return &this->folders;
