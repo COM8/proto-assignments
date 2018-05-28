@@ -23,18 +23,17 @@ int FilesystemClient::genMap()
 void Filesystem::calcSHA256(const string FID, char *buffer)
 {
 	MD5 m = MD5();
+	int length = (int) Filesystem::filesize(FID);
 	ifstream file(FID, ifstream::binary);
 	if (file)
 	{
 		file.seekg(0, file.beg);
-		int length = file.tellg();
 		char *b = new char[length];
 		file.read(b, length);
 		file.close();
-		m.update(b, length);
-		m.finalize();
-		//cout << FID << ": " << m.hexdigest()<< endl;
-		strcpy(buffer, m.hexdigest().c_str());
+		m.add(b, length);
+		delete b;
+		strcpy(buffer, m.getHash().c_str());
 	}
 	else
 	{
@@ -235,7 +234,7 @@ string FilesystemClient::filesToString()
 	for (auto const &ent1 : this->files)
 	{
 		shared_ptr<File> t = ent1.second;
-		temp = temp + ent1.first + ": " + to_string(t->size) + " Bytes" + "\n";
+		temp = temp + ent1.first + ": " + to_string(t->size) + " Bytes" + " Hash: " + string(t->hash)+ "\n";
 	}
 	return temp;
 }
