@@ -60,7 +60,7 @@ class WorkingSet
     std::unordered_map<std::string, std::shared_ptr<File>> files;
     std::list<std::string> deleteFolder;
     std::list<std::string> deleteFile;
-    std::pair<std::string, File *> *curFile;
+    std::shared_ptr<std::pair<std::string, std::shared_ptr<File>>> curFile;
     int curFilePartNr = -1;
 
   public:
@@ -179,14 +179,14 @@ class WorkingSet
         delFileMutex.unlock();
     }
 
-    void setCurFile(std::pair<std::string, File *> *in)
+    void setCurFile(std::string FID, std::shared_ptr<File>f)
     {
         curFileMutex.lock();
-        this->curFile = in;
+        this->curFile = std::make_shared<std::pair<std::string, std::shared_ptr<File>>>(std::pair<std::string, std::shared_ptr<File>>(FID,f));
         curFileMutex.unlock();
     }
 
-    std::pair<std::string, File *> *getCurFile()
+    std::shared_ptr<std::pair<std::string, std::shared_ptr<File>>> getCurFile()
     {
         curFileMutex.lock();
         return curFile;

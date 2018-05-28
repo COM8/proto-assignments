@@ -89,12 +89,12 @@ class FileClient2 : public TimerTickable
     void sendFolderDeletionMessage(std::string folder, net::Client *client);
     void sendFileDeletionMessage(std::string file, net::Client *client);
     void sendTransferEndedMessage(unsigned char flags, net::Client *client);
-    void sendFolderCreationMessage(struct Folder *f, net::Client *client);
-    void sendFileCreationMessage(std::string fid, struct File *f, net::Client *client);
-    bool sendFilePartMessage(std::string fid, struct File *f, unsigned int nextPartNr, net::Client *client);
+    void sendFolderCreationMessage(std::shared_ptr<Folder> f, net::Client *client);
+    void sendFileCreationMessage(std::string fid, std::shared_ptr<File> f, net::Client *client);
+    bool sendFilePartMessage(std::string fid, std::shared_ptr<File> f, unsigned int nextPartNr, net::Client *client);
     void sendClientHelloMessage(unsigned short listenPort, net::Client *client, unsigned char flags);
     void sendPingMessage(unsigned int plLength, unsigned int seqNumber, net::Client *client);
-    void sendFileStatusMessage(std::string fid, struct File *f, net::Client *client);
+    void sendFileStatusMessage(std::string fid, std::shared_ptr<File>, net::Client *client);
     void onServerHelloMessage(net::ReadMessage *msg);
     void onFileStatusMessage(net::ReadMessage *msg);
     void onAckMessage(net::ReadMessage *msg);

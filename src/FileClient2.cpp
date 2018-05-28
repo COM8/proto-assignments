@@ -139,10 +139,10 @@ void FileClient2::setState(FileClient2State state)
 
 void FileClient2::sendNextFilePart()
 {
-    auto folders = curWorkingSet->getFolders();
-    auto files = curWorkingSet->getFiles();
-    auto delFolders = curWorkingSet->getDelFolders();
-    auto delFiles = curWorkingSet->getDelFiles();
+    std::list<std::shared_ptr<Folder>> *folders = curWorkingSet->getFolders();
+    std::unordered_map<std::string, std::shared_ptr<File>> *files = curWorkingSet->getFiles();
+    std::list<std::string> *delFolders = curWorkingSet->getDelFolders();
+    std::list<std::string> *delFiles = curWorkingSet->getDelFiles();
 
     // Continue file transfer:
     int curFilePartNr = curWorkingSet->getCurFilePartNr();
@@ -180,7 +180,7 @@ void FileClient2::sendNextFilePart()
     // Trasfer folder:
     else if (!folders->empty())
     {
-        struct Folder *f = folders->front();
+        shared_ptr<Folder> f = folders->front();
         folders->pop_front();
         setState(awaitingAck);
         sendFolderCreationMessage(f, uploadClient);
@@ -188,8 +188,7 @@ void FileClient2::sendNextFilePart()
     // Transfer file:
     else if (!files->empty())
     {
-        pair<string, File *> *nextCurFile = new pair<string, File *>(files->begin()->first, files->begin()->second);
-        curWorkingSet->setCurFile(nextCurFile);
+        curWorkingSet->setCurFile(files->begin()->first, files->begin()->second);
         curWorkingSet->setCurFilePartNr(0);
 
         auto curFile = curWorkingSet->getCurFile();
@@ -233,7 +232,7 @@ void FileClient2::sendTransferEndedMessage(unsigned char flags, Client *client)
     client->send(msg);
 }
 
-void FileClient2::sendFolderCreationMessage(struct Folder *f, Client *client)
+void FileClient2::sendFolderCreationMessage(shared_ptr<Folder> f, Client *client)
 {
     const char *c = f->path.c_str();
     uint64_t l = f->path.length();
@@ -269,7 +268,7 @@ void FileClient2::sendFileDeletionMessage(string filePath, Client *client)
     Logger::info("Send file deletion for: \"" + filePath + "\"");
 }
 
-void FileClient2::sendFileCreationMessage(string fid, struct File *f, Client *client)
+void FileClient2::sendFileCreationMessage(string fid,std::shared_ptr<File> f, Client *client)
 {
     const char *c = fid.c_str();
     uint64_t l = fid.length();
@@ -281,7 +280,7 @@ void FileClient2::sendFileCreationMessage(string fid, struct File *f, Client *cl
     Logger::info("Send file creation: " + fid);
 }
 
-void FileClient2::sendFileStatusMessage(string fid, struct File *f, Client *client)
+void FileClient2::sendFileStatusMessage(string fid, struct std::shared_ptr<File> f, Client *client)
 {
     const char *c = fid.c_str();
     uint64_t l = fid.length();
@@ -293,7 +292,7 @@ void FileClient2::sendFileStatusMessage(string fid, struct File *f, Client *clie
     Logger::info("Requested file status for: " + fid);
 }
 
-bool FileClient2::sendFilePartMessage(string fid, struct File *f, unsigned int nextPartNr, Client *client)
+bool FileClient2::sendFilePartMessage(string fid, shared_ptr<File> f, unsigned int nextPartNr, Client *client)
 {
     char chunk[Filesystem::partLength];
     bool isLastPart = false;
