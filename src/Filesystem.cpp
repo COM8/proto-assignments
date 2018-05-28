@@ -63,9 +63,12 @@ WorkingSet *FilesystemClient::getWorkingSet()
 	genMap(this->path, &files, &folders, &deleteFile, &deleteFolder);
 
 	// Only add the folder if it contains files:
+	// ToDo: Fix me
 	if (!files.empty() || !folders.empty())
 	{
-		this->folders.push_back(Folder::genPointer(path));
+		shared_ptr<Folder> f = Folder::genPointer(path);
+		this->folders.push_back(f);
+		folders.push_back(f);
 	}
 
 	for (shared_ptr<Folder> f : this->folders)
