@@ -86,7 +86,7 @@ void printClientHelp() {
 
 void launchClient(unsigned int port, string host, string dir) {
 	FilesystemClient *fS = new FilesystemClient(dir);
-	FileClient2 *fC = new FileClient2(host, (unsigned short)port, 42, "66--666--999!", fS);
+	FileClient2 *fC = new FileClient2(host, (unsigned short)port, "42", "66--666--999!", fS);
 	fC->connect();
 	
 

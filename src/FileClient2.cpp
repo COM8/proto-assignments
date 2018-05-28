@@ -3,10 +3,12 @@
 using namespace net;
 using namespace std;
 
-FileClient2::FileClient2(string serverAddress, unsigned short serverPort, unsigned int clientId, string clientPassword, FilesystemClient *fS)
+FileClient2::FileClient2(string serverAddress, unsigned short serverPort, string userName, string clientPassword, FilesystemClient *fS)
 {
     this->serverAddress = serverAddress;
     this->serverPort = serverPort;
+    this->userName = userName;
+    this->clientPassword = clientPassword;
     this->fS = fS;
 
     srand(time(NULL));
@@ -27,11 +29,10 @@ FileClient2::FileClient2(string serverAddress, unsigned short serverPort, unsign
     this->reconnect = false;
     this->msgTimeoutCount = 0;
     this->uploadPort = 0;
-    this->tTimer = new Timer(true, TIMER_TICK_INTERVALL_MS, this, 1);
-    this->clientId = clientId;
-    this->clientPassword = clientPassword;
-    this->curWorkingSet = fS->getWorkingSet();
     this->transferFinished = false;
+    this->tTimer = new Timer(true, TIMER_TICK_INTERVALL_MS, this, 1);
+    this->curWorkingSet = fS->getWorkingSet();
+    this->clientId = getRandomClientId();
 }
 
 FileClient2::~FileClient2()
@@ -46,6 +47,11 @@ FileClient2::~FileClient2()
     delete sendMessageQueue;
     delete curWorkingSet;
     delete tTimer;
+}
+
+unsigned int FileClient2::getRandomClientId()
+{
+    return rand();
 }
 
 unsigned int FileClient2::getNextSeqNumber()
@@ -512,8 +518,25 @@ void FileClient2::onServerHelloMessage(ReadMessage *msg)
         unsigned char flags = ServerHelloMessage::getFlagsFromMessage(msg->buffer);
         if ((flags & 0b0001) != 1)
         {
-            Logger::error("Client not accepted: " + to_string(flags));
-            setState(disconnected);
+            if ((flags & 0b0100) == 0b0100)
+            {
+                unsigned int recClientId = ServerHelloMessage::getClientIdFromMessage(msg->buffer);
+                if (recClientId == clientId)
+                {
+                    Logger::warn("Client ID " + to_string(clientId) + " already taken. Changing ID");
+                    clientId = getRandomClientId();
+                    Logger::info("Changed client ID to: " + to_string(clientId));
+                }
+                else
+                {
+                    Logger::debug("Dropped ServerHelloMessage with invalid client ID.");
+                }
+            }
+            else
+            {
+                Logger::error("Client not accepted: " + to_string(flags));
+                setState(disconnected);
+            }
             return;
         }
 

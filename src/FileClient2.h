@@ -40,7 +40,7 @@ enum FileClient2State
 class FileClient2 : public TimerTickable
 {
   public:
-    FileClient2(std::string serverAddress, unsigned short serverPort, unsigned int clientId, std::string clientPassword, FilesystemClient *fS);
+    FileClient2(std::string serverAddress, unsigned short serverPort, std::string userName, std::string clientPassword, FilesystemClient *fS);
     ~FileClient2();
 
     void connect();
@@ -65,6 +65,7 @@ class FileClient2 : public TimerTickable
     bool shouldConsumerRun;
     unsigned int clientId;
     std::string clientPassword;
+    std::string userName;
     net::Client *client;
     net::Client *uploadClient;
     net::Server *server;
@@ -78,6 +79,7 @@ class FileClient2 : public TimerTickable
 
     void setState(FileClient2State state);
     void startSendingFS();
+    unsigned int getRandomClientId();
     unsigned int getNextSeqNumber();
     void startHelloThread();
     void stopHelloThread();
