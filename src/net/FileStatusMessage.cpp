@@ -3,28 +3,32 @@
 using namespace net;
 using namespace std;
 
-FileStatusMessage::FileStatusMessage(unsigned int clientId, unsigned int lastFIDPartNumber, unsigned char flags, uint64_t fIDLength, unsigned char *fID) : AbstractMessage(4 << 4)
+FileStatusMessage::FileStatusMessage(unsigned int clientId, unsigned int seqNumber, unsigned int lastFIDPartNumber, unsigned char flags, uint64_t fIDLength, unsigned char *fID) : AbstractMessage(4 << 4)
 {
 	this->clientId = clientId;
 	this->lastFIDPartNumber = lastFIDPartNumber;
 	this->flags = flags;
 	this->fIDLength = fIDLength;
 	this->fID = fID;
+	this->seqNumber = seqNumber;
 }
 
-FileStatusMessage::FileStatusMessage(unsigned int clientId, unsigned char flags)
+FileStatusMessage::FileStatusMessage(unsigned int clientId, unsigned int seqNumber, unsigned char flags, uint64_t fIDLength, unsigned char *fID)
 {
 	this->clientId = clientId;
 	this->flags = flags;
+	this->fIDLength = fIDLength;
+	this->fID = fID;
+	this->seqNumber = seqNumber;
 }
 
 void FileStatusMessage::createBuffer(struct Message *msg)
 {
-	msg->buffer = new unsigned char[53 + fIDLength]{};
-	msg->bufferLength = 53 + fIDLength;
+	msg->buffer = new unsigned char[25 + fIDLength]{};
+	msg->bufferLength = 25 + fIDLength;
 
 	// Add type:
-	msg->buffer[0] |= type;
+	msg->buffer[0] |= (4 << 4);
 
 	// Add flags:
 	msg->buffer[0] |= flags;
@@ -32,20 +36,28 @@ void FileStatusMessage::createBuffer(struct Message *msg)
 	// Add client id:
 	setBufferUnsignedInt(msg, clientId, 8);
 
+	// Add sequence number:
+	setBufferUnsignedInt(msg, seqNumber, 40);
+
 	if ((flags & 0b0010) == 0b0010)
 	{
 		// Add last FID part number:
-		setBufferUnsignedInt(msg, lastFIDPartNumber, 40);
-
-		// Add content length:
-		setBufferUint64_t(msg, fIDLength, 104);
-
-		// Add content:
-		setBufferValue(msg, fID, fIDLength, 168);
+		setBufferUnsignedInt(msg, lastFIDPartNumber, 72);
 	}
+
+	// Add FID length:
+	setBufferUint64_t(msg, fIDLength, 136);
+
+	// Add FID:
+	setBufferValue(msg, fID, fIDLength, 200);
 
 	// Add checksum:
 	addChecksum(msg, CHECKSUM_OFFSET_BITS);
+}
+
+unsigned int FileStatusMessage::getSeqNumberFromMessage(unsigned char *buffer)
+{
+	return getUnsignedIntFromMessage(buffer, 40);
 }
 
 unsigned int FileStatusMessage::getClientIdFromMessage(unsigned char *buffer)
@@ -55,7 +67,7 @@ unsigned int FileStatusMessage::getClientIdFromMessage(unsigned char *buffer)
 
 unsigned int FileStatusMessage::getLastFIDPartNumberFromMessage(unsigned char *buffer)
 {
-	return getUnsignedIntFromMessage(buffer, 40);
+	return getUnsignedIntFromMessage(buffer, 72);
 }
 
 unsigned char FileStatusMessage::getFlagsFromMessage(unsigned char *buffer)
@@ -65,10 +77,10 @@ unsigned char FileStatusMessage::getFlagsFromMessage(unsigned char *buffer)
 
 uint64_t FileStatusMessage::getFIDLengthFromMessage(unsigned char *buffer)
 {
-	return getUnsignedInt64FromMessage(buffer, 104);
+	return getUnsignedInt64FromMessage(buffer, 136);
 }
 
 unsigned char *FileStatusMessage::getFIDFromMessage(unsigned char *buffer, uint64_t fIDLength)
 {
-	return getBytesWithOffset(buffer, 168, fIDLength * 8);
+	return getBytesWithOffset(buffer, 200, fIDLength * 8);
 }
