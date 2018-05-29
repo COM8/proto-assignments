@@ -250,7 +250,7 @@ void FileClient2::sendFolderCreationMessage(shared_ptr<Folder> f, Client *client
     uint64_t l = f->path.length();
     int i = getNextSeqNumber();
     FileCreationMessage *msg = new FileCreationMessage(clientId, i, 1, NULL, l, (unsigned char *)c);
-    sendMessageQueue->pushSendMessage(i, msg);
+    sendMessageQueue->pushSendMessage(i, *msg);
 
     client->send(msg);
     delete msg;
@@ -263,7 +263,7 @@ void FileClient2::sendFolderDeletionMessage(string folderPath, Client *client)
     uint64_t l = folderPath.length();
     int i = getNextSeqNumber();
     FileCreationMessage *msg = new FileCreationMessage(clientId, i, 2, NULL, l, (unsigned char *)c);
-    sendMessageQueue->pushSendMessage(i, msg);
+    sendMessageQueue->pushSendMessage(i, *msg);
 
     client->send(msg);
     delete msg;
@@ -276,7 +276,7 @@ void FileClient2::sendFileDeletionMessage(string filePath, Client *client)
     uint64_t l = filePath.length();
     int i = getNextSeqNumber();
     FileCreationMessage *msg = new FileCreationMessage(clientId, i, 8, NULL, l, (unsigned char *)c);
-    sendMessageQueue->pushSendMessage(i, msg);
+    sendMessageQueue->pushSendMessage(i, *msg);
 
     client->send(msg);
     delete msg;
@@ -289,7 +289,7 @@ void FileClient2::sendFileCreationMessage(string fid, std::shared_ptr<File> f, C
     uint64_t l = fid.length();
     unsigned int i = getNextSeqNumber();
     FileCreationMessage *msg = new FileCreationMessage(clientId, i, 4, (unsigned char *)f->hash.get()->data(), l, (unsigned char *)c);
-    sendMessageQueue->pushSendMessage(i, msg);
+    sendMessageQueue->pushSendMessage(i, *msg);
 
     client->send(msg);
     delete msg;
@@ -302,7 +302,7 @@ void FileClient2::sendFileStatusMessage(string fid, struct std::shared_ptr<File>
     uint64_t l = fid.length();
     unsigned int i = getNextSeqNumber();
     FileStatusMessage *msg = new FileStatusMessage(clientId, i, 9, l, (unsigned char *)c);
-    sendMessageQueue->pushSendMessage(i, msg);
+    sendMessageQueue->pushSendMessage(i, *msg);
 
     client->send(msg);
     delete msg;
@@ -331,7 +331,7 @@ bool FileClient2::sendFilePartMessage(string fid, shared_ptr<File> f, unsigned i
 
     unsigned int i = getNextSeqNumber();
     FileTransferMessage *msg = new FileTransferMessage(clientId, i, flags, nextPartNr, (unsigned char *)f->hash.get()->data(), (uint64_t)readCount, (unsigned char *)chunk);
-    sendMessageQueue->pushSendMessage(i, msg);
+    sendMessageQueue->pushSendMessage(i, *msg);
 
     client->send(msg);
     delete msg;
@@ -603,7 +603,7 @@ void FileClient2::onTimerTick(int identifier)
             else
             {
                 // Resend message:
-                uploadClient->send(msg.msg);
+                uploadClient->send(&msg.msg);
                 msg.sendCount++;
                 msg.sendTime = time(NULL);
                 sendMessageQueue->push(msg);
@@ -641,7 +641,7 @@ void FileClient2::onTimerTick(int identifier)
 void FileClient2::sendPingMessage(unsigned int plLength, unsigned int seqNumber, Client *client)
 {
     PingMessage *msg = new PingMessage(plLength, seqNumber, clientId);
-    sendMessageQueue->pushSendMessage(seqNumber, msg);
+    sendMessageQueue->pushSendMessage(seqNumber, *msg);
 
     client->send(msg);
     delete msg;
