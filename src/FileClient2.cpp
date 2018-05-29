@@ -38,6 +38,9 @@ FileClient2::FileClient2(string serverAddress, unsigned short serverPort, string
 FileClient2::~FileClient2()
 {
     stopHelloThread();
+    stopConsumerThread();
+    tTimer->stop();
+
     delete stateMutex;
     delete seqNumberMutex;
     delete client;
@@ -238,6 +241,7 @@ void FileClient2::sendTransferEndedMessage(unsigned char flags, Client *client)
 {
     TransferEndedMessage *msg = new TransferEndedMessage(clientId, flags);
     client->send(msg);
+    delete msg;
 }
 
 void FileClient2::sendFolderCreationMessage(shared_ptr<Folder> f, Client *client)
@@ -249,6 +253,7 @@ void FileClient2::sendFolderCreationMessage(shared_ptr<Folder> f, Client *client
     sendMessageQueue->pushSendMessage(i, msg);
 
     client->send(msg);
+    delete msg;
     Logger::info("Send folder creation for: \"" + f->path + "\"");
 }
 
@@ -261,6 +266,7 @@ void FileClient2::sendFolderDeletionMessage(string folderPath, Client *client)
     sendMessageQueue->pushSendMessage(i, msg);
 
     client->send(msg);
+    delete msg;
     Logger::info("Send folder deletion for: \"" + folderPath + "\"");
 }
 
@@ -273,6 +279,7 @@ void FileClient2::sendFileDeletionMessage(string filePath, Client *client)
     sendMessageQueue->pushSendMessage(i, msg);
 
     client->send(msg);
+    delete msg;
     Logger::info("Send file deletion for: \"" + filePath + "\"");
 }
 
@@ -285,6 +292,7 @@ void FileClient2::sendFileCreationMessage(string fid, std::shared_ptr<File> f, C
     sendMessageQueue->pushSendMessage(i, msg);
 
     client->send(msg);
+    delete msg;
     Logger::info("Send file creation: " + fid);
 }
 
@@ -297,6 +305,7 @@ void FileClient2::sendFileStatusMessage(string fid, struct std::shared_ptr<File>
     sendMessageQueue->pushSendMessage(i, msg);
 
     client->send(msg);
+    delete msg;
     Logger::info("Requested file status for: " + fid);
 }
 
@@ -325,6 +334,7 @@ bool FileClient2::sendFilePartMessage(string fid, shared_ptr<File> f, unsigned i
     sendMessageQueue->pushSendMessage(i, msg);
 
     client->send(msg);
+    delete msg;
     Logger::info("Send file part " + to_string(nextPartNr) + ", length: " + to_string(readCount) + " for file: " + fid);
     return isLastPart;
 }
@@ -373,6 +383,9 @@ void FileClient2::stopHelloThread()
     if (helloThread && helloThread->joinable() && helloThread->get_id() != this_thread::get_id())
     {
         helloThread->join();
+    }
+
+    if(helloThread) {
         delete helloThread;
     }
 }
@@ -397,6 +410,7 @@ void FileClient2::sendClientHelloMessage(unsigned short listenPort, Client *clie
 {
     ClientHelloMessage *msg = new ClientHelloMessage(listenPort, clientId, flags);
     client->send(msg);
+    delete msg;
 }
 
 void FileClient2::startConsumerThread()
@@ -414,6 +428,11 @@ void FileClient2::stopConsumerThread()
         msg->msgType = 0xff;
         cpQueue->push(*msg); // Push dummy message to wake the consumer up
         consumerThread->join();
+        delete msg;
+    }
+
+    if(consumerThread) {
+        delete consumerThread;
     }
 }
 
