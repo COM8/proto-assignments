@@ -17,14 +17,34 @@ runClient:
 runServer:
 	./$(DEBUG_DIR)/csync -s -p 1234
 
+runDebugServer:
+	gdb --args ./$(DEBUG_DIR)/csync "-s" "-p" "1234"
+
+runDebugClient:
+	gdb --args ./$(DEBUG_DIR)/csync "-h" "localhost" "-p" "1234" "-f" "$(DEBUG_DIR)"
+
+runMassifClient:
+	valgrind --tool=massif$(DEBUG_DIR)/csync "-s" "-p" "1234"
+
+runMassifServer:
+	valgrind --tool=massif $(DEBUG_DIR)/csync "-h" "localhost" "-p" "1234" "-f" "$(DEBUG_DIR)"
+
+MassifClient:
+	make default
+	make runMassifClient
+
+MassifServer:
+	make default
+	make runMassifServer
+
 debugServer:
 	make default
-	gdb --args ./$(DEBUG_DIR)/csync "-s" "-p" "1234"
+	make runDebugServer
 
 debugClient:
 	make default
-	gdb --args ./$(DEBUG_DIR)/csync "-h" "localhost" "-p" "1234" "-f" "$(DEBUG_DIR)"
-	
+	make runDebugClient	
+
 client:
 	make default
 	make runClient

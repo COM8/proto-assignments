@@ -393,3 +393,5 @@ sync/
 .sublime-project
 PD-ASS-1.sublime-project
 PD-ASS-1.sublime-workspace
+massif.out.[1234567890]*
+compile_commands.json
