@@ -18,12 +18,11 @@ runServer:
 	./$(DEBUG_DIR)/csync -s -p 1234
 
 debugServer:
-	make clean
-	make debug
+	make default
 	gdb --args ./$(DEBUG_DIR)/csync "-s" "-p" "1234"
 
 debugClient:
-	make debug
+	make default
 	gdb --args ./$(DEBUG_DIR)/csync "-h" "localhost" "-p" "1234" "-f" "$(DEBUG_DIR)"
 	
 client:
