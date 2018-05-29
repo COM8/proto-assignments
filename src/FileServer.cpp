@@ -136,6 +136,8 @@ void FileServer::consumerTask()
 			cerr << "Unknown message type received: " << msg.msgType << endl;
 			break;
 		}
+		
+		delete[] msg.buffer;
 	}
 }
 
@@ -171,6 +173,8 @@ void FileServer::onFileStatusMessage(ReadMessage *msg)
 
 		FileStatusMessage *fSMsg = new FileStatusMessage(clientId, seqNumber, lastPart, flags, c->second->curFIDLength, (unsigned char *)c->second->curFID.c_str());
 		c->second->udpClient->send(fSMsg);
+
+		delete[] fid;
 	}
 
 	mlock.unlock();
@@ -201,7 +205,7 @@ void FileServer::onFileCreationMessage(ReadMessage *msg)
 		unsigned char fileType = FileCreationMessage::getFileTypeFromMessage(msg->buffer);
 		uint64_t fidLengt = FileCreationMessage::getFIDLengthFromMessage(msg->buffer);
 		unsigned char *fid = FileCreationMessage::getFIDFromMessage(msg->buffer, fidLengt);
-		unsigned char *hash;
+		unsigned char *hash = FileCreationMessage::getFileHashFromMessage(msg->buffer);
 		string fidString = string((char *)fid, fidLengt);
 		switch (fileType)
 		{
@@ -230,6 +234,8 @@ void FileServer::onFileCreationMessage(ReadMessage *msg)
 			cerr << "Unknown fileType received: " << fileType << endl;
 			break;
 		}
+		delete[] fid;
+		delete[] hash;
 	}
 	mlock.unlock();
 }
@@ -268,6 +274,7 @@ void FileServer::onFileTransferMessage(ReadMessage *msg)
 			{
 				cout << "Last filepart recieved: " << fCC->curFID << endl;
 			}
+			delete[] content;
 		}
 		else
 		{

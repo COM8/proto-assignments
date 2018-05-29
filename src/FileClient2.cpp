@@ -520,6 +520,8 @@ void FileClient2::consumerTask()
             Logger::warn("Unknown message type received: " + to_string(msg.msgType));
             break;
         }
+
+        delete[] msg.buffer;
     }
     Logger::debug("Stopend consumer thread.");
 }
