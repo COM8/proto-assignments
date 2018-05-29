@@ -136,8 +136,6 @@ void FileServer::consumerTask()
 			cerr << "Unknown message type received: " << msg.msgType << endl;
 			break;
 		}
-		
-		delete[] msg.buffer;
 	}
 }
 
