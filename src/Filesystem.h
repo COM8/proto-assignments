@@ -10,6 +10,9 @@
 
 #pragma once
 
+#define HASHPARTSIZE 16777216
+#define PARTLENGTH 900
+
 
 struct ServerFile {
     char *hash = new char[32];
@@ -30,7 +33,7 @@ class Filesystem {
 protected:
     static std::shared_ptr<File> genFile(std::string FID);
 public:
-    const unsigned static int partLength = 900;
+    const unsigned static int partLength = PARTLENGTH;
     static long unsigned int filesize(const std::string FID);
     static void calcSHA256(const std::string FID, char* buffer);
     static bool exists(std::string path);

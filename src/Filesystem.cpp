@@ -28,10 +28,16 @@ void Filesystem::calcSHA256(const string FID, char *buffer)
 	if (file)
 	{
 		file.seekg(0, file.beg);
-		char *b = new char[length];
-		file.read(b, length);
+		char *b = new char[HASHPARTSIZE];
+		int curPart = 0;
+		while(length >= (curPart+1)*HASHPARTSIZE) {
+			file.seekg(curPart++*HASHPARTSIZE, file.beg);
+			file.read(b, HASHPARTSIZE);
+			m.add(b,HASHPARTSIZE);
+			}
+		file.read(b, length%HASHPARTSIZE);
+		m.add(b,length%HASHPARTSIZE);
 		file.close();
-		m.add(b, length);
 		delete b;
 		strcpy(buffer, m.getHash().c_str());
 	}
