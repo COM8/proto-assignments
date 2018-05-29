@@ -26,6 +26,7 @@ void Filesystem::calcSHA256(const string FID, shared_ptr<array<char,32>> buffer)
 //toDo
 void Filesystem::calcSHA256(const string FID, char* buffer)
 {
+	Logger::debug("Caluclating md5 of "+ FID);
 	MD5 m = MD5();
 	int length = (int) Filesystem::filesize(FID);
 	ifstream file(FID, ifstream::binary);
