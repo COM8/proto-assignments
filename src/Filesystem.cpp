@@ -298,9 +298,8 @@ void FilesystemServer::readFileFile()
 		tmp.read(name, l);
 		tmp.read(length, 4);
 		int last_part = charToInt(length);
-		char *hash = new char[32];
-		tmp.read(hash, 32);
-		this->files[string(name)] = ServerFile::genPointer(hash, last_part);
+		this->files[string(name)] = ServerFile::genPointer(last_part);
+		tmp.read(this->files[string(name)]->hash.get()->data(), 32);
 		currPosition += l + 40;
 	}
 	tmp.close();
@@ -343,7 +342,7 @@ void FilesystemServer::saveFileFile()
 		tmp.write(intToArray(ent1.first.length()), 4);
 		tmp.write(ent1.first.c_str(), ent1.first.length());
 		tmp.write(intToArray(ent1.second.get()->last_part), 4);
-		tmp.write(ent1.second.get()->hash, 32);
+		tmp.write(ent1.second.get()->hash.get()->data(), 32);
 	}
 	tmp.close();
 }

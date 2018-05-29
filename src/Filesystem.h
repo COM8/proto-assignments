@@ -15,17 +15,23 @@
 
 
 struct ServerFile {
-    char *hash = new char[32];
+    std::shared_ptr<std::array<char,32>> hash = std::make_shared<std::array<char,32>>();
     unsigned int last_part = 0;
-    ServerFile(char *hash, unsigned int last_part) {
-        this->hash = hash;
+    ServerFile(unsigned int last_part) {
         this->last_part = last_part;
+    }
+    ServerFile(char* hash, unsigned int last_part) {
+        this->last_part = last_part;
+        strcpy(this->hash->data(), hash);
     }
     ServerFile() {
     }
-    static std::unique_ptr<struct ServerFile> genPointer(char *hash, unsigned int last_part) {
+    static std::unique_ptr<struct ServerFile> genPointer(unsigned int last_part) {
+        return std::make_unique<struct ServerFile>(ServerFile(last_part));
+    }
+    static std::unique_ptr<struct ServerFile> genPointer(char* hash, unsigned int last_part) {
         return std::make_unique<struct ServerFile>(ServerFile(hash, last_part));
-    }  
+    }
     };
 
 
