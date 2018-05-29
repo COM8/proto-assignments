@@ -25,12 +25,12 @@ struct Folder
 struct File
 {
     std::string name;
-    char *hash = new char[32];
+    std::shared_ptr<std::array<char,32>> hash = std::make_shared<std::array<char,32>>(); 
     bool isOpen = false;
     unsigned int size;
     std::ifstream fd;
     unsigned last_part;
-    File(std::string name, char *hash, unsigned int size){
+    File(std::string name, unsigned int size){
         this->name = name;
         this->hash = hash;
         this->size = size;
@@ -40,8 +40,8 @@ struct File
         this->name = FID;
 
     }
-    static std::shared_ptr<struct File> genPointer(std::string name, char *hash, unsigned int size) {
-        return std::make_shared<struct File>(File(name, hash, size));
+    static std::shared_ptr<struct File> genPointer(std::string name, unsigned int size) {
+        return std::make_shared<struct File>(File(name, size));
     }
     static std::shared_ptr<struct File> genPointer(std::string name) {
         return std::make_shared<struct File>(File(name));

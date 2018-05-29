@@ -281,7 +281,7 @@ void FileClient2::sendFileCreationMessage(string fid, std::shared_ptr<File> f, C
     const char *c = fid.c_str();
     uint64_t l = fid.length();
     unsigned int i = getNextSeqNumber();
-    FileCreationMessage *msg = new FileCreationMessage(clientId, i, 4, (unsigned char *)f->hash, l, (unsigned char *)c);
+    FileCreationMessage *msg = new FileCreationMessage(clientId, i, 4, (unsigned char *)f->hash.get()->data(), l, (unsigned char *)c);
     sendMessageQueue->pushSendMessage(i, msg);
 
     client->send(msg);
@@ -321,7 +321,7 @@ bool FileClient2::sendFilePartMessage(string fid, shared_ptr<File> f, unsigned i
     }
 
     unsigned int i = getNextSeqNumber();
-    FileTransferMessage *msg = new FileTransferMessage(clientId, i, flags, nextPartNr, (unsigned char *)f->hash, (uint64_t)readCount, (unsigned char *)chunk);
+    FileTransferMessage *msg = new FileTransferMessage(clientId, i, flags, nextPartNr, (unsigned char *)f->hash.get()->data(), (uint64_t)readCount, (unsigned char *)chunk);
     sendMessageQueue->pushSendMessage(i, msg);
 
     client->send(msg);

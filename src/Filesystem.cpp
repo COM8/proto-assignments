@@ -19,8 +19,12 @@ int FilesystemClient::genMap()
 	return genMap(this->path);
 }
 
+void Filesystem::calcSHA256(const string FID, shared_ptr<array<char,32>> buffer) {
+	calcSHA256(FID, buffer.get()->data());
+	}
+
 //toDo
-void Filesystem::calcSHA256(const string FID, char *buffer)
+void Filesystem::calcSHA256(const string FID, char* buffer)
 {
 	MD5 m = MD5();
 	int length = (int) Filesystem::filesize(FID);
@@ -38,7 +42,7 @@ void Filesystem::calcSHA256(const string FID, char *buffer)
 		file.read(b, length%HASHPARTSIZE);
 		m.add(b,length%HASHPARTSIZE);
 		file.close();
-		delete b;
+		delete[] b;
 		strcpy(buffer, m.getHash().c_str());
 	}
 	else
@@ -118,7 +122,7 @@ int FilesystemClient::genMap(string path, unordered_map <string, shared_ptr<File
 				{
 					char *hash = new char[32];
 					calcSHA256(temp, hash);
-					if (strcmp(this->files[temp]->hash, hash) == 1)
+					if (strcmp(this->files[temp]->hash->data(), hash) == 1)
 					{
 						deleteFile->push_back(temp);
 						this->files.erase(temp);
@@ -126,6 +130,7 @@ int FilesystemClient::genMap(string path, unordered_map <string, shared_ptr<File
 						this->files[temp] = f;
 						(*files)[temp] = f;
 					}
+					delete hash;
 				}
 				else
 				{
@@ -219,9 +224,7 @@ shared_ptr<File> Filesystem::genFile(string FID)
 {
 	shared_ptr<File> f= File::genPointer(FID);
 	f->size = filesize(FID);
-	char *buffer = new char[32];
-	calcSHA256(FID, buffer);
-	f->hash = buffer;
+	calcSHA256(FID, f->hash);
 	return f;
 }
 
@@ -240,7 +243,7 @@ string FilesystemClient::filesToString()
 	for (auto const &ent1 : this->files)
 	{
 		shared_ptr<File> t = ent1.second;
-		temp = temp + ent1.first + ": " + to_string(t->size) + " Bytes" + " Hash: " + string(t->hash)+ "\n";
+		temp = temp + ent1.first + ": " + to_string(t->size) + " Bytes" + " Hash: " + string(t->hash.get()->data())+ "\n";
 	}
 	return temp;
 }

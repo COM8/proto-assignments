@@ -35,6 +35,7 @@ protected:
 public:
     const unsigned static int partLength = PARTLENGTH;
     static long unsigned int filesize(const std::string FID);
+    static void calcSHA256(const std::string FID, std::shared_ptr<std::array<char,32>> buffer);
     static void calcSHA256(const std::string FID, char* buffer);
     static bool exists(std::string path);
     };
