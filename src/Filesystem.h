@@ -7,6 +7,7 @@
 #include <cstring>
 #include <WorkingSet.h>
 #include <lib/hash-library/md5.h>
+#include <Logger.h>
 
 #pragma once
 
