@@ -37,6 +37,7 @@ FileClient2::FileClient2(string serverAddress, unsigned short serverPort, string
 
 FileClient2::~FileClient2()
 {
+    disconnect();
     stopHelloThread();
     stopConsumerThread();
     tTimer->stop();
@@ -373,6 +374,10 @@ void FileClient2::startSendingFS()
 
 void FileClient2::startHelloThread()
 {
+    if(helloThread) {
+        stopHelloThread();
+    }
+
     shouldHelloRun = true;
     helloThread = new thread(&FileClient2::helloTask, this, listenPort, reconnect, client);
 }
@@ -387,6 +392,7 @@ void FileClient2::stopHelloThread()
 
     if(helloThread) {
         delete helloThread;
+        helloThread = NULL;
     }
 }
 
@@ -415,6 +421,10 @@ void FileClient2::sendClientHelloMessage(unsigned short listenPort, Client *clie
 
 void FileClient2::startConsumerThread()
 {
+    if(consumerThread) {
+        stopConsumerThread();
+    }
+
     shouldConsumerRun = true;
     consumerThread = new thread(&FileClient2::consumerTask, this);
 }
@@ -424,15 +434,15 @@ void FileClient2::stopConsumerThread()
     shouldConsumerRun = false;
     if (consumerThread && consumerThread->joinable() && consumerThread->get_id() != this_thread::get_id())
     {
-        ReadMessage *msg = new ReadMessage();
-        msg->msgType = 0xff;
-        cpQueue->push(*msg); // Push dummy message to wake the consumer up
+        ReadMessage msg = ReadMessage();
+        msg.msgType = 0xff;
+        cpQueue->push(msg); // Push dummy message to wake up the consumer thread
         consumerThread->join();
-        delete msg;
     }
 
     if(consumerThread) {
         delete consumerThread;
+        consumerThread = NULL;
     }
 }
 

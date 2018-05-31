@@ -20,25 +20,13 @@
 #include "Timer.h"
 #include "TimerTickable.h"
 #include "Logger.h"
+#include "FileServerUser.h"
+#include "FileServerClient.h"
 
 enum FileServerState
 {
     fs_stopped = 0,
     fs_running = 1
-};
-
-enum FileServerClientState
-{
-    fsc_disconnected = 0,
-    fsc_clientHello = 1,
-    fsc_handshake = 2,
-    fsc_connected = 3,
-    fsc_ping = 4,
-    fsc_error = 5
-};
-
-struct FileServerClient
-{
 };
 
 class FileServer2
@@ -54,9 +42,21 @@ class FileServer2
   private:
     FileServerState state;
     std::mutex *stateMutex;
+    std::mutex *userMutex;
     net::Server *udpServer;
     unsigned short port;
     Queue<net::ReadMessage> *cpQueue;
+    bool shouldConsumerRun;
+    std::thread *consumerThread;
+    std::unordered_map<std::string, FileServerUser *> users;
+    Timer *cleanupTimer;
 
+    FileServerUser *getUser(std::string userName);
+    FileServerUser *addUser(string userName, string password);
     void setState(FileServerState state);
+    void consumerTask();
+    void startConsumerThread();
+    void stopConsumerThread();
+    void onClientHelloMessage(net::ReadMessage *msg);
+    FileServerClient *findClient(unsigned int clientId);
 };
