@@ -336,7 +336,11 @@ bool FileClient2::sendFilePartMessage(string fid, shared_ptr<File> f, unsigned i
 
     client->send(msg);
     delete msg;
-    Logger::info("Send file part " + to_string(nextPartNr) + ", length: " + to_string(readCount) + " for file: " + fid);
+    Logger::debug("Send file part " + to_string(nextPartNr) + ", length: " + to_string(readCount) + " for file: " + fid);
+    if (isLastPart)
+    {
+        Logger::info("Finished sending: " + fid);
+    }
     return isLastPart;
 }
 
@@ -374,7 +378,8 @@ void FileClient2::startSendingFS()
 
 void FileClient2::startHelloThread()
 {
-    if(helloThread) {
+    if (helloThread)
+    {
         stopHelloThread();
     }
 
@@ -390,7 +395,8 @@ void FileClient2::stopHelloThread()
         helloThread->join();
     }
 
-    if(helloThread) {
+    if (helloThread)
+    {
         delete helloThread;
         helloThread = NULL;
     }
@@ -421,7 +427,8 @@ void FileClient2::sendClientHelloMessage(unsigned short listenPort, Client *clie
 
 void FileClient2::startConsumerThread()
 {
-    if(consumerThread) {
+    if (consumerThread)
+    {
         stopConsumerThread();
     }
 
@@ -440,7 +447,8 @@ void FileClient2::stopConsumerThread()
         consumerThread->join();
     }
 
-    if(consumerThread) {
+    if (consumerThread)
+    {
         delete consumerThread;
         consumerThread = NULL;
     }
@@ -499,7 +507,7 @@ void FileClient2::onFileStatusMessage(net::ReadMessage *msg)
 
 void FileClient2::consumerTask()
 {
-    Logger::debug("Stopped consumer thread.");
+    Logger::debug("Started consumer thread.");
     while (shouldConsumerRun)
     {
         ReadMessage msg = cpQueue->pop();

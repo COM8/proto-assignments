@@ -7,9 +7,14 @@
 #include "net/Server.h"
 #include "Queue.h"
 #include "Filesystem.h"
-#include "FileServerUser.h"
 #include "net/AbstractMessage.h"
 #include "net/ServerHelloMessage.h"
+#include "net/FileCreationMessage.h"
+#include "net/FileTransferMessage.h"
+#include "net/TransferEndedMessage.h"
+#include "net/FileStatusMessage.h"
+#include "net/PingMessage.h"
+#include "net/AckMessage.h"
 
 enum FileServerClientState
 {
@@ -24,13 +29,14 @@ enum FileServerClientState
 
 class FileServerClient
 {
+
 public:
   const unsigned int CLIENT_ID;
   const unsigned short PORT_LOCAL;
   const unsigned short PORT_REMOTE;
   const char *IP_REMOTE;
 
-  FileServerClient(unsigned int clientId, unsigned short portLocal, unsigned short portRemote, char *ipRemote, FileServerUser *user);
+  FileServerClient(unsigned int clientId, unsigned short portLocal, unsigned short portRemote, char *ipRemote, class FileServerUser *user);
   ~FileServerClient();
   void disconnect();
   FileServerClientState getState();
@@ -38,7 +44,7 @@ public:
   void setAccepted(unsigned char flags);
 
 private:
-  const FileServerUser *USER;
+  const class FileServerUser *USER;
   FileServerClientState state;
   std::mutex stateMutex;
   net::Client *udpClient;
@@ -47,10 +53,21 @@ private:
   bool shouldConsumerRun;
   std::thread *consumerThread;
   time_t lastMessageTime;
+  std::string curFID;
+  unsigned int lastFIDPartNumber;
+  std::uint64_t curFIDLength;
 
   void setState(FileServerClientState state);
   void consumerTask();
   void startConsumerThread();
   void stopConsumerThread();
   void sendServerHelloMessage(unsigned char flags);
+  void sendAckMessage(unsigned int seqNumber);
+  void sendFileStatusAnswerMessage(unsigned int seqNumber, unsigned int lastFIDPartNumber, unsigned char flags, uint64_t fIDLength, unsigned char *fID);
+  void onPingMessage(net::ReadMessage *msg);
+  void onAckMessage(net::ReadMessage *msg);
+  void onFileCreationMessage(net::ReadMessage *msg);
+  void onFileTransferMessage(net::ReadMessage *msg);
+  void onTransferEndedMessage(net::ReadMessage *msg);
+  void onFileStatusMessage(net::ReadMessage *msg);
 };

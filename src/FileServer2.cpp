@@ -13,6 +13,7 @@ FileServer2::FileServer2(unsigned short port) : users()
     this->udpServer = new Server(port, cpQueue);
     this->shouldConsumerRun = false;
     this->consumerThread = NULL;
+    this->state = fs_stopped;
 }
 
 FileServer2::~FileServer2()
@@ -42,16 +43,21 @@ void FileServer2::setState(FileServerState state)
         mlock.unlock();
         return;
     }
-
+    Logger::debug("[FileServer2]: " + to_string(this->state) + " -> " + to_string(state));
     this->state = state;
     mlock.unlock();
 
     switch (state)
     {
     case fs_running:
+        startConsumerThread();
+        udpServer->start();
         break;
 
     case fs_stopped:
+        udpServer->stop();
+        stopConsumerThread();
+        deleteAllUsers();
         break;
 
     default:
@@ -100,6 +106,7 @@ void FileServer2::stopConsumerThread()
 
 void FileServer2::consumerTask()
 {
+    Logger::debug("Started server consumer thread.");
     while (shouldConsumerRun)
     {
         ReadMessage msg = cpQueue->pop();
@@ -114,35 +121,26 @@ void FileServer2::consumerTask()
             onClientHelloMessage(&msg);
             break;
 
-        case 2:
-            // onFileCreationMessage(&msg);
-            break;
-
-        case 3:
-            // onFileTransferMessage(&msg);
-            break;
-
-        case 4:
-            // onFileStatusMessage(&msg);
-            break;
-
-        case 5:
-            // onAckMessage(&msg);
-            break;
-
-        case 6:
-            // onPingMessage(&msg);
-            break;
-
-        case 7:
-            // onTransferEndedMessage(&msg);
-            break;
-
         default:
-            cerr << "Unknown message type received: " << msg.msgType << endl;
+            Logger::warn("Server received an unknown message type: " + to_string((int)msg.msgType));
             break;
         }
     }
+    Logger::debug("Stopped server consumer thread.");
+}
+
+void FileServer2::deleteAllUsers()
+{
+    Logger::info("Started deleteing all users...");
+    std::unique_lock<std::mutex> mlock(*userMutex);
+    auto i = users.begin();
+    while (i != users.end())
+    {
+        delete i->second;
+        i = users.erase(i);
+    }
+    mlock.unlock();
+    Logger::info("Finished deleteing all users!");
 }
 
 FileServerUser *FileServer2::getUser(string userName)
@@ -185,6 +183,7 @@ FileServerClient *FileServer2::findClient(unsigned int clientId)
             mlock.unlock();
             return client;
         }
+        i++;
     }
     mlock.unlock();
     return NULL;

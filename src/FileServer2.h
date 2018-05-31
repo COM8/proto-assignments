@@ -52,11 +52,12 @@ class FileServer2
     Timer *cleanupTimer;
 
     FileServerUser *getUser(std::string userName);
-    FileServerUser *addUser(string userName, string password);
+    FileServerUser *addUser(std::string userName, std::string password);
     void setState(FileServerState state);
     void consumerTask();
     void startConsumerThread();
     void stopConsumerThread();
+    void deleteAllUsers();
     void onClientHelloMessage(net::ReadMessage *msg);
     FileServerClient *findClient(unsigned int clientId);
 };

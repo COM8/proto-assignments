@@ -53,7 +53,7 @@ struct arg* parseParameter(int argc, char* argv[]) {
 }
 
 void launchServer(unsigned int port) {
-	FileServer fS = FileServer((unsigned short)port);
+	FileServer2 fS = FileServer2((unsigned short)port);
 	fS.start();
 
 	cout << "Server console type \"stop\" to stop the server." << endl;

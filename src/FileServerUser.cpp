@@ -19,6 +19,7 @@ FileServerUser::~FileServerUser()
 void FileServerUser::deleteAllClients()
 {
     Logger::info("Started deleting all clients for username: " + USER_NAME);
+    std::unique_lock<std::mutex> mlock(*clientsMutex);
     auto i = clients.begin();
     while (i != clients.end())
     {
@@ -26,6 +27,7 @@ void FileServerUser::deleteAllClients()
         delete i->second;
         i = clients.erase(i);
     }
+    mlock.unlock();
     Logger::info("Finished deleting all clients for username: " + USER_NAME);
 }
 
@@ -42,7 +44,7 @@ FileServerClient *FileServerUser::getClient(unsigned int clientId)
     return NULL;
 }
 
-void FileServerUser::addClient(FileServerClient * client)
+void FileServerUser::addClient(FileServerClient *client)
 {
     std::unique_lock<std::mutex> mlock(*clientsMutex);
 

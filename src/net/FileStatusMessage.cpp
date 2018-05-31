@@ -13,7 +13,7 @@ FileStatusMessage::FileStatusMessage(unsigned int clientId, unsigned int seqNumb
 	this->seqNumber = seqNumber;
 }
 
-FileStatusMessage::FileStatusMessage(unsigned int clientId, unsigned int seqNumber, unsigned char flags, uint64_t fIDLength, unsigned char *fID)
+FileStatusMessage::FileStatusMessage(unsigned int clientId, unsigned int seqNumber, unsigned char flags, uint64_t fIDLength, unsigned char *fID) : AbstractMessage(4 << 4)
 {
 	this->clientId = clientId;
 	this->flags = flags;
@@ -28,7 +28,7 @@ void FileStatusMessage::createBuffer(struct Message *msg)
 	msg->bufferLength = 25 + fIDLength;
 
 	// Add type:
-	msg->buffer[0] |= (4 << 4);
+	msg->buffer[0] |= type;
 
 	// Add flags:
 	msg->buffer[0] |= flags;
