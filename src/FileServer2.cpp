@@ -14,6 +14,7 @@ FileServer2::FileServer2(unsigned short port) : users()
     this->shouldConsumerRun = false;
     this->consumerThread = NULL;
     this->state = fs_stopped;
+    this->cleanupTimer = new Timer(true, 1000, this, 1);
 }
 
 FileServer2::~FileServer2()
@@ -25,6 +26,7 @@ FileServer2::~FileServer2()
     delete userMutex;
     delete udpServer;
     delete cpQueue;
+    delete cleanupTimer;
 }
 
 FileServerState FileServer2::getState()
@@ -50,11 +52,13 @@ void FileServer2::setState(FileServerState state)
     switch (state)
     {
     case fs_running:
+        cleanupTimer->start();
         startConsumerThread();
         udpServer->start();
         break;
 
     case fs_stopped:
+        cleanupTimer->stop();
         udpServer->stop();
         stopConsumerThread();
         deleteAllUsers();
@@ -74,6 +78,38 @@ void FileServer2::start()
 void FileServer2::stop()
 {
     setState(fs_stopped);
+}
+
+void FileServer2::onTimerTick(int identifier)
+{
+    if (identifier == 1)
+    {
+        std::unique_lock<std::mutex> mlock(*userMutex);
+        auto i = users.begin();
+        while (i != users.end())
+        {
+            if (i->second)
+            {
+                // If user has no clients:
+                i->second->clanupClients();
+                if (i->second->isEmpty())
+                {
+                    Logger::info("Removing user \"" + i->second->USER_NAME + "\" because he does not contain any clients.");
+                    delete i->second;
+                    i = users.erase(i);
+                }
+                else
+                {
+                    i++;
+                }
+            }
+            else
+            {
+                i++;
+            }
+        }
+        mlock.unlock();
+    }
 }
 
 void FileServer2::startConsumerThread()

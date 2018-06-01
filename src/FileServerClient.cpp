@@ -7,9 +7,10 @@ using namespace net;
 FileServerClient::FileServerClient(unsigned int clientId, unsigned short portLocal, unsigned short portRemote, char *ipRemote, FileServerUser *user) : CLIENT_ID(clientId),
                                                                                                                                                        PORT_LOCAL(portLocal),
                                                                                                                                                        PORT_REMOTE(portRemote),
-                                                                                                                                                       IP_REMOTE(ipRemote),
-                                                                                                                                                       USER(user)
+                                                                                                                                                       IP_REMOTE(ipRemote)
 {
+    this->user = user;
+
     this->consumerThread = NULL;
     this->shouldConsumerRun = false;
     this->state = fsc_disconnected;
@@ -26,7 +27,6 @@ FileServerClient::FileServerClient(unsigned int clientId, unsigned short portLoc
 FileServerClient::~FileServerClient()
 {
     disconnect();
-    delete[] IP_REMOTE;
     delete cpQueue;
     delete udpClient;
     delete udpServer;
@@ -77,9 +77,9 @@ void FileServerClient::setState(FileServerClientState state)
         break;
 
     case fsc_clientHello:
-        setState(fsc_connected);
         startConsumerThread();
         udpServer->start();
+        setState(fsc_connected);
         break;
 
     case fsc_handshake:
@@ -240,24 +240,24 @@ void FileServerClient::onFileCreationMessage(net::ReadMessage *msg)
     switch (fileType)
     {
     case 1:
-        USER->fS->genFolder(fidString);
+        user->fS->genFolder(fidString);
         Logger::debug("Folder \"" + fidString + "\" generated.");
         break;
 
     case 2:
-        USER->fS->delFolder(fidString);
+        user->fS->delFolder(fidString);
         break;
 
     case 4:
         hash = FileCreationMessage::getFileHashFromMessage(msg->buffer);
         curFID = fidString;
         curFIDLength = fidLengt;
-        USER->fS->genFile(curFID, (char *)hash);
+        user->fS->genFile(curFID, (char *)hash);
         Logger::debug("File \"" + fidString + "\" generated.");
         break;
 
     case 8:
-        USER->fS->delFile(fidString);
+        user->fS->delFile(fidString);
         break;
 
     default:
@@ -295,7 +295,7 @@ void FileServerClient::onFileTransferMessage(net::ReadMessage *msg)
         unsigned int partNumber = FileTransferMessage::getFIDPartNumberFromMessage(msg->buffer);
         uint64_t contLength = FileTransferMessage::getContentLengthFromMessage(msg->buffer);
         unsigned char *content = FileTransferMessage::getContentFromMessage(msg->buffer, contLength);
-        int result = USER->fS->writeFilePart(curFID, (char *)content, partNumber, contLength);
+        int result = user->fS->writeFilePart(curFID, (char *)content, partNumber, contLength);
         Logger::debug("Wrote file part: " + to_string(contLength) + ", length: " + to_string(contLength) + " for file: \"" + curFID + "\" with result: " + to_string(result));
         if ((flags & 0b1000) == 0b1000)
         {
@@ -335,13 +335,17 @@ void FileServerClient::onTransferEndedMessage(net::ReadMessage *msg)
     else if ((flags & 0b0010) == 0b0010)
     {
         Logger::info("Client " + to_string(clientId) + " canceled upload.");
-        // ToDo: Remove client
+        Logger::info("Disconnecting client...");
+        user->removeClient(this);
+        Logger::info("Client disconnected.");
     }
     // Error:
     else
     {
         Logger::info("Client " + to_string(clientId) + " upload failed.");
-        // ToDo: Remove client
+        Logger::info("Disconnecting client...");
+        user->removeClient(this);
+        Logger::info("Client disconnected.");
     }
 }
 
@@ -364,7 +368,7 @@ void FileServerClient::onFileStatusMessage(net::ReadMessage *msg)
     uint64_t fidLengt = FileStatusMessage::getFIDLengthFromMessage(msg->buffer);
     unsigned char *fid = FileStatusMessage::getFIDFromMessage(msg->buffer, fidLengt);
     string fidString = string((char *)fid, fidLengt);
-    unsigned int lastPart = USER->fS->getLastPart(fidString);
+    unsigned int lastPart = user->fS->getLastPart(fidString);
     unsigned int seqNumber = FileStatusMessage::getSeqNumberFromMessage(msg->buffer);
 
     unsigned char recFlags = FileStatusMessage::getFlagsFromMessage(msg->buffer);

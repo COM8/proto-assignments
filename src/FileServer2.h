@@ -25,39 +25,40 @@
 
 enum FileServerState
 {
-    fs_stopped = 0,
-    fs_running = 1
+  fs_stopped = 0,
+  fs_running = 1
 };
 
-class FileServer2
+class FileServer2 : public TimerTickable
 {
-  public:
-    FileServer2(unsigned short port);
-    ~FileServer2();
+public:
+  FileServer2(unsigned short port);
+  ~FileServer2();
 
-    FileServerState getState();
-    void start();
-    void stop();
+  FileServerState getState();
+  void start();
+  void stop();
 
-  private:
-    FileServerState state;
-    std::mutex *stateMutex;
-    std::mutex *userMutex;
-    net::Server *udpServer;
-    unsigned short port;
-    Queue<net::ReadMessage> *cpQueue;
-    bool shouldConsumerRun;
-    std::thread *consumerThread;
-    std::unordered_map<std::string, FileServerUser *> users;
-    Timer *cleanupTimer;
+private:
+  FileServerState state;
+  std::mutex *stateMutex;
+  std::mutex *userMutex;
+  net::Server *udpServer;
+  unsigned short port;
+  Queue<net::ReadMessage> *cpQueue;
+  bool shouldConsumerRun;
+  std::thread *consumerThread;
+  std::unordered_map<std::string, FileServerUser *> users;
+  Timer *cleanupTimer;
 
-    FileServerUser *getUser(std::string userName);
-    FileServerUser *addUser(std::string userName, std::string password);
-    void setState(FileServerState state);
-    void consumerTask();
-    void startConsumerThread();
-    void stopConsumerThread();
-    void deleteAllUsers();
-    void onClientHelloMessage(net::ReadMessage *msg);
-    FileServerClient *findClient(unsigned int clientId);
+  FileServerUser *getUser(std::string userName);
+  FileServerUser *addUser(std::string userName, std::string password);
+  void setState(FileServerState state);
+  void consumerTask();
+  void startConsumerThread();
+  void stopConsumerThread();
+  void deleteAllUsers();
+  void onClientHelloMessage(net::ReadMessage *msg);
+  void onTimerTick(int identifier);
+  FileServerClient *findClient(unsigned int clientId);
 };

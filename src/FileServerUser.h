@@ -3,6 +3,7 @@
 #include <string>
 #include <mutex>
 #include <unordered_map>
+#include <time.h>
 #include "Filesystem.h"
 #include "Logger.h"
 #include "FileServerClient.h"
@@ -20,6 +21,9 @@ public:
 
   FileServerClient *getClient(unsigned int clientId);
   void addClient(FileServerClient *client);
+  void removeClient(FileServerClient *client);
+  void clanupClients();
+  bool isEmpty();
 
 private:
   std::unordered_map<unsigned int, FileServerClient *> clients;

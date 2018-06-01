@@ -35,6 +35,7 @@ public:
   const unsigned short PORT_LOCAL;
   const unsigned short PORT_REMOTE;
   const char *IP_REMOTE;
+  time_t lastMessageTime;
 
   FileServerClient(unsigned int clientId, unsigned short portLocal, unsigned short portRemote, char *ipRemote, class FileServerUser *user);
   ~FileServerClient();
@@ -44,7 +45,7 @@ public:
   void setAccepted(unsigned char flags);
 
 private:
-  const class FileServerUser *USER;
+  class FileServerUser *user;
   FileServerClientState state;
   std::mutex stateMutex;
   net::Client *udpClient;
@@ -52,7 +53,6 @@ private:
   Queue<net::ReadMessage> *cpQueue;
   bool shouldConsumerRun;
   std::thread *consumerThread;
-  time_t lastMessageTime;
   std::string curFID;
   unsigned int lastFIDPartNumber;
   std::uint64_t curFIDLength;

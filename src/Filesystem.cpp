@@ -342,7 +342,8 @@ void FilesystemServer::saveFileFile()
 	{
 		tmp.write(intToArray(ent1.first.length()), 4);
 		tmp.write(ent1.first.c_str(), ent1.first.length());
-		tmp.write(intToArray(ent1.second.get()->last_part), 4);
+		unsigned int last_part = ent1.second.get()->last_part;
+		tmp.write(intToArray(last_part), 4);
 		tmp.write(ent1.second.get()->hash.get()->data(), 32);
 	}
 	tmp.close();
@@ -365,7 +366,7 @@ unsigned int FilesystemServer::charToInt(char *buffer)
 
 void FilesystemServer::createPath()
 {
-	system(("mkdir " + this->path).c_str());
+	system(("mkdir -p " + this->path).c_str());
 }
 
 void FilesystemServer::genFolder(string path)
@@ -452,9 +453,10 @@ int FilesystemServer::writeFilePart(string FID, char *buffer, unsigned int partN
 		tmp.seekp(partNr * partLength, tmp.beg);
 		tmp.write(buffer, length > partLength ? partLength : length);
 		tmp.close();
-		if (this->files[this->path + FID].get()->last_part + 1 == partNr)
+		unsigned int last_part = this->files[this->path + FID].get()->last_part;
+		if (last_part + 1 == partNr)
 		{
-			this->files[this->path + FID].get()->last_part = this->files[this->path + FID].get()->last_part + 1;
+			this->files[this->path + FID].get()->last_part = last_part + 1;
 		}
 		return 0;
 	}

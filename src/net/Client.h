@@ -13,19 +13,22 @@
 #define MESSAGE_DROP_CHANCE 0 // Between 0 and 100 of 100
 
 // Based on: https://www.cs.rutgers.edu/~pxk/417/notes/sockets/udp.html
-namespace net {
-	class Client {
-	public:
-		Client(std::string hostAddr, unsigned short port);
-		Client() = default;
-		bool send(net::AbstractMessage* msg);
+namespace net
+{
+class Client
+{
+  public:
+	Client(std::string hostAddr, unsigned short port);
+	Client() = default;
+	bool send(net::AbstractMessage *msg);
+	bool send(net::Message *msg);
 
-	private:
-		int sockFD;
-    	unsigned short port;
-    	std::string hostAddr;
-    	struct sockaddr_in serverAddressStruct;
+  private:
+	int sockFD;
+	unsigned short port;
+	std::string hostAddr;
+	struct sockaddr_in serverAddressStruct;
 
-		void init();
-	};	
+	void init();
+};
 }

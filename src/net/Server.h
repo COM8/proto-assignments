@@ -15,6 +15,8 @@
 #include "Helpers.h"
 #include "Queue.h"
 #include "net/AbstractMessage.h"
+#include "Logger.h"
+#include "Client.h"
 
 #define BUF_SIZE 2048
 #define MAX_CLIENT_COUNT = 1;

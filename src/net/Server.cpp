@@ -33,15 +33,26 @@ void Server::setState(State state)
 		break;
 
 	case stopping:
-		close(sockFD);
+	{
+		shouldRun = false;
+
+		// ToDo: fix segfault:
+		// Send dummy message:
+		/* Client c = Client("127.0.0.0", port);
+		Message dummyMsg = Message{};
+		dummyMsg.buffer = (unsigned char *)"The wordl is flat!";
+		dummyMsg.bufferLength = 18;
+		c.send(&dummyMsg); */
+
 		if (serverThread && serverThread->joinable() && serverThread->get_id() != this_thread::get_id())
 		{
-			// Broken never joins because recvfrom has no timeout:
 			// serverThread->join();
 		}
 		serverThread = NULL;
+		close(sockFD);
 		setState(stopped);
-		break;
+	}
+	break;
 
 	case error:
 		break;
@@ -56,7 +67,6 @@ State Server::getState()
 void Server::stop()
 {
 	setState(stopping);
-	shouldRun = false;
 }
 
 void Server::start()
@@ -127,7 +137,7 @@ void Server::startTask()
 void Server::contReadStart()
 {
 	while (shouldRun)
-	{		
+	{
 		readNextMessage();
 	}
 }

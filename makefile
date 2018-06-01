@@ -2,6 +2,7 @@ G++_COMPILER=g++ # In mac I need to change this to g++-7 , so I made it a variab
 BUILD_DIR=build
 DEBUG_DIR=debug
 SYNC_DIR=sync
+PORT=12345
 
 default:
 	make clean
@@ -12,28 +13,28 @@ init:
 	git submodule update
 
 runClient:
-	./$(DEBUG_DIR)/csync -h localhost -p 1234 -f $(DEBUG_DIR)
+	./$(DEBUG_DIR)/csync -h localhost -p $(PORT) -f $(DEBUG_DIR)
 
 runServer:
-	./$(DEBUG_DIR)/csync -s -p 1234
+	./$(DEBUG_DIR)/csync -s -p $(PORT)
 
 runDebugServer:
-	gdb --args ./$(DEBUG_DIR)/csync "-s" "-p" "1234"
+	gdb --args ./$(DEBUG_DIR)/csync "-s" "-p" "$(PORT)"
 
 runDebugClient:
-	gdb --args ./$(DEBUG_DIR)/csync "-h" "localhost" "-p" "1234" "-f" "$(DEBUG_DIR)"
-
-runMassifClient:
-	valgrind --tool=massif$(DEBUG_DIR)/csync "-s" "-p" "1234"
+	gdb --args ./$(DEBUG_DIR)/csync "-h" "localhost" "-p" "$(PORT)" "-f" "$(DEBUG_DIR)"
 
 runMassifServer:
-	valgrind --tool=massif $(DEBUG_DIR)/csync "-h" "localhost" "-p" "1234" "-f" "$(DEBUG_DIR)"
+	valgrind --tool=massif $(DEBUG_DIR)/csync "-s" "-p" "$(PORT)"
 
-MassifClient:
+runMassifClient:
+	valgrind --tool=massif $(DEBUG_DIR)/csync "-h" "localhost" "-p" "$(PORT)" "-f" "$(DEBUG_DIR)"
+
+massifClient:
 	make default
 	make runMassifClient
 
-MassifServer:
+massifServer:
 	make default
 	make runMassifServer
 
@@ -70,7 +71,3 @@ clean:
 	if [ -d $(BUILD_DIR) ]; then rm -rf $(BUILD_DIR); fi
 	if [ -d $(DEBUG_DIR) ]; then rm -rf $(DEBUG_DIR); fi
 	if [ -d $(SYNC_DIR) ]; then rm -rf $(SYNC_DIR); fi
-
-test:
-	make compile
-	./$(DEBUG_DIR)/csync -f .vscode/ -h myhost -p 4500

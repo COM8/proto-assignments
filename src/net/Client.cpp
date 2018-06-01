@@ -41,8 +41,15 @@ void Client::init()
 
 bool Client::send(AbstractMessage *msg)
 {
-	struct Message msgStruct = {};
+	Message msgStruct = {};
 	msg->createBuffer(&msgStruct);
+	bool result = send(&msgStruct);
+	delete[] msgStruct.buffer;
+	return result;
+}
+
+bool Client::send(Message *msg)
+{
 	// Print message:
 	// AbstractMessage::printMessage(&msgStruct);
 
@@ -55,12 +62,11 @@ bool Client::send(AbstractMessage *msg)
 	}
 	else
 	{
-		if (sendto(sockFD, msgStruct.buffer, msgStruct.bufferLength, 0, (struct sockaddr *)&serverAddressStruct, sizeof(serverAddressStruct)) < 0)
+		if (sendto(sockFD, msg->buffer, msg->bufferLength, 0, (struct sockaddr *)&serverAddressStruct, sizeof(serverAddressStruct)) < 0)
 		{
 			cerr << "UDP client failed to send message to: " << hostAddr << " and port: " << port << endl;
 			success = false;
 		}
 	}
-	delete[] msgStruct.buffer;
 	return success;
 }
