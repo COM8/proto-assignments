@@ -268,3 +268,19 @@ Payload [X Byte]:<br/>
 	|	Transfer-Ended		    |
 	| --------------------------------> | The client tells the server that the transfer finished
 ```
+
+## Key Exhange
+
+````
+Client				  Server
+	|	ClientStartConnection	    |
+	| --------------------------------> | Client calculates and sends P,G, it's public key
+	|				    | 
+	|	onServerReceive             |
+	| <-------------------------------- | Server calculates it's shared key,public key and sends it's public key to client
+	|				    | sets secureConnection to true
+	|	onClientReceive		    |
+	| --------------------------------> | Client calculates it's shared key
+	|                                   | sets secure connection to true
+
+```
