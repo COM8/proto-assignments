@@ -1,6 +1,5 @@
 #include "DiffieHellman.h"
 
-
 DiffieHellman::DiffieHellman(){
     this->isSecure=false;
 }
@@ -60,7 +59,7 @@ bool DiffieHellman::isConnectionSecure(){
     return this->isSecure;
 }
 
-void DiffieHellman::Encrypt(unsigned char * toEncrypt){
+void DiffieHellman::Encrypt(unsigned char *& toEncrypt){
     std::string output = (string)(char *)toEncrypt;
     for (int i = 0; i < output.size(); i++){
         char k = toEncrypt[i] ^ this->key[i % (sizeof(key) / sizeof(char))];
@@ -70,9 +69,8 @@ void DiffieHellman::Encrypt(unsigned char * toEncrypt){
 toEncrypt=(unsigned char *)output.c_str();
 }
 
-void DiffieHellman::Decrypt(unsigned char * toDecrypt){
+void DiffieHellman::Decrypt(unsigned char *& toDecrypt){
     std::string output = (string)(char *)toDecrypt;
-           
     for (int i = 0; i < output.size(); i++){
         char k = toDecrypt[i] ^ this->key[i % (sizeof(key) / sizeof(char))];
        
@@ -80,4 +78,17 @@ void DiffieHellman::Decrypt(unsigned char * toDecrypt){
     }
     
    toDecrypt=(unsigned char *)output.c_str();
+}
+
+unsigned long DiffieHellman::getPrime(){
+    return this->P;
+}
+
+unsigned long DiffieHellman::getPrimitiveRoot(){
+    return this->G;
+}
+
+
+unsigned long DiffieHellman::getPubKey(){
+    return this->myPub;
 }

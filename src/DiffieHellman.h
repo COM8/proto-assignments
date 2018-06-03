@@ -14,14 +14,20 @@ class DiffieHellman{
         void onServerReceive(unsigned long P,unsigned long G,unsigned long otherPub);
         bool isConnectionSecure();
 
-        void  Encrypt(unsigned char *  toEncrypt);
-        void  Decrypt(unsigned char *  toDecrypt);
+        void  Encrypt(unsigned char *&  toEncrypt);
+        void  Decrypt(unsigned char *&  toDecrypt);
 
-        unsigned long P,G,myPub;
+        
+
+        unsigned long getPrime();
+        unsigned long getPrimitiveRoot();
+        unsigned long getPubKey();
+        
     private:
         std::string key;
         bool isSecure;
         unsigned long otherPub,sharedKey,mySecret;
+        unsigned long P,G,myPub;
 
         vector<unsigned long> get_primes(unsigned long max){
             vector<unsigned long> primes;
