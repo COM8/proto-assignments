@@ -277,8 +277,8 @@ Payload [X Byte]:<br/>
 
 ## Key Exhange
 
-````
-Client				  Server
+```
+      Client				  Server
 	|	ClientStartConnection	    |
 	| --------------------------------> | Client calculates and sends P,G, it's public key
 	|				    | 
