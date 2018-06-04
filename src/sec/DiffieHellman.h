@@ -6,6 +6,7 @@
 #include <sstream>
 #include <cstring>
 using namespace std;
+namespace sec{
 class DiffieHellman{
     public:
         DiffieHellman();
@@ -56,3 +57,5 @@ class DiffieHellman{
         
 
 };
+
+}

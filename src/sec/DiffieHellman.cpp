@@ -1,6 +1,7 @@
 #include "DiffieHellman.h"
 #include "encrypt.h"
 #include "time.h"
+using namespace sec;
 DiffieHellman::DiffieHellman(){
     this->isSecure=false;
 }

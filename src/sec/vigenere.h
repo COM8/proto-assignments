@@ -6,7 +6,7 @@
 #include <ctype.h>
 
 using namespace std;
-
+namespace sec{
 std::string AVAILABLE_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 ";
 
 int index(char c) {
@@ -73,3 +73,4 @@ std::string decrypt_vigenere(std::string& encryptedMsg, std::string& newKey) {
 	return decryptedMsg;
 }
 
+}
