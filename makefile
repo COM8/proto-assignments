@@ -1,4 +1,4 @@
-G++_COMPILER=g++-8 # In mac I need to change this to g++-7 , so I made it a variable.
+G++_COMPILER=g++ # In mac I need to change this to g++-7 , so I made it a variable.
 BUILD_DIR=build
 DEBUG_DIR=debug
 SYNC_DIR=sync
@@ -56,7 +56,7 @@ server:
 
 debug:
 	mkdir -p $(DEBUG_DIR)
-	${G++_COMPILER} -g src/*.cpp src/net/*.cpp src/lib/hash-library/md5.cpp -I src/ -I src/net/ -I src/lib/hash-library/ -o $(DEBUG_DIR)/csync -lstdc++fs -std=c++17 -pthread
+	${G++_COMPILER} -g src/*.cpp src/sec/*.cpp src/net/*.cpp src/lib/hash-library/md5.cpp -I src/  -I src/sec/ src/net/ -I src/lib/hash-library/ -o $(DEBUG_DIR)/csync -lstdc++fs -std=c++17 -pthread
 
 release:
 	make compile
@@ -64,7 +64,7 @@ release:
 compile:
 	# Create the build directory if it does not allready exist:
 	mkdir -p $(BUILD_DIR)
-	${G++_COMPILER} src/*.cpp src/net/*.cpp src/sec/*.cpp src/lib/zedwood/*.cpp -I src/ -I src/net/ -I src/sec -I src/lib/zedwood/ -o $(BUILD_DIR)/csync -lstdc++fs -std=c++17 -pthread
+	${G++_COMPILER} src/*.cpp src/net/*.cpp src/sec/*.cpp src/lib/hash-library/md5.cpp -I src/ -I src/sec/ -I src/net/ -I src/lib/hash-library/ -o $(BUILD_DIR)/csync -lstdc++fs -std=c++17 -pthread
 
 
 clean:
