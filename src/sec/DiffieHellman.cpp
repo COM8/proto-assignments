@@ -1,18 +1,26 @@
 #include "DiffieHellman.h"
 #include "encrypt.h"
+#include "time.h"
 DiffieHellman::DiffieHellman(){
     this->isSecure=false;
 }
 
 void DiffieHellman::ClientStartConnection(){
-    int max=10000000;
+    unsigned long max=100000000;
     vector<unsigned long> primes;
     primes=this->get_primes(max);
+
+    srand(5);
     unsigned long myPrime=primes[rand()%max];
     this->P=myPrime;          
 
-    G=9;
-    this->mySecret=4;
+    G=2;
+
+    while ((power(G,((P-1)/2),P) == 1))
+     {
+          G+=1;
+     }
+    this->mySecret=rand()%15;
 
     this->myPub=power(this->G,this->mySecret,this->P);
 
@@ -39,7 +47,7 @@ void DiffieHellman::onServerReceive(unsigned long P,unsigned long G,unsigned lon
     this->otherPub=otherPub;
     isSecure=false;
 
-    this->mySecret=3;
+    this->mySecret=rand()%15;
     this->myPub=power(this->G,this->mySecret,this->P);
 
     this->sharedKey=power(this->otherPub,this->mySecret,this->P);
