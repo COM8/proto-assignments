@@ -2,11 +2,14 @@
 
 using namespace std;
 using namespace net;
+using namespace sec;
 
-Server::Server(unsigned short port, Queue<ReadMessage> *cpQueue)
+Server::Server(unsigned short port, Queue<ReadMessage> *cpQueue, DiffieHellman *enc)
 {
 	this->port = port;
 	this->cpQueue = cpQueue;
+	this->enc = enc;
+
 	this->sockFD = -1;
 	this->state = stopped;
 	this->serverThread = NULL;
@@ -163,6 +166,11 @@ void Server::readNextMessage()
 		msg.msgType = buf[0] >> 4;
 		// Get sender IP:
 		inet_ntop(AF_INET, &(remAddr.sin_addr), msg.senderIp, INET_ADDRSTRLEN);
+
+		// Decrypt message:
+		if(enc && enc->isConnectionSecure()) {
+			enc->Decrypt(msg.buffer, msg.bufferLength);
+		}
 
 		// Insert in consumer producer queue:
 		cpQueue->push(msg);

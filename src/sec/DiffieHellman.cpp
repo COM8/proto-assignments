@@ -68,14 +68,14 @@ bool DiffieHellman::isConnectionSecure(){
     return this->isSecure;
 }
 
-void DiffieHellman::Encrypt(unsigned char *& toEncrypt){
-    std::string output = (string)(char *)toEncrypt;
+void DiffieHellman::Encrypt(unsigned char * toEncrypt, unsigned int toEncryptLength){
+    std::string output = string((char *)toEncrypt, toEncryptLength);
     output=encrypt(output,this->key);
     toEncrypt=(unsigned char *)output.c_str();
 }
 
-void DiffieHellman::Decrypt(unsigned char *& toDecrypt){
-    std::string output = (string)(char *)toDecrypt;
+void DiffieHellman::Decrypt(unsigned char * toDecrypt, unsigned int toDecryptLengtht){
+    std::string output = string((char *)toDecrypt, toDecryptLengtht);
     output=decrypt(output,this->key);
     
    toDecrypt=(unsigned char *)output.c_str();

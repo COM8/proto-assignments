@@ -2,11 +2,14 @@
 
 using namespace std;
 using namespace net;
+using namespace sec;
 
-Client::Client(string hostAddr, unsigned short port)
+Client::Client(string hostAddr, unsigned short port, DiffieHellman *enc)
 {
 	this->hostAddr = hostAddr;
+	this->enc = enc;
 	this->port = port;
+
 	this->sockFD = -1;
 	srand(time(NULL));
 	init();
@@ -62,6 +65,11 @@ bool Client::send(Message *msg)
 	}
 	else
 	{
+		// Encrypt message:
+		if(enc && enc->isConnectionSecure()) {
+			enc->Encrypt(msg->buffer, msg->bufferLength);
+		}
+
 		if (sendto(sockFD, msg->buffer, msg->bufferLength, 0, (struct sockaddr *)&serverAddressStruct, sizeof(serverAddressStruct)) < 0)
 		{
 			cerr << "UDP client failed to send message to: " << hostAddr << " and port: " << port << endl;

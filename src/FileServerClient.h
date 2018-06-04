@@ -15,6 +15,7 @@
 #include "net/FileStatusMessage.h"
 #include "net/PingMessage.h"
 #include "net/AckMessage.h"
+#include "sec/DiffieHellman.h"
 
 enum FileServerClientState
 {
@@ -56,6 +57,7 @@ private:
   std::string curFID;
   unsigned int lastFIDPartNumber;
   std::uint64_t curFIDLength;
+  sec::DiffieHellman *enc;
 
   void setState(FileServerClientState state);
   void consumerTask();

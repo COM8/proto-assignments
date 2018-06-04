@@ -3,6 +3,7 @@
 
 using namespace std;
 using namespace net;
+using namespace sec;
 
 FileServerClient::FileServerClient(unsigned int clientId, unsigned short portLocal, unsigned short portRemote, char *ipRemote, FileServerUser *user) : CLIENT_ID(clientId),
                                                                                                                                                        PORT_LOCAL(portLocal),
@@ -15,8 +16,9 @@ FileServerClient::FileServerClient(unsigned int clientId, unsigned short portLoc
     this->shouldConsumerRun = false;
     this->state = fsc_disconnected;
     this->cpQueue = new Queue<ReadMessage>();
-    this->udpServer = new Server(PORT_LOCAL, cpQueue);
-    this->udpClient = new Client(IP_REMOTE, PORT_REMOTE);
+    this->enc = new DiffieHellman();
+    this->udpServer = new Server(PORT_LOCAL, cpQueue, enc);
+    this->udpClient = new Client(IP_REMOTE, PORT_REMOTE, enc);
     this->lastMessageTime = time(NULL);
     this->curFID = "";
     this->curFIDLength = 0;

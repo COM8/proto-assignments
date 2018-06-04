@@ -19,6 +19,7 @@
 #include "Timer.h"
 #include "TimerTickable.h"
 #include "Logger.h"
+#include "sec/DiffieHellman.h"
 
 #define MAX_ACK_TIME_IN_S 1
 #define TIMER_TICK_INTERVALL_MS 1000
@@ -76,6 +77,7 @@ class FileClient2 : public TimerTickable
 	Timer *tTimer;
     WorkingSet *curWorkingSet;
     bool transferFinished;
+    sec::DiffieHellman *enc;
 
     void setState(FileClient2State state);
     void startSendingFS();

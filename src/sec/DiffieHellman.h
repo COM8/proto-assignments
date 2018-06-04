@@ -15,8 +15,8 @@ class DiffieHellman{
         void onServerReceive(unsigned long P,unsigned long G,unsigned long otherPub);
         bool isConnectionSecure();
 
-        void  Encrypt(unsigned char *&  toEncrypt);
-        void  Decrypt(unsigned char *&  toDecrypt);
+        void Encrypt(unsigned char * toEncryp, unsigned int toEncryptLengtht);
+        void Decrypt(unsigned char * toDecrypt, unsigned int toDecryptLengtht);
 
         
 

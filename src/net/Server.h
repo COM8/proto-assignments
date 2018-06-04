@@ -17,6 +17,7 @@
 #include "net/AbstractMessage.h"
 #include "Logger.h"
 #include "Client.h"
+#include "sec/DiffieHellman.h"
 
 #define BUF_SIZE 2048
 #define MAX_CLIENT_COUNT = 1;
@@ -28,7 +29,7 @@ namespace net
 class Server
 {
   public:
-	Server(unsigned short port, Queue<net::ReadMessage> *cpQueue);
+	Server(unsigned short port, Queue<net::ReadMessage> *cpQueue, sec::DiffieHellman *enc);
 	Server() = default;
 	void start();
 	void stop();
@@ -42,6 +43,7 @@ class Server
 	std::thread *serverThread;
 	bool shouldRun;
 	Queue<net::ReadMessage> *cpQueue;
+	sec::DiffieHellman *enc;
 
 	void setState(net::State state);
 	void contReadStart();

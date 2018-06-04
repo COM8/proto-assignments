@@ -2,6 +2,7 @@
 
 using namespace net;
 using namespace std;
+using namespace sec;
 
 FileClient2::FileClient2(string serverAddress, unsigned short serverPort, string userName, string clientPassword, FilesystemClient *fS)
 {
@@ -33,6 +34,7 @@ FileClient2::FileClient2(string serverAddress, unsigned short serverPort, string
     this->tTimer = new Timer(true, TIMER_TICK_INTERVALL_MS, this, 1);
     this->curWorkingSet = fS->getWorkingSet();
     this->clientId = getRandomClientId();
+    this->enc = new DiffieHellman();
 }
 
 FileClient2::~FileClient2()
@@ -51,6 +53,7 @@ FileClient2::~FileClient2()
     delete sendMessageQueue;
     delete curWorkingSet;
     delete tTimer;
+    delete enc;
 }
 
 unsigned int FileClient2::getRandomClientId()
@@ -350,8 +353,8 @@ void FileClient2::connect()
     if (state == disconnected)
     {
         listenPort = 2000 + rand() % 63000; // Pick random lisen port
-        client = new Client(serverAddress, serverPort);
-        server = new Server(listenPort, cpQueue);
+        client = new Client(serverAddress, serverPort, enc);
+        server = new Server(listenPort, cpQueue, enc);
         server->start();
 
         setState(sendClientHello);
@@ -578,7 +581,7 @@ void FileClient2::onServerHelloMessage(ReadMessage *msg)
         }
 
         uploadPort = ServerHelloMessage::getPortFromMessage(msg->buffer);
-        uploadClient = new Client(serverAddress, uploadPort);
+        uploadClient = new Client(serverAddress, uploadPort, enc);
 
         setState(handshake);
     }

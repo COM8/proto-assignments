@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include "net/AbstractMessage.h"
 #include "Helpers.h"
+#include "sec/DiffieHellman.h"
 
 #define BUF_SIZE 2048
 #define MESSAGE_DROP_CHANCE 0 // Between 0 and 100 of 100
@@ -18,7 +19,7 @@ namespace net
 class Client
 {
   public:
-	Client(std::string hostAddr, unsigned short port);
+	Client(std::string hostAddr, unsigned short port, sec::DiffieHellman *enc);
 	Client() = default;
 	bool send(net::AbstractMessage *msg);
 	bool send(net::Message *msg);
@@ -28,6 +29,7 @@ class Client
 	unsigned short port;
 	std::string hostAddr;
 	struct sockaddr_in serverAddressStruct;
+	sec::DiffieHellman *enc;
 
 	void init();
 };
