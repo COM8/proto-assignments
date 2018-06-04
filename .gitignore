@@ -384,5 +384,14 @@ ASALocalRun/
 # sftp configuration file
 sftp-config.json
 
-build/
+[Bb]uild/
 .vscode/
+[Db]ebug/
+sync/
+.cquery
+[tT]est/
+.sublime-project
+PD-ASS-1.sublime-project
+PD-ASS-1.sublime-workspace
+massif.out.[1234567890]*
+compile_commands.json

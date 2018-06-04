@@ -73,7 +73,7 @@ protected:
 };
 
 struct SendMessage {
-	net::AbstractMessage *msg;
+	net::AbstractMessage msg;
 	unsigned int sequenceNumber;
 	time_t sendTime;
 	unsigned int sendCount;
@@ -85,13 +85,13 @@ public:
 	SendMessageQueue() {}
 	~SendMessageQueue() {}
 
-	void pushSendMessage(int sequenceNumber, net::AbstractMessage *msg) {
-		struct SendMessage *sM = new struct SendMessage();
-		sM->sendTime = time(NULL);
-		sM->sequenceNumber = sequenceNumber;
-		sM->msg = msg;
-		sM->sendCount = 1;
-		push(*sM);
+	void pushSendMessage(int sequenceNumber, net::AbstractMessage &msg) {
+		struct SendMessage sM = {};
+		sM.sendTime = time(NULL);
+		sM.sequenceNumber = sequenceNumber;
+		sM.msg = msg;
+		sM.sendCount = 1;
+		push(sM);
 	}
 
 	bool onSequenceNumberAck(unsigned int sequenceNumber) {
@@ -116,7 +116,6 @@ public:
 		std::unique_lock<std::mutex> mlock(*queueMutex);
 		time_t now = time(NULL);
 		auto i = queue.begin();
-		bool found = false;
 		while (i != queue.end())
 		{
 			if(difftime(now, i->sendTime) > maxMessageAgeInSec) {

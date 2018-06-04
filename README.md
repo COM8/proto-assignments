@@ -9,6 +9,7 @@
 * Don't create packages with a size of (bit-size mod 8) != 0. It makes it hard on the receiver side to interpret those!
 
 ### Changelog:
+* 27.05.2018 [Fabian] Updated ```File-Status``` message
 * 04.05.2018 [Fabian] Added Ping checksum
 * 30.04.2018 [Fabian] Updated ToDo
 * 29.04.2018 [Fabian] Updated protocol
@@ -156,12 +157,17 @@ Content [defined in "Content Length" in Bit]:**Size not final. Don't forget abou
 	The actual file content.
 
 ### File-Status:
-Used for requesting and responding the current file status e.g. after a connection disconnect.
+Used for requesting and responding the current file status bevor a file gets transfered.
 ```
-0      4       8           40                     72         104         168
-+------+-------+-----------+----------------------+----------+-----------+-----+
-| Type | Flags | Client ID | Last FID Part Number | Checksum |FID Length | FID | 
-+------+-------+-----------+----------------------+----------+-----------+-----+
+0      4       8           40                72                     104
++------+-------+-----------+-----------------+----------------------+
+| Type | Flags | Client ID | Sequence Number | Last FID Part Number |
++------+-------+-----------+-----------------+----------------------+
+
+104        136          200
++----------+------------+-----+
+| Checksum | FID Length | FID |
++----------+------------+-----+
 ```
 
 Flags [4 Bit]:
@@ -171,7 +177,7 @@ Flags [4 Bit]:
 |||+-> Request status of FID
 ||+--> FID status response
 |+---> Restart sending file system
-+----> File = 0/Folder = 1 FID
++----> File = 0/Folder = 1
 ```
 
 Last FID Part Number [32 Bit]:

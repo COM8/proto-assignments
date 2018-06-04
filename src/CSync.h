@@ -4,8 +4,8 @@
 #include <cstring>
 #include "Helpers.h"
 #include "Filesystem.h"
-#include "FileClient.h"
-#include "FileServer.h"
+#include "FileClient2.h"
+#include "FileServer2.h"
 #include "net/ClientHelloMessage.h"
 
 const int DEFAULT_PORT = 1234;

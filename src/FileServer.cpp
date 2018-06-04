@@ -159,14 +159,20 @@ void FileServer::onFileStatusMessage(ReadMessage *msg)
 	auto c = clients->find(clientId);
 	if (c != clients->end())
 	{
-		unsigned char flags = 0b0010;
-		if (c->second->isCurFIDFolder)
-		{
-			flags |= 0b1000;
-		}
+		uint64_t fidLengt = FileStatusMessage::getFIDLengthFromMessage(msg->buffer);
+		unsigned char *fid = FileStatusMessage::getFIDFromMessage(msg->buffer, fidLengt);
+		string fidString = string((char *)fid, fidLengt);
+		unsigned int lastPart = c->second->fS->getLastPart(fidString);
+		unsigned int seqNumber = FileStatusMessage::getSeqNumberFromMessage(msg->buffer);
 
-		FileStatusMessage *fSMsg = new FileStatusMessage(clientId, c->second->lastFIDPartNumber, flags, c->second->curFIDLength, (unsigned char *)c->second->curFID.c_str());
+		unsigned char recFlags = FileStatusMessage::getFlagsFromMessage(msg->buffer);
+		unsigned char flags = 0b0010;
+		flags |= (recFlags & 0b1000);
+
+		FileStatusMessage *fSMsg = new FileStatusMessage(clientId, seqNumber, lastPart, flags, c->second->curFIDLength, (unsigned char *)c->second->curFID.c_str());
 		c->second->udpClient->send(fSMsg);
+
+		delete[] fid;
 	}
 
 	mlock.unlock();
@@ -197,7 +203,7 @@ void FileServer::onFileCreationMessage(ReadMessage *msg)
 		unsigned char fileType = FileCreationMessage::getFileTypeFromMessage(msg->buffer);
 		uint64_t fidLengt = FileCreationMessage::getFIDLengthFromMessage(msg->buffer);
 		unsigned char *fid = FileCreationMessage::getFIDFromMessage(msg->buffer, fidLengt);
-		unsigned char *hash;
+		unsigned char *hash = FileCreationMessage::getFileHashFromMessage(msg->buffer);
 		string fidString = string((char *)fid, fidLengt);
 		switch (fileType)
 		{
@@ -226,6 +232,8 @@ void FileServer::onFileCreationMessage(ReadMessage *msg)
 			cerr << "Unknown fileType received: " << fileType << endl;
 			break;
 		}
+		delete[] fid;
+		delete[] hash;
 	}
 	mlock.unlock();
 }
@@ -262,8 +270,9 @@ void FileServer::onFileTransferMessage(ReadMessage *msg)
 			cout << "Wrote file part: " << partNumber << ", length: " << contLength << " for file: \"" << fCC->curFID << "\" with result: " << result << endl;
 			if ((flags & 0b1000) == 0b1000)
 			{
-				cout << "File ende received: " << fCC->curFID << endl;
+				cout << "Last filepart recieved: " << fCC->curFID << endl;
 			}
+			delete[] content;
 		}
 		else
 		{
@@ -372,7 +381,7 @@ void FileServer::onClientHelloMessage(ReadMessage *msg)
 	client->cpQueue = cpQueue;
 	client->udpClient = new Client(client->remoteIp, client->portRemote);
 	client->udpServer = new Server(client->portLocal, client->cpQueue);
-	client->fS = new FilesystemServer(to_string(client->clientId) + "/");
+	client->fS = new FilesystemServer("sync/" + to_string(client->clientId) + "/");
 	client->curFID = "";
 	client->lastMessageTime = time(NULL);
 	client->lastFIDPartNumber = 0;

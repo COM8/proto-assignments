@@ -36,7 +36,7 @@ struct FileClientConnection {
 	unsigned int clientId;
 	unsigned short portLocal;
 	unsigned short portRemote;
-	char* remoteIp;
+	char *remoteIp;
 	net::Client* udpClient;
 	net::Server* udpServer;
 	Queue<net::ReadMessage>* cpQueue;
