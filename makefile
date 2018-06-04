@@ -56,7 +56,7 @@ server:
 
 debug:
 	mkdir -p $(DEBUG_DIR)
-	${G++_COMPILER} -g src/*.cpp src/sec/*.cpp src/net/*.cpp src/lib/hash-library/md5.cpp -I src/  -I src/sec/ src/net/ -I src/lib/hash-library/ -o $(DEBUG_DIR)/csync -lstdc++fs -std=c++17 -pthread
+	${G++_COMPILER} -g src/*.cpp src/sec/*.cpp src/net/*.cpp src/lib/hash-library/md5.cpp -I src/ -I src/sec/ -I src/net/ -I src/lib/hash-library/ -o $(DEBUG_DIR)/csync -lstdc++fs -std=c++17 -pthread
 
 release:
 	make compile
