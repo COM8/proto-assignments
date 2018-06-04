@@ -1,7 +1,6 @@
 # protocol-assignment-1
 
 ### ToDo:
-* Add some way to continue the file transfer once the client crashed
 * Send file metadate e.g. rights, owner, creation date, ...
 
 ### Important:
