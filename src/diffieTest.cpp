@@ -1,7 +1,7 @@
 #include <iostream>
-#include "DiffieHellman.h"
+#include "sec/DiffieHellman.h"
 using namespace std;
-int main(){
+/*int main(){
 
     
     unsigned char * text=(unsigned char * )"I'm a client and I'm sending this text";
@@ -31,4 +31,4 @@ int main(){
 
     
     
-}
+}*/
