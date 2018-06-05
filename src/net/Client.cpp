@@ -19,7 +19,7 @@ void Client::init()
 {
 	if ((sockFD = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
 	{
-		cerr << "UDP socket creation failed!" << endl;
+		Logger::error("UDP socket creation failed!");
 	}
 	else
 	{
@@ -32,7 +32,7 @@ void Client::init()
 		hp = gethostbyname(hostAddr.c_str());
 		if (!hp)
 		{
-			cerr << "UDP client unable to look up host: " << hostAddr << endl;
+			Logger::error("UDP client unable to look up host: " + hostAddr);
 		}
 		else
 		{
@@ -61,18 +61,19 @@ bool Client::send(Message *msg)
 	// Message drop chance:
 	if (rand() % 100 + 1 <= MESSAGE_DROP_CHANCE)
 	{
-		cout << "Droped message!" << endl;
+		Logger::info("Droped message!");
 	}
 	else
 	{
 		// Encrypt message:
-		if(enc && enc->isConnectionSecure()) {
+		if (enc && enc->isConnectionSecure())
+		{
 			enc->Encrypt(msg->buffer, msg->bufferLength);
 		}
 
 		if (sendto(sockFD, msg->buffer, msg->bufferLength, 0, (struct sockaddr *)&serverAddressStruct, sizeof(serverAddressStruct)) < 0)
 		{
-			cerr << "UDP client failed to send message to: " << hostAddr << " and port: " << port << endl;
+			Logger::error("UDP client failed to send message to: " + hostAddr + " and port: " + to_string(port));
 			success = false;
 		}
 	}

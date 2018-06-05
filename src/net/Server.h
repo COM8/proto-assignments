@@ -18,6 +18,7 @@
 #include "Logger.h"
 #include "Client.h"
 #include "sec/DiffieHellman.h"
+#include "Logger.h"
 
 #define BUF_SIZE 2048
 #define MAX_CLIENT_COUNT = 1;

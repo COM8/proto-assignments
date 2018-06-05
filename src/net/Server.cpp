@@ -76,12 +76,12 @@ void Server::start()
 {
 	if (state != stopped)
 	{
-		cout << "Unable to start server - state != " << stopped << " state is " << state << endl;
+		Logger::error("Unable to start server - state != " + to_string(stopped) + " state is " + to_string(state));
 		return;
 	}
 	if (serverThread)
 	{
-		cerr << "UDP server already running! Please stop first!" << endl;
+		Logger::error("UDP server already running! Please stop first!");
 	}
 	else
 	{
@@ -96,11 +96,11 @@ void Server::startTask()
 {
 	if (sockFD > 0)
 	{
-		cerr << "UDP server already running! Please stop first!" << endl;
+		Logger::error("UDP server already running! Please stop first!");
 	}
 	else if ((sockFD = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
 	{
-		cerr << "UDP socket creation failed!" << endl;
+		Logger::error("UDP socket creation failed!");
 		setState(error);
 	}
 	else
@@ -114,7 +114,7 @@ void Server::startTask()
 
 		if (bind(sockFD, (struct sockaddr *)&myAddr, sizeof(myAddr)) < 0)
 		{
-			cerr << "UDP server binding failed!" << endl;
+			Logger::error("UDP server binding failed!");
 			setState(error);
 		}
 		else
@@ -168,7 +168,8 @@ void Server::readNextMessage()
 		inet_ntop(AF_INET, &(remAddr.sin_addr), msg.senderIp, INET_ADDRSTRLEN);
 
 		// Decrypt message:
-		if(enc && enc->isConnectionSecure()) {
+		if (enc && enc->isConnectionSecure())
+		{
 			enc->Decrypt(msg.buffer, msg.bufferLength);
 		}
 
