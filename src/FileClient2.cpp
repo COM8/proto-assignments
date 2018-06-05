@@ -626,7 +626,7 @@ void FileClient2::onTimerTick(int identifier)
 
         for (struct SendMessage msg : *msgs)
         {
-            if (msg.sendCount > MAX_MESSAGE_SEND_TRIES)
+            if (msg.sendCount > MAX_MESSAGE_TIMEOUT_COUNT)
             {
                 Logger::error("Failed to send messge " + to_string(msg.sendCount) + " times - reconnecting!");
                 disconnect();
@@ -651,7 +651,7 @@ void FileClient2::onTimerTick(int identifier)
         sendMessageQueue->clear();
         msgTimeoutCount++;
         Logger::warn("Ping timeout, msgTimeoutCount: " + to_string(msgTimeoutCount));
-        if (msgTimeoutCount < 3)
+        if (msgTimeoutCount < MAX_PING_MESSAGE_TIMEOUT_COUNT)
         {
             Logger::warn("Resending ping");
             sendPingMessage(0, getNextSeqNumber(), uploadClient);

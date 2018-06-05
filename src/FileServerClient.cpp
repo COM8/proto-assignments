@@ -66,17 +66,13 @@ void FileServerClient::onTimerTick(int identifier)
             break;
 
         case fsc_ping:
-            Logger::warn("Client (" + to_string(CLIENT_ID) + ") handshake failed with timeout!");
-            setState(fsc_error);
-            break;
-
         case fsc_awaitingAck:
             list<struct SendMessage> *msgs = new list<struct SendMessage>();
             sendMessageQueue->popNotAckedMessages(MAX_ACK_TIME_IN_S, msgs);
 
             for (struct SendMessage msg : *msgs)
             {
-                if (msg.sendCount > MAX_MESSAGE_SEND_TRIES)
+                if (msg.sendCount > MAX_MESSAGE_TIMEOUT_COUNT)
                 {
                     Logger::error("Failed to send messge " + to_string(msg.sendCount) + " times - reconnecting!");
                     setState(fsc_error);

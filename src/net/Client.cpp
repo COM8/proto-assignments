@@ -59,7 +59,7 @@ bool Client::send(Message *msg)
 	bool success = true;
 
 	// Message drop chance:
-	if (rand() % 100 + 1 <= MESSAGE_DROP_CHANCE)
+	if (rand() % 100 + 1 <= CLIENT_MESSAGE_DROP_CHANCE)
 	{
 		Logger::info("Droped message!");
 	}

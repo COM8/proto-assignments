@@ -10,9 +10,7 @@
 #include "Helpers.h"
 #include "sec/DiffieHellman.h"
 #include "Logger.h"
-
-#define BUF_SIZE 2048
-#define MESSAGE_DROP_CHANCE 0 // Between 0 and 100 of 100
+#include "Consts.h"
 
 // Based on: https://www.cs.rutgers.edu/~pxk/417/notes/sockets/udp.html
 namespace net
