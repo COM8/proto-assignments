@@ -43,7 +43,7 @@ void DiffieHellman::onClientReceive(unsigned long otherPub){
 }
 
 void DiffieHellman::onServerReceive(unsigned long P,unsigned long G,unsigned long otherPub){
-     this->P=P;
+    this->P=P;
     this->G=G;
     this->otherPub=otherPub;
     isSecure=false;

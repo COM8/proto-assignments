@@ -260,7 +260,11 @@ void FileServer2::onClientHelloMessage(ReadMessage *msg)
         return;
     }
 
-    client->setAccepted(0b0001);
+    unsigned long prime = ClientHelloMessage::getPrimeNumberFromMessage(msg->buffer);
+    unsigned long primRoot = ClientHelloMessage::getPrimitiveRootFromMessage(msg->buffer);
+    unsigned long pubKey = ClientHelloMessage::getPubKeyFromMessage(msg->buffer);
+
+    client->setAccepted(0b0001, prime, primRoot, pubKey);
     user->addClient(client);
     cout << "New client with id: " << client->CLIENT_ID << " accepted on port: " << client->PORT_REMOTE << endl;
 }

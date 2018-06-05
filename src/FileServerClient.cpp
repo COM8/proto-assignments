@@ -16,7 +16,7 @@ FileServerClient::FileServerClient(unsigned int clientId, unsigned short portLoc
     this->shouldConsumerRun = false;
     this->state = fsc_disconnected;
     this->cpQueue = new Queue<ReadMessage>();
-    this->enc = new DiffieHellman();
+    this->enc = NULL;
     this->udpServer = new Server(PORT_LOCAL, cpQueue, enc);
     this->udpClient = new Client(IP_REMOTE, PORT_REMOTE, enc);
     this->lastMessageTime = time(NULL);
@@ -24,14 +24,86 @@ FileServerClient::FileServerClient(unsigned int clientId, unsigned short portLoc
     this->curFIDLength = 0;
     this->lastFIDPartNumber = 0;
     this->state = fsc_disconnected;
+    this->tTimer = new Timer(true, 1000, this, 1);
+    this->sendMessageQueue = new SendMessageQueue();
+    this->seqNumber = 0;
+    this->seqNumberMutex = new mutex();
 }
 
 FileServerClient::~FileServerClient()
 {
     disconnect();
+    tTimer->stop();
+    delete tTimer;
     delete cpQueue;
     delete udpClient;
     delete udpServer;
+    delete sendMessageQueue;
+    delete seqNumberMutex;
+}
+
+unsigned int FileServerClient::getNextSeqNumber()
+{
+    unique_lock<mutex> mlock(*seqNumberMutex);
+    unsigned int i = seqNumber++;
+    mlock.unlock();
+    return i;
+}
+
+void FileServerClient::onTimerTick(int identifier)
+{
+    if (identifier == 1)
+    {
+        switch (getState())
+        {
+        case fsc_awaitHandshAck:
+            Logger::warn("Client (" + to_string(CLIENT_ID) + ") handshake failed with timeout!");
+            setState(fsc_error);
+            break;
+
+        case fsc_connected:
+            setState(fsc_ping);
+            break;
+
+        case fsc_ping:
+            Logger::warn("Client (" + to_string(CLIENT_ID) + ") handshake failed with timeout!");
+            setState(fsc_error);
+            break;
+
+        case fsc_awaitingAck:
+            list<struct SendMessage> *msgs = new list<struct SendMessage>();
+            sendMessageQueue->popNotAckedMessages(MAX_ACK_TIME_IN_S, msgs);
+
+            for (struct SendMessage msg : *msgs)
+            {
+                if (msg.sendCount > MAX_MESSAGE_SEND_TRIES)
+                {
+                    Logger::error("Failed to send messge " + to_string(msg.sendCount) + " times - reconnecting!");
+                    setState(fsc_error);
+                }
+                else
+                {
+                    // Resend message:
+                    udpClient->send(&msg.msg);
+                    msg.sendCount++;
+                    msg.sendTime = time(NULL);
+                    sendMessageQueue->push(msg);
+                    Logger::info("Resending message.");
+                }
+            }
+            delete msgs;
+            break;
+        }
+    }
+}
+
+void FileServerClient::onDisconnectedOrErrorState()
+{
+    tTimer->stop();
+    stopConsumerThread();
+    cpQueue->clear();
+    udpServer->stop();
+    sendMessageQueue->clear();
 }
 
 void FileServerClient::disconnect()
@@ -41,12 +113,21 @@ void FileServerClient::disconnect()
 
 void FileServerClient::setDeclined(unsigned char flags)
 {
-    sendServerHelloMessage(flags);
+    sendServerHelloMessage(flags, -1);
     setState(fsc_disconnected);
 }
-void FileServerClient::setAccepted(unsigned char flags)
+void FileServerClient::setAccepted(unsigned char flags, unsigned long prime, unsigned long primRoot, unsigned long pubKey)
 {
-    sendServerHelloMessage(flags);
+    // Setup encryption:
+    if (enc)
+    {
+        delete enc;
+        enc = NULL;
+    }
+    enc = new DiffieHellman();
+    enc->onServerReceive(prime, primRoot, pubKey);
+
+    sendServerHelloMessage(flags, enc->getPubKey());
     setState(fsc_clientHello);
 }
 
@@ -73,9 +154,7 @@ void FileServerClient::setState(FileServerClientState state)
     switch (state)
     {
     case fsc_disconnected:
-        stopConsumerThread();
-        cpQueue->clear();
-        udpServer->stop();
+        onDisconnectedOrErrorState();
         break;
 
     case fsc_clientHello:
@@ -84,19 +163,28 @@ void FileServerClient::setState(FileServerClientState state)
         setState(fsc_connected);
         break;
 
-    case fsc_handshake:
+    case fsc_awaitHandshAck:
+        tTimer->start();
         break;
 
     case fsc_connected:
+        tTimer->reset();
         break;
 
     case fsc_sendingChanges:
+        tTimer->stop();
         break;
 
     case fsc_awaitingAck:
+        tTimer->start();
         break;
 
     case fsc_ping:
+        tTimer->start();
+        break;
+
+    case fsc_error:
+        onDisconnectedOrErrorState();
         break;
 
     default:
@@ -382,9 +470,9 @@ void FileServerClient::onFileStatusMessage(net::ReadMessage *msg)
     delete[] fid;
 }
 
-void FileServerClient::sendServerHelloMessage(unsigned char flags)
+void FileServerClient::sendServerHelloMessage(unsigned char flags, unsigned long pubKey)
 {
-    ServerHelloMessage msg = ServerHelloMessage(PORT_LOCAL, CLIENT_ID, flags);
+    ServerHelloMessage msg = ServerHelloMessage(PORT_LOCAL, CLIENT_ID, flags, pubKey, getNextSeqNumber());
     udpClient->send(&msg);
 }
 
@@ -398,4 +486,14 @@ void FileServerClient::sendFileStatusAnswerMessage(unsigned int seqNumber, unsig
 {
     FileStatusMessage msg = FileStatusMessage(CLIENT_ID, seqNumber, lastFIDPartNumber, flags, fIDLength, fID);
     udpClient->send(&msg);
+}
+
+void FileServerClient::sendPingMessage(unsigned int plLength, unsigned int seqNumber)
+{
+    PingMessage *msg = new PingMessage(plLength, seqNumber, CLIENT_ID);
+    sendMessageQueue->pushSendMessage(seqNumber, *msg);
+
+    udpClient->send(msg);
+    delete msg;
+    Logger::debug("Ping");
 }

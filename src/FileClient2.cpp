@@ -34,7 +34,7 @@ FileClient2::FileClient2(string serverAddress, unsigned short serverPort, string
     this->tTimer = new Timer(true, TIMER_TICK_INTERVALL_MS, this, 1);
     this->curWorkingSet = fS->getWorkingSet();
     this->clientId = getRandomClientId();
-    this->enc = new DiffieHellman();
+    this->enc = NULL;
 }
 
 FileClient2::~FileClient2()
@@ -102,6 +102,15 @@ void FileClient2::setState(FileClient2State state)
         break;
 
     case sendClientHello:
+        // Setup diffi:
+        if (enc)
+        {
+            delete enc;
+            enc = NULL;
+        }
+        enc = new DiffieHellman();
+        enc->ClientStartConnection();
+
         msgTimeoutCount = 0;
         startConsumerThread();
         startHelloThread();
@@ -423,7 +432,7 @@ void FileClient2::helloTask(unsigned short listenPort, bool reconnecting, Client
 
 void FileClient2::sendClientHelloMessage(unsigned short listenPort, Client *client, unsigned char flags)
 {
-    ClientHelloMessage *msg = new ClientHelloMessage(listenPort, clientId, flags);
+    ClientHelloMessage *msg = new ClientHelloMessage(listenPort, clientId, flags, enc->getPrime(), enc->getPrimitiveRoot(), enc->getPubKey());
     client->send(msg);
     delete msg;
 }
@@ -583,6 +592,9 @@ void FileClient2::onServerHelloMessage(ReadMessage *msg)
         uploadPort = ServerHelloMessage::getPortFromMessage(msg->buffer);
         uploadClient = new Client(serverAddress, uploadPort, enc);
 
+        unsigned int seqNumber = ServerHelloMessage::getSeqNumberFromMessage(msg->buffer);
+        sendAckMessage(seqNumber, uploadClient);
+
         setState(handshake);
     }
     else
@@ -734,4 +746,10 @@ void FileClient2::printToDo()
         curWorkingSet->unlockFiles();
         curWorkingSet->unlockFolders();
     }
+}
+
+void FileClient2::sendAckMessage(unsigned int seqNumber, net::Client *client)
+{
+    AckMessage msg = AckMessage(seqNumber);
+    client->send(&msg);
 }

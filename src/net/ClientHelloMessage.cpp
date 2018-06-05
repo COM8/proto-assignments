@@ -3,17 +3,20 @@
 using namespace net;
 using namespace std;
 
-ClientHelloMessage::ClientHelloMessage(unsigned short port, unsigned int clientId, unsigned char flags) : AbstractMessage(1 << 4)
-{ // 00010000
+ClientHelloMessage::ClientHelloMessage(unsigned short port, unsigned int clientId, unsigned char flags, unsigned long prime, unsigned long primRoot, unsigned long pubKey) : AbstractMessage(1 << 4)
+{
 	this->port = port;
 	this->clientId = clientId;
 	this->flags = flags;
+	this->prime = prime;
+	this->primRoot = primRoot;
+	this->pubKey = pubKey;
 }
 
 void ClientHelloMessage::createBuffer(struct Message *msg)
 {
-	msg->buffer = new unsigned char[11]{};
-	msg->bufferLength = 11;
+	msg->buffer = new unsigned char[123]{};
+	msg->bufferLength = 123;
 
 	// Add type:
 	msg->buffer[0] |= type;
@@ -26,6 +29,15 @@ void ClientHelloMessage::createBuffer(struct Message *msg)
 
 	// Add client id:
 	setBufferUnsignedInt(msg, clientId, 24);
+
+	// Prime number:
+	setBufferUnsignedInt(msg, prime, 56);
+
+	// Primitive root:
+	setBufferUnsignedInt(msg, primRoot, 88);
+
+	// Public key:
+	setBufferUnsignedInt(msg, pubKey, 120);
 
 	// Add checksum:
 	addChecksum(msg, CHECKSUM_OFFSET_BITS);
@@ -44,4 +56,19 @@ unsigned short ClientHelloMessage::getPortFromMessage(unsigned char *buffer)
 unsigned int ClientHelloMessage::getClientIdFromMessage(unsigned char *buffer)
 {
 	return getUnsignedIntFromMessage(buffer, 24);
+}
+
+unsigned long ClientHelloMessage::getPubKeyFromMessage(unsigned char *buffer)
+{
+	return getUnsignedIntFromMessage(buffer, 120);
+}
+
+unsigned long ClientHelloMessage::getPrimeNumberFromMessage(unsigned char *buffer)
+{
+	return getUnsignedIntFromMessage(buffer, 56);
+}
+
+unsigned long ClientHelloMessage::getPrimitiveRootFromMessage(unsigned char *buffer)
+{
+	return getUnsignedIntFromMessage(buffer, 88);
 }

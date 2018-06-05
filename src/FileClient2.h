@@ -20,10 +20,7 @@
 #include "TimerTickable.h"
 #include "Logger.h"
 #include "sec/DiffieHellman.h"
-
-#define MAX_ACK_TIME_IN_S 1
-#define TIMER_TICK_INTERVALL_MS 1000
-#define MAX_MESSAGE_SEND_TRIES 15
+#include "Consts.h"
 
 enum FileClient2State
 {
@@ -99,6 +96,7 @@ class FileClient2 : public TimerTickable
     void sendClientHelloMessage(unsigned short listenPort, net::Client *client, unsigned char flags);
     void sendPingMessage(unsigned int plLength, unsigned int seqNumber, net::Client *client);
     void sendFileStatusMessage(std::string fid, std::shared_ptr<File>, net::Client *client);
+    void sendAckMessage(unsigned int seqNumber, net::Client *client);
     void onServerHelloMessage(net::ReadMessage *msg);
     void onFileStatusMessage(net::ReadMessage *msg);
     void onAckMessage(net::ReadMessage *msg);

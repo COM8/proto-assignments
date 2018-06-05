@@ -8,6 +8,7 @@
 * Don't create packages with a size of (bit-size mod 8) != 0. It makes it hard on the receiver side to interpret those!
 
 ### Changelog:
+* 05.06.2018 [Fabian] Updated messages to support key exchange
 * 27.05.2018 [Fabian] Updated ```File-Status``` message
 * 04.05.2018 [Fabian] Added Ping checksum
 * 30.04.2018 [Fabian] Updated ToDo
@@ -39,7 +40,7 @@ Checksum [32 Bit]:<br/>
 	CRC32 Algorithm [Wiki Link](https://en.wikipedia.org/wiki/Cyclic_redundancy_check)
 
 Sequence Number [32 bit]:<br/>
-	Like TCP
+	Like TCP.
 	
 FID Length [64 Bit]:<br/>
 	The length of the ```FID``` field in bytes.
@@ -50,13 +51,16 @@ FID [Defined in the ```FID Length``` filed]:
 FID Part Number [32 Bit]:<br/>
 	The file part number.
 
+Pub Key [32 Bit]:<br/>
+	The client public key for the Diffie Hellman encryption.
+
 ### Client-Hello-Handshake:
 The initial connection message that gets send by the client.
 ```
-0      4       8      24          56         88
-+------+-------+------+-----------+----------+
-| Type | Flags | Port | Client ID | Checksum |
-+------+-------+------+-----------+----------+
+0      4       8      24          56             88              120       152        184       984
++------+-------+------+-----------+--------------+----------------+---------+----------+--------+
+| Type | Flags | Port | Client ID | Prime Number | Primitive Root | Pub Key | Checksum | UNUSED |
++------+-------+------+-----------+--------------+----------------+---------+----------+--------+
 ```
 
 Flags [4 Bit]:
@@ -70,18 +74,24 @@ Flags [4 Bit]:
 ```
 
 Port [16 Bit]:<br/>
-	The port on which the client listens to server messages
+	The port on which the client listens to server messages.
 
-UNUSED [4 Bit]:<br/>
-	To ensure the package has mod 8 = 0 size
+Prime Number [32 Bit]:<br/>
+	The client prime number for the Diffie Hellman encryption.
+	
+Primitive Root [32 Bit]:<br/>
+	The client primitive root for the Diffie Hellman encryption.
+
+UNUSED [800 Bit]:<br/>
+	To "prevent" DoS attacks.
 
 ### Server-Hello-Handshake:
 Once the server received a ```Client-Hello-Handshake``` message he should reply with this message.
 ```
-0      4       8           40            56         88
-+------+-------+-----------+-------------+----------+
-| Type | Flags | Client ID | Upload-port | Checksum |
-+------+-------+-----------+-------------+----------+
+0      4       8           40                56            88        120        152
++------+-------+-----------+-----------------+-------------+---------+----------+
+| Type | Flags | Client ID | Sequence Number | Upload-port | Pub Key | Checksum |
++------+-------+-----------+-----------------+-------------+---------+----------+
 ```
 
 Upload-port [16 Bit]:<br/>
@@ -103,7 +113,7 @@ Replaces existing files.
 ```
 0      4           36                68          72              328        360          424
 +------+-----------+-----------------+-----------+----------+----------+------------+-----+
-| Type | Client ID | Sequence Number | File Type | File MD% | Checksum | FID Length | FID |
+| Type | Client ID | Sequence Number | File Type | File MD5 | Checksum | FID Length | FID |
 +------+-----------+-----------------+-----------+----------+----------+------------+-----+
 
 ```
