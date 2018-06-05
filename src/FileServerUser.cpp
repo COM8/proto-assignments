@@ -57,7 +57,7 @@ void FileServerUser::clanupClients()
     while (i != clients.end())
     {
         // If last message is older than 10 seconds:
-        if (i->second && difftime(now, i->second->lastMessageTime) > 10)
+        if (i->second || i->second->getState() == fsc_error || difftime(now, i->second->lastMessageTime) > 10)
         {
             Logger::info("Removing client " + to_string(i->second->CLIENT_ID) + " for inactivity.");
             delete i->second;
