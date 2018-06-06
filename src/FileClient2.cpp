@@ -109,7 +109,7 @@ void FileClient2::setState(FileClient2State state)
             enc = NULL;
         }
         enc = new DiffieHellman();
-        enc->ClientStartConnection();
+        enc->clientStartConnection();
 
         msgTimeoutCount = 0;
         startConsumerThread();

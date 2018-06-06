@@ -68,7 +68,7 @@ bool Client::send(Message *msg)
 		// Encrypt message:
 		if (enc && enc->isConnectionSecure())
 		{
-			enc->Encrypt(msg->buffer, msg->bufferLength);
+			enc->encrypt(msg->buffer, msg->bufferLength);
 		}
 
 		if (sendto(sockFD, msg->buffer, msg->bufferLength, 0, (struct sockaddr *)&serverAddressStruct, sizeof(serverAddressStruct)) < 0)

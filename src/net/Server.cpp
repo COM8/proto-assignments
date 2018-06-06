@@ -170,7 +170,7 @@ void Server::readNextMessage()
 		// Decrypt message:
 		if (enc && enc->isConnectionSecure())
 		{
-			enc->Decrypt(msg.buffer, msg.bufferLength);
+			enc->decrypt(msg.buffer, msg.bufferLength);
 		}
 
 		// Insert in consumer producer queue:
