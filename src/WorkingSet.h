@@ -8,6 +8,114 @@
 
 #pragma once
 
+struct NextPart{
+    std::list<std::pair<unsigned int, unsigned int>> content;
+
+    NextPart(){};
+
+    NextPart(unsigned int partNr) {
+        this->addPart(partNr);
+    }
+
+    bool isempty() {
+        return this->content.empty();
+    }
+
+    unsigned int getNextPart() {
+        if(!this->isempty()){
+            return this->content.begin()->first;
+        }
+        return -1;
+    }
+
+    void addPart(unsigned int partNr) {
+        if(!this->isempty()){
+            for(std::list<std::pair<unsigned int, unsigned int>>::iterator i = content.begin(); i != content.end(); i++){
+                if(i->first <= partNr && partNr<= i->second) {
+                    return;
+                }
+                if(partNr < i->first) {
+                    if(partNr + 1 == i->first) {
+                        i->first = partNr;
+                        return;
+                    }
+                    else {
+                        this->content.insert(i, std::pair<unsigned int, unsigned int>(partNr, partNr));
+                        return;
+                    }
+                }else {
+                    std::list<std::pair<unsigned int, unsigned int>>::iterator next = ++i;
+                    --i;
+                    if(i->second < partNr && partNr < next->first) {
+                        bool c = false;
+                        if(i->second+1== partNr) {
+                            i->second = partNr;
+                            c = true;
+                        }else {
+                            if(next->first -1 == partNr) {
+                                next->first = partNr;
+                                c = true;
+                            }
+                            else {
+                                this->content.insert(i,std::pair<unsigned int, unsigned int>(partNr, partNr));
+                                return;
+                            }
+                        }
+                        if(c) {
+                            if(i->second == next->first) {
+                                this->content.insert(i, std::pair<unsigned int, unsigned int>(i->first, next->second));
+                                this->content.erase(i);
+                                this->content.erase(next);
+                                return;
+                            }
+                        }
+                        if(next->first <= partNr && partNr <= next->second) {
+                            return;
+                        }
+                    }
+                }
+            }
+            std::list<std::pair<unsigned int, unsigned int>>::iterator i = content.end();
+            if(i->second + 1 == partNr) {
+                i->second = partNr;
+                this->content.push_back(std::pair<unsigned int, unsigned int>(partNr, partNr));
+                return;
+            }else {
+                this->content.push_back(std::pair<unsigned int, unsigned int>(partNr, partNr));
+                return;
+            }
+        }
+        else {
+            this->content.push_back(std::pair<unsigned int, unsigned int>(partNr, partNr));
+            return;
+        }
+    }
+
+    int acknowledgePart(unsigned int partNr) {
+        if(this->isempty()) {
+            return -1;
+        }
+        std::list<std::pair<unsigned int, unsigned int>>::iterator i = this->content.begin();
+        if(i->first == partNr) {
+            if(i->first == i->second) {
+                this->content.erase(i);
+            }else {
+                i->first = i->first +1;
+            }
+            return 0;
+        }
+        return -1;
+    }
+
+    static std::shared_ptr<NextPart>genPointer() {
+        return std::make_shared<struct NextPart>(NextPart());
+    }
+
+    static std::shared_ptr<NextPart>genPointer(unsigned int partNr){
+        return std::make_shared<struct NextPart>(NextPart(partNr));
+    }
+};
+
 struct Folder
 {
     std::string path = "";
@@ -29,7 +137,7 @@ struct File
     bool isOpen = false;
     unsigned int size;
     std::ifstream fd;
-    unsigned last_part;
+    unsigned int last_part;
     File(std::string name, unsigned int size){
         this->name = name;
         this->hash = hash;
