@@ -1,3 +1,5 @@
+#pragma once
+
 #define MAX_ACK_TIME_IN_S 1
 #define TIMER_TICK_INTERVALL_MS 1000
 #define MAX_MESSAGE_TIMEOUT_COUNT 15
