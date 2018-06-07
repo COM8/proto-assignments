@@ -542,9 +542,13 @@ void FileClient2::consumerTask()
             onAckMessage(&msg);
             break;
 
-        case 7:
-            // onTransferEndedMessage(&msg);
+        case 6:
+            onPingMessage(&msg);
             break;
+
+            /*case 7:
+            onTransferEndedMessage(&msg);
+            break;*/
 
         default:
             Logger::warn("Unknown message type received: " + to_string(msg.msgType));
@@ -564,28 +568,32 @@ void FileClient2::onServerHelloMessage(ReadMessage *msg)
             return;
         }
 
-        unsigned char flags = ServerHelloMessage::getFlagsFromMessage(msg->buffer);
-        if ((flags & 0b0001) != 1)
+        // Check client ID:
+        unsigned int recClientId = ServerHelloMessage::getClientIdFromMessage(msg->buffer);
+        if (recClientId != clientId)
         {
-            if ((flags & 0b0100) == 0b0100)
-            {
-                unsigned int recClientId = ServerHelloMessage::getClientIdFromMessage(msg->buffer);
-                if (recClientId == clientId)
-                {
-                    Logger::warn("Client ID " + to_string(clientId) + " already taken. Changing ID");
-                    clientId = getRandomClientId();
-                    Logger::info("Changed client ID to: " + to_string(clientId));
-                }
-                else
-                {
-                    Logger::debug("Dropped ServerHelloMessage with invalid client ID.");
-                }
-            }
-            else
-            {
-                Logger::error("Client not accepted: " + to_string(flags));
-                setState(disconnected);
-            }
+            Logger::debug("Dropped ServerHelloMessage with invalid client ID.");
+            return;
+        }
+
+        unsigned char flags = ServerHelloMessage::getFlagsFromMessage(msg->buffer);
+        if ((flags & 0b1000) == 0b1000)
+        {
+            Logger::error("Client not accepted with unknown reason: " + to_string(flags));
+            disconnect();
+            return;
+        }
+        else if ((flags & 0b0100) == 0b0100)
+        {
+            Logger::warn("Client ID " + to_string(clientId) + " already taken. Changing ID");
+            clientId = getRandomClientId();
+            Logger::info("Changed client ID to: " + to_string(clientId));
+            return;
+        }
+        else if ((flags & 0b0010) == 0b0010)
+        {
+            Logger::error("Client not accepted. Server has too many clients. Try again later.");
+            disconnect();
             return;
         }
 
@@ -605,6 +613,7 @@ void FileClient2::onServerHelloMessage(ReadMessage *msg)
 
 void FileClient2::disconnect()
 {
+    Logger::info("Disconnecting...");
     setState(disconnected);
 }
 
@@ -714,6 +723,27 @@ void FileClient2::onAckMessage(ReadMessage *msg)
     default:
         break;
     }
+}
+
+void FileClient2::onPingMessage(net::ReadMessage *msg)
+{
+    // Check if the checksum of the received message is valid else drop it:
+    if (!AbstractMessage::isChecksumValid(msg, PingMessage::CHECKSUM_OFFSET_BITS))
+    {
+        return;
+    }
+
+    // Check if client ID is valid:
+    unsigned int clientId = PingMessage::getClientIdFromMessage(msg->buffer);
+    if (this->clientId != clientId)
+    {
+        Logger::warn("Invalid client id received!");
+        return;
+    }
+
+    unsigned int seqNum = PingMessage::getSeqNumberFromMessage(msg->buffer);
+    sendAckMessage(seqNum, uploadClient);
+    Logger::debug("PONG " + to_string(clientId));
 }
 
 void FileClient2::printToDo()

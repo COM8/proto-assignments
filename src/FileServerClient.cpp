@@ -32,8 +32,7 @@ FileServerClient::FileServerClient(unsigned int clientId, unsigned short portLoc
 
 FileServerClient::~FileServerClient()
 {
-    disconnect();
-    tTimer->stop();
+    setState(fsc_error);
     delete tTimer;
     delete cpQueue;
     delete udpClient;
@@ -468,7 +467,7 @@ void FileServerClient::onFileStatusMessage(net::ReadMessage *msg)
 
 void FileServerClient::sendServerHelloMessage(unsigned char flags, unsigned long pubKey)
 {
-    ServerHelloMessage msg = ServerHelloMessage(PORT_LOCAL, CLIENT_ID, flags, pubKey, getNextSeqNumber());
+    ServerHelloMessage msg = ServerHelloMessage(PORT_LOCAL, CLIENT_ID, getNextSeqNumber(), flags, pubKey);
     udpClient->send(&msg);
 }
 

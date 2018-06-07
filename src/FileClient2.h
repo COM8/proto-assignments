@@ -100,4 +100,5 @@ class FileClient2 : public TimerTickable
     void onServerHelloMessage(net::ReadMessage *msg);
     void onFileStatusMessage(net::ReadMessage *msg);
     void onAckMessage(net::ReadMessage *msg);
+    void onPingMessage(net::ReadMessage *msg);
 };
