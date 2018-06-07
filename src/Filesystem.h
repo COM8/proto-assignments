@@ -1,3 +1,5 @@
+#pragma once
+
 #include <experimental/filesystem>
 #include <iostream>
 #include <string>
@@ -7,12 +9,8 @@
 #include <cstring>
 #include <WorkingSet.h>
 #include <lib/hash-library/md5.h>
-#include <Logger.h>
-
-#pragma once
-
-#define HASHPARTSIZE 16777216
-#define PARTLENGTH 900
+#include "Logger.h"
+#include "Consts.h"
 
 
 struct ServerFile {
@@ -40,7 +38,7 @@ class Filesystem {
 protected:
     static std::shared_ptr<File> genFile(std::string FID);
 public:
-    const unsigned static int partLength = PARTLENGTH;
+    const unsigned static int partLength = MAX_CONTENT_LENGTH;
     static long unsigned int filesize(const std::string FID);
     static void calcSHA256(const std::string FID, std::shared_ptr<std::array<char,32>> buffer);
     static void calcSHA256(const std::string FID, char* buffer);
