@@ -44,7 +44,7 @@ void Server::setState(State state)
 
 		// ToDo: fix segfault:
 		// Send dummy message:
-		Client c = Client("127.0.0.0", port);
+		Client c = Client("127.0.0.0", port, NULL);
 		Message dummyMsg = Message{};
 		dummyMsg.buffer = (unsigned char *)"The wordl is flat!";
 		dummyMsg.bufferLength = 18;
