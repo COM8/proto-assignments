@@ -73,7 +73,7 @@ bool Client::send(Message *msg)
 
 		if (sendto(sockFD, msg->buffer, msg->bufferLength, 0, (struct sockaddr *)&serverAddressStruct, sizeof(serverAddressStruct)) < 0)
 		{
-			Logger::error("UDP client failed to send message to: " + hostAddr + " and port: " + to_string(port));
+			Logger::error("UDP client failed to send message to: " + hostAddr + " on port: " + to_string(port) + " with error: " + strerror(errno));
 			success = false;
 		}
 	}

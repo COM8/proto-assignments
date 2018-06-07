@@ -12,13 +12,13 @@
 #include <bitset>
 #include <unistd.h>
 #include "net/State.h"
-#include "Helpers.h"
 #include "Queue.h"
 #include "net/AbstractMessage.h"
 #include "Logger.h"
 #include "Client.h"
 #include "sec/DiffieHellman.h"
 #include "Logger.h"
+#include "net/Client.h"
 
 #define BUF_SIZE 2048
 

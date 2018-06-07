@@ -1,4 +1,5 @@
 #pragma once
+
 #include <iostream>
 #include <string>
 #include <string.h>
@@ -7,7 +8,6 @@
 #include <netdb.h>
 #include <stdlib.h>
 #include "net/AbstractMessage.h"
-#include "Helpers.h"
 #include "sec/DiffieHellman.h"
 #include "Logger.h"
 #include "Consts.h"

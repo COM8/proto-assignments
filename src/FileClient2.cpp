@@ -716,7 +716,6 @@ void FileClient2::onAckMessage(ReadMessage *msg)
         break;
 
     case ping:
-        Logger::debug("Pong");
         setState(connected);
         break;
 

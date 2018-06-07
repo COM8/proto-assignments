@@ -30,6 +30,9 @@ void Server::setState(State state)
 		break;
 
 	case starting:
+		shouldRun = true;
+		// Start a new server thread:
+		serverThread = new thread(&Server::startTask, this);
 		break;
 
 	case running:
@@ -41,11 +44,11 @@ void Server::setState(State state)
 
 		// ToDo: fix segfault:
 		// Send dummy message:
-		/* Client c = Client("127.0.0.0", port);
+		Client c = Client("127.0.0.0", port);
 		Message dummyMsg = Message{};
 		dummyMsg.buffer = (unsigned char *)"The wordl is flat!";
 		dummyMsg.bufferLength = 18;
-		c.send(&dummyMsg); */
+		c.send(&dummyMsg);
 
 		if (serverThread && serverThread->joinable() && serverThread->get_id() != this_thread::get_id())
 		{
@@ -82,14 +85,9 @@ void Server::start()
 	if (serverThread)
 	{
 		Logger::error("UDP server already running! Please stop first!");
+		return;
 	}
-	else
-	{
-		setState(starting);
-		shouldRun = true;
-		// Start a new server thread:
-		serverThread = new thread(&Server::startTask, this);
-	}
+	setState(starting);
 }
 
 void Server::startTask()
