@@ -30,7 +30,7 @@ struct NextPart{
 
     void addPart(unsigned int partNr) {
         if(!this->isempty()){
-            for(std::list<std::pair<unsigned int, unsigned int>>::iterator i = content.begin(); i != content.end(); i++){
+            for(std::list<std::pair<unsigned int, unsigned int>>::iterator i = content.begin(); i != content.end(); ++i){
                 if(i->first <= partNr && partNr<= i->second) {
                     return;
                 }
@@ -45,40 +45,42 @@ struct NextPart{
                     }
                 }else {
                     std::list<std::pair<unsigned int, unsigned int>>::iterator next = ++i;
-                    --i;
-                    if(i->second < partNr && partNr < next->first) {
-                        bool c = false;
-                        if(i->second+1== partNr) {
-                            i->second = partNr;
-                            c = true;
-                        }else {
-                            if(next->first -1 == partNr) {
-                                next->first = partNr;
+                    --i;    
+                    if(next->first <= partNr && partNr <= next->second) {
+                        return;
+                    }else {
+                        if(i->second < partNr && partNr < next->first) {
+                            bool c = false;
+                            if(i->second+1== partNr) {
+                                i->second = partNr;
                                 c = true;
+                            }else {
+                                if(next->first -1 == partNr) {
+                                    next->first = partNr;
+                                    c = true;
+                                }
+                                else {
+                                    this->content.insert(next,std::pair<unsigned int, unsigned int>(partNr, partNr));
+                                    return;
+                                }
                             }
-                            else {
-                                this->content.insert(i,std::pair<unsigned int, unsigned int>(partNr, partNr));
+                            if(c) {
+                                if(i->second == next->first || i->second +1 == next->first) {
+                                    this->content.insert(i, std::pair<unsigned int, unsigned int>(i->first, next->second));
+                                    this->content.erase(i);
+                                    this->content.erase(next);
+                                    return;
+                                }
                                 return;
+                                }
                             }
                         }
-                        if(c) {
-                            if(i->second == next->first) {
-                                this->content.insert(i, std::pair<unsigned int, unsigned int>(i->first, next->second));
-                                this->content.erase(i);
-                                this->content.erase(next);
-                                return;
-                            }
-                        }
-                        if(next->first <= partNr && partNr <= next->second) {
-                            return;
-                        }
-                    }
                 }
             }
-            std::list<std::pair<unsigned int, unsigned int>>::iterator i = content.end();
+            std::list<std::pair<unsigned int, unsigned int>>::iterator i = content.begin();
             if(i->second + 1 == partNr) {
                 i->second = partNr;
-                this->content.push_back(std::pair<unsigned int, unsigned int>(partNr, partNr));
+                //this->content.push_back(std::pair<unsigned int, unsigned int>(partNr, partNr));
                 return;
             }else {
                 this->content.push_back(std::pair<unsigned int, unsigned int>(partNr, partNr));
@@ -105,6 +107,13 @@ struct NextPart{
             return 0;
         }
         return -1;
+    }
+
+    void printNexPart() {
+        for(std::pair<unsigned int, unsigned int> t: this->content) {
+            std::cout << t.first << "-" << t.second << " ";
+        }
+        std::cout << std::endl;
     }
 
     static std::shared_ptr<NextPart>genPointer() {
