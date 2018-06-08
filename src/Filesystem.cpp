@@ -302,6 +302,8 @@ void FilesystemServer::readFileFile()
 		this->files[string(name)] = ServerFile::genPointer(last_part);
 		tmp.read(this->files[string(name)]->hash.get()->data(), 32);
 		currPosition += l + 40;
+		delete[] length;
+		delete[] name;
 	}
 	tmp.close();
 }
@@ -320,6 +322,8 @@ void FilesystemServer::readFolderFile()
 		tmp.read(name, l);
 		this->folders[string(name)] = true;
 		currPosition += l + 4;
+		delete [] length;
+		delete[] name;
 	}
 	tmp.close();
 }
