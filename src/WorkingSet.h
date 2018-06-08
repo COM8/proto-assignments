@@ -27,7 +27,6 @@ struct NextPart{
         }
         return -1;
     }
-
     void addPart(unsigned int partNr) {
         if(!this->isempty()){
             for(std::list<std::pair<unsigned int, unsigned int>>::iterator i = content.begin(); i != content.end(); ++i){

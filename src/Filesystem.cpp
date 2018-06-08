@@ -81,14 +81,13 @@ WorkingSet *FilesystemClient::getWorkingSet()
 		folders.push_back(f);
 	}
 
-	for (shared_ptr<Folder> f : this->folders)
-	{
-		if (!Filesystem::exists(f->path))
-		{
-			deleteFolder.push_back(f->path);
-			//this->folders.erase(f);
+	for(_List_iterator<shared_ptr<Folder> > i = this->folders.begin(); i != this->folders.end(); ++i) {
+		if(!Filesystem::exists(i->get()->path)) {
+			deleteFolder.push_back(i->get()->path);
+			this->folders.erase(i++);
 		}
 	}
+
 	for (const auto f : this->files)
 	{
 		if (!Filesystem::exists(f.first))
