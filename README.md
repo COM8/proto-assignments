@@ -104,7 +104,7 @@ Flags [4 Bit]:
 |||+-> Client accepted
 ||+--> Too many clients - connection revoked
 |+---> Client ID taken
-+----> *UNUSED*
++----> Invalid username
 ```
 
 ### File-Creation:
