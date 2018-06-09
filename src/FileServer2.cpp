@@ -193,15 +193,15 @@ FileServerUser *FileServer2::getUser(string userName)
     return NULL;
 }
 
-FileServerUser *FileServer2::addUser(string userName, string password)
+FileServerUser *FileServer2::addUser(const User *u)
 {
     std::unique_lock<std::mutex> mlock(*userMutex);
-    if (users[userName])
+    if (users[u->username])
     {
-        delete users[userName];
+        delete users[u->username];
     }
-    FileServerUser *user = new FileServerUser(userName, password);
-    users[userName] = user;
+    FileServerUser *user = new FileServerUser(u->username, u->password);
+    users[u->username] = user;
     mlock.unlock();
 
     return user;
@@ -242,10 +242,23 @@ void FileServer2::onClientHelloMessage(ReadMessage *msg)
     }
 
     // Get user:
-    FileServerUser *user = getUser("username");
+    unsigned int usernameLength = ClientHelloMessage::getUsernameLengthFromMessage(msg->buffer);
+    unsigned char *username = ClientHelloMessage::getUsernameFromMessage(msg->buffer, usernameLength);
+    string usernameString = string((char *)username, usernameLength);
+    FileServerUser *user = getUser(usernameString);
     if (!user)
     {
-        user = addUser("username", "password");
+        // Check if UserStore contains user:
+        const User *u = UserStore::INSTANCE.findUser(usernameString);
+        if (u)
+        {
+            user = addUser(u);
+        }
+        else
+        {
+            // Create dummy user:
+            user = new FileServerUser(usernameString, "");
+        }
     }
 
     unsigned int clientId = ClientHelloMessage::getClientIdFromMessage(msg->buffer);
@@ -253,10 +266,19 @@ void FileServer2::onClientHelloMessage(ReadMessage *msg)
     unsigned int portLocal = 2000 + clientId % 63000;
     FileServerClient *client = new FileServerClient(clientId, portLocal, portRemote, msg->senderIp, maxPPS, user);
 
+    if (!user)
+    {
+        client->setDeclined(0b1000);
+        delete client;
+        delete user;
+        Logger::warn("Client request declined! Reason: Client username \"" + usernameString + "\" not found!");
+        return;
+    }
     if (findClient(clientId))
     {
         client->setDeclined(0b0100);
         delete client;
+        delete user;
         Logger::warn("Client request declined! Reason: Client ID \"" + to_string(clientId) + "\" already taken!");
         return;
     }

@@ -4,11 +4,11 @@ using namespace net;
 using namespace std;
 using namespace sec;
 
-FileClient2::FileClient2(string serverAddress, unsigned short serverPort, string userName, string clientPassword, FilesystemClient *fS)
+FileClient2::FileClient2(string serverAddress, unsigned short serverPort, string username, string clientPassword, FilesystemClient *fS)
 {
     this->serverAddress = serverAddress;
     this->serverPort = serverPort;
-    this->userName = userName;
+    this->username = username;
     this->clientPassword = clientPassword;
     this->fS = fS;
 
@@ -436,15 +436,17 @@ void FileClient2::helloTask(unsigned short listenPort, bool reconnecting, Client
         {
             flags |= 0b0010;
         }
-        sendClientHelloMessage(listenPort, client, flags);
+        sendClientHelloMessage(listenPort, flags, username, client);
         sleep(1); // Sleep for 1 second
     }
     Logger::debug("Stopped hello thread.");
 }
 
-void FileClient2::sendClientHelloMessage(unsigned short listenPort, Client2 *client, unsigned char flags)
+void FileClient2::sendClientHelloMessage(unsigned short listenPort, unsigned char flags, string username, Client2 *client)
 {
-    ClientHelloMessage *msg = new ClientHelloMessage(listenPort, clientId, flags, enc->getPrime(), enc->getPrimitiveRoot(), enc->getPubKey());
+    const char *c = username.c_str();
+    unsigned int l = username.length();
+    ClientHelloMessage *msg = new ClientHelloMessage(listenPort, clientId, flags, enc->getPrime(), enc->getPrimitiveRoot(), enc->getPubKey(), (unsigned char *)c, l);
     client->send(msg);
     delete msg;
 }

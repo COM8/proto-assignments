@@ -1,13 +1,13 @@
-#include "TransferEndedMessage.h"
+#include "AuthResultMessage.h"
 
 using namespace net;
 
-TransferEndedMessage::TransferEndedMessage(unsigned int clientId, unsigned char flags) : AbstractMessage(7 << 4) {
+AuthResultMessage::AuthResultMessage(unsigned int clientId, unsigned char flags) : AbstractMessage(9 << 4) {
 	this->clientId = clientId;
 	this->flags = flags;
 }
 
-void TransferEndedMessage::createBuffer(struct Message* msg) {
+void AuthResultMessage::createBuffer(struct Message* msg) {
 	msg->buffer = new unsigned char[9]{};
 	msg->bufferLength = 9;
 	
@@ -24,10 +24,10 @@ void TransferEndedMessage::createBuffer(struct Message* msg) {
 	addChecksum(msg, CHECKSUM_OFFSET_BITS);
 }
 
-unsigned int TransferEndedMessage::getClientIdFromMessage(unsigned char* buffer) {
+unsigned int AuthResultMessage::getClientIdFromMessage(unsigned char* buffer) {
 	return getUnsignedIntFromMessage(buffer, 8);
 }
 
-unsigned char TransferEndedMessage::getFlagsFromMessage(unsigned char* buffer) {
+unsigned char AuthResultMessage::getFlagsFromMessage(unsigned char* buffer) {
 	return buffer[0] & 0xF; // 4 bit offset
 }

@@ -39,7 +39,7 @@ enum FileClient2State
 class FileClient2 : public TimerTickable
 {
   public:
-    FileClient2(std::string serverAddress, unsigned short serverPort, std::string userName, std::string clientPassword, FilesystemClient *fS);
+    FileClient2(std::string serverAddress, unsigned short serverPort, std::string username, std::string clientPassword, FilesystemClient *fS);
     ~FileClient2();
 
     void connect();
@@ -64,7 +64,7 @@ class FileClient2 : public TimerTickable
     bool shouldConsumerRun;
     unsigned int clientId;
     std::string clientPassword;
-    std::string userName;
+    std::string username;
     net::Client2 *client;
     net::Client2 *uploadClient;
     net::Server2 *server;
@@ -94,7 +94,7 @@ class FileClient2 : public TimerTickable
     void sendFolderCreationMessage(std::shared_ptr<Folder> f, net::Client2 *client);
     void sendFileCreationMessage(std::string fid, std::shared_ptr<File> f, net::Client2 *client);
     bool sendFilePartMessage(std::string fid, std::shared_ptr<File> f, unsigned int nextPartNr, net::Client2 *client);
-    void sendClientHelloMessage(unsigned short listenPort, net::Client2 *client, unsigned char flags);
+    void sendClientHelloMessage(unsigned short listenPort, unsigned char flags, std::string username, net::Client2 *client);
     void sendPingMessage(unsigned int plLength, unsigned int seqNumber, net::Client2 *client);
     void sendFileStatusMessage(std::string fid, std::shared_ptr<File>, net::Client2 *client);
     void sendAckMessage(unsigned int seqNumber, net::Client2 *client);

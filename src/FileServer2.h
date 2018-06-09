@@ -21,6 +21,7 @@
 #include "Logger.h"
 #include "FileServerUser.h"
 #include "FileServerClient.h"
+#include "UserStore.h"
 
 enum FileServerState
 {
@@ -52,7 +53,7 @@ private:
   unsigned int maxPPS;
 
   FileServerUser *getUser(std::string userName);
-  FileServerUser *addUser(std::string userName, std::string password);
+  FileServerUser *addUser(const User *u);
   void setState(FileServerState state);
   void consumerTask();
   void startConsumerThread();

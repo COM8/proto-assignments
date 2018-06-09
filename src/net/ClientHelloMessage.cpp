@@ -3,7 +3,7 @@
 using namespace net;
 using namespace std;
 
-ClientHelloMessage::ClientHelloMessage(unsigned short port, unsigned int clientId, unsigned char flags, unsigned long prime, unsigned long primRoot, unsigned long pubKey) : AbstractMessage(1 << 4)
+ClientHelloMessage::ClientHelloMessage(unsigned short port, unsigned int clientId, unsigned char flags, unsigned long prime, unsigned long primRoot, unsigned long pubKey, unsigned char *userName, unsigned int usernameLength) : AbstractMessage(1 << 4)
 {
 	this->port = port;
 	this->clientId = clientId;
@@ -11,12 +11,14 @@ ClientHelloMessage::ClientHelloMessage(unsigned short port, unsigned int clientI
 	this->prime = prime;
 	this->primRoot = primRoot;
 	this->pubKey = pubKey;
+	this->userName = userName;
+	this->usernameLength = usernameLength;
 }
 
 void ClientHelloMessage::createBuffer(struct Message *msg)
 {
-	msg->buffer = new unsigned char[123]{};
-	msg->bufferLength = 123;
+	msg->buffer = new unsigned char[125]{};
+	msg->bufferLength = 125;
 
 	// Add type:
 	msg->buffer[0] |= type;
@@ -38,6 +40,12 @@ void ClientHelloMessage::createBuffer(struct Message *msg)
 
 	// Public key:
 	setBufferUnsignedInt(msg, pubKey, 120);
+
+	// Username length:
+	setBufferUnsignedInt(msg, usernameLength, 184);
+
+	// Username:
+	setBufferValue(msg, userName, usernameLength, 216);
 
 	// Add checksum:
 	addChecksum(msg, CHECKSUM_OFFSET_BITS);
@@ -71,4 +79,13 @@ unsigned long ClientHelloMessage::getPrimeNumberFromMessage(unsigned char *buffe
 unsigned long ClientHelloMessage::getPrimitiveRootFromMessage(unsigned char *buffer)
 {
 	return getUnsignedIntFromMessage(buffer, 88);
+}
+
+unsigned int ClientHelloMessage::getUsernameLengthFromMessage(unsigned char *buffer)
+{
+	return getUnsignedIntFromMessage(buffer, 184);
+}
+
+unsigned char *ClientHelloMessage::getUsernameFromMessage(unsigned char *buffer, unsigned int usernameLength) {
+	return getBytesWithOffset(buffer, 216, (uint64_t)usernameLength);
 }
