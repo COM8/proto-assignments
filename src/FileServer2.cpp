@@ -10,7 +10,7 @@ FileServer2::FileServer2(unsigned short port) : users()
     this->stateMutex = new mutex();
     this->userMutex = new mutex();
     this->cpQueue = new Queue<ReadMessage>();
-    this->udpServer = new Server(port, cpQueue, NULL); // Set encryption to NULL because ther is no encryption on the main connection
+    this->udpServer = new Server2(port, cpQueue, NULL); // Set encryption to NULL because ther is no encryption on the main connection
     this->shouldConsumerRun = false;
     this->consumerThread = NULL;
     this->state = fs_stopped;

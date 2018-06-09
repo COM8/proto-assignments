@@ -3,9 +3,10 @@
 #include <iostream>
 #include <mutex>
 #include <list>
+#include <unistd.h>
 #include "Filesystem.h"
-#include "net/Client.h"
-#include "net/Server.h"
+#include "net/Client2.h"
+#include "net/Server2.h"
 #include "net/ClientHelloMessage.h"
 #include "net/ServerHelloMessage.h"
 #include "net/PingMessage.h"
@@ -64,9 +65,9 @@ class FileClient2 : public TimerTickable
     unsigned int clientId;
     std::string clientPassword;
     std::string userName;
-    net::Client *client;
-    net::Client *uploadClient;
-    net::Server *server;
+    net::Client2 *client;
+    net::Client2 *uploadClient;
+    net::Server2 *server;
     Queue<net::ReadMessage> *cpQueue;
     SendMessageQueue *sendMessageQueue;
     bool reconnect;
@@ -82,21 +83,21 @@ class FileClient2 : public TimerTickable
     unsigned int getNextSeqNumber();
     void startHelloThread();
     void stopHelloThread();
-    void helloTask(unsigned short listenPort, bool reconnecting, net::Client *client);
+    void helloTask(unsigned short listenPort, bool reconnecting, net::Client2 *client);
     void stopConsumerThread();
     void startConsumerThread();
     void consumerTask();
     void sendNextFilePart();
-    void sendFolderDeletionMessage(std::string folder, net::Client *client);
-    void sendFileDeletionMessage(std::string file, net::Client *client);
-    void sendTransferEndedMessage(unsigned char flags, net::Client *client);
-    void sendFolderCreationMessage(std::shared_ptr<Folder> f, net::Client *client);
-    void sendFileCreationMessage(std::string fid, std::shared_ptr<File> f, net::Client *client);
-    bool sendFilePartMessage(std::string fid, std::shared_ptr<File> f, unsigned int nextPartNr, net::Client *client);
-    void sendClientHelloMessage(unsigned short listenPort, net::Client *client, unsigned char flags);
-    void sendPingMessage(unsigned int plLength, unsigned int seqNumber, net::Client *client);
-    void sendFileStatusMessage(std::string fid, std::shared_ptr<File>, net::Client *client);
-    void sendAckMessage(unsigned int seqNumber, net::Client *client);
+    void sendFolderDeletionMessage(std::string folder, net::Client2 *client);
+    void sendFileDeletionMessage(std::string file, net::Client2 *client);
+    void sendTransferEndedMessage(unsigned char flags, net::Client2 *client);
+    void sendFolderCreationMessage(std::shared_ptr<Folder> f, net::Client2 *client);
+    void sendFileCreationMessage(std::string fid, std::shared_ptr<File> f, net::Client2 *client);
+    bool sendFilePartMessage(std::string fid, std::shared_ptr<File> f, unsigned int nextPartNr, net::Client2 *client);
+    void sendClientHelloMessage(unsigned short listenPort, net::Client2 *client, unsigned char flags);
+    void sendPingMessage(unsigned int plLength, unsigned int seqNumber, net::Client2 *client);
+    void sendFileStatusMessage(std::string fid, std::shared_ptr<File>, net::Client2 *client);
+    void sendAckMessage(unsigned int seqNumber, net::Client2 *client);
     void onServerHelloMessage(net::ReadMessage *msg);
     void onFileStatusMessage(net::ReadMessage *msg);
     void onAckMessage(net::ReadMessage *msg);

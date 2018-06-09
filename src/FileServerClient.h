@@ -3,8 +3,8 @@
 #include <mutex>
 #include <cstdint>
 #include <time.h>
-#include "net/Client.h"
-#include "net/Server.h"
+#include "net/Client2.h"
+#include "net/Server2.h"
 #include "Queue.h"
 #include "Filesystem.h"
 #include "net/AbstractMessage.h"
@@ -56,8 +56,8 @@ private:
   std::mutex stateMutex;
   std::mutex *seqNumberMutex;
   unsigned int seqNumber;
-  net::Client *udpClient;
-  net::Server *udpServer;
+  net::Client2 *udpClient;
+  net::Server2 *udpServer;
   Queue<net::ReadMessage> *cpQueue;
   SendMessageQueue *sendMessageQueue;
   bool shouldConsumerRun;

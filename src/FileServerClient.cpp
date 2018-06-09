@@ -17,8 +17,9 @@ FileServerClient::FileServerClient(unsigned int clientId, unsigned short portLoc
     this->state = fsc_disconnected;
     this->cpQueue = new Queue<ReadMessage>();
     this->enc = NULL;
-    this->udpServer = new Server(PORT_LOCAL, cpQueue, enc);
-    this->udpClient = new Client(IP_REMOTE, PORT_REMOTE, enc);
+    this->udpServer = new Server2(PORT_LOCAL, cpQueue, enc);
+    this->udpClient = new Client2(IP_REMOTE, PORT_REMOTE, enc);
+    this->udpClient->init();
     this->lastMessageTime = time(NULL);
     this->curFID = "";
     this->curFIDLength = 0;

@@ -5,11 +5,19 @@
 #define MAX_MESSAGE_TIMEOUT_COUNT 15
 #define MAX_PING_MESSAGE_TIMEOUT_COUNT 3
 
-#define CLIENT_MESSAGE_DROP_CHANCE 0 // Between 0 and 100
+// UDP-Server:
+#define BUF_SIZE 2048
+#define ENABLE_UDP_SERVER_DEBUG_OUTPUT false
 
+// UDP-Client:
+#define CLIENT_MESSAGE_DROP_CHANCE 0 // Between 0 and 100
+#define ENABLE_UDP_CLIENT_DEBUG_OUTPUT false
+
+// Filesystem:
 #define MAX_CONTENT_LENGTH 1000
 #define MAX_HASH_PART_SIZE_BYTE 16777216
 
+// CRC:
 // Source: https://github.com/gcc-mirror/gcc/blob/master/libiberty/crc32.c
 static const unsigned int CRC32_TABLE[] = {
 		0x00000000, 0x04c11db7, 0x09823b6e, 0x0d4326d9,

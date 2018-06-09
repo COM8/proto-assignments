@@ -5,8 +5,7 @@
 #include <unordered_map>
 #include <time.h>
 #include <mutex>
-#include "net/Server.h"
-#include "net/Client.h"
+#include "net/Server2.h"
 #include "Queue.h"
 #include "net/ServerHelloMessage.h"
 #include "net/FileCreationMessage.h"
@@ -43,7 +42,7 @@ private:
   FileServerState state;
   std::mutex *stateMutex;
   std::mutex *userMutex;
-  net::Server *udpServer;
+  net::Server2 *udpServer;
   unsigned short port;
   Queue<net::ReadMessage> *cpQueue;
   bool shouldConsumerRun;

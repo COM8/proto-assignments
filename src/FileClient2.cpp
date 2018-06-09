@@ -99,6 +99,17 @@ void FileClient2::setState(FileClient2State state)
         stopHelloThread();
         stopConsumerThread();
         sendMessageQueue->clear();
+        if (server)
+        {
+            server->stop();
+            delete server;
+            server = NULL;
+        }
+        if (client)
+        {
+            delete client;
+            client = NULL;
+        }
         break;
 
     case sendClientHello:
@@ -250,14 +261,14 @@ void FileClient2::sendNextFilePart()
     curWorkingSet->unlockDelFolders();
 }
 
-void FileClient2::sendTransferEndedMessage(unsigned char flags, Client *client)
+void FileClient2::sendTransferEndedMessage(unsigned char flags, Client2 *client)
 {
     TransferEndedMessage *msg = new TransferEndedMessage(clientId, flags);
     client->send(msg);
     delete msg;
 }
 
-void FileClient2::sendFolderCreationMessage(shared_ptr<Folder> f, Client *client)
+void FileClient2::sendFolderCreationMessage(shared_ptr<Folder> f, Client2 *client)
 {
     const char *c = f->path.c_str();
     uint64_t l = f->path.length();
@@ -270,7 +281,7 @@ void FileClient2::sendFolderCreationMessage(shared_ptr<Folder> f, Client *client
     Logger::info("Send folder creation for: \"" + f->path + "\"");
 }
 
-void FileClient2::sendFolderDeletionMessage(string folderPath, Client *client)
+void FileClient2::sendFolderDeletionMessage(string folderPath, Client2 *client)
 {
     const char *c = folderPath.c_str();
     uint64_t l = folderPath.length();
@@ -283,7 +294,7 @@ void FileClient2::sendFolderDeletionMessage(string folderPath, Client *client)
     Logger::info("Send folder deletion for: \"" + folderPath + "\"");
 }
 
-void FileClient2::sendFileDeletionMessage(string filePath, Client *client)
+void FileClient2::sendFileDeletionMessage(string filePath, Client2 *client)
 {
     const char *c = filePath.c_str();
     uint64_t l = filePath.length();
@@ -296,7 +307,7 @@ void FileClient2::sendFileDeletionMessage(string filePath, Client *client)
     Logger::info("Send file deletion for: \"" + filePath + "\"");
 }
 
-void FileClient2::sendFileCreationMessage(string fid, std::shared_ptr<File> f, Client *client)
+void FileClient2::sendFileCreationMessage(string fid, std::shared_ptr<File> f, Client2 *client)
 {
     const char *c = fid.c_str();
     uint64_t l = fid.length();
@@ -309,7 +320,7 @@ void FileClient2::sendFileCreationMessage(string fid, std::shared_ptr<File> f, C
     Logger::info("Send file creation: " + fid);
 }
 
-void FileClient2::sendFileStatusMessage(string fid, struct std::shared_ptr<File> f, Client *client)
+void FileClient2::sendFileStatusMessage(string fid, struct std::shared_ptr<File> f, Client2 *client)
 {
     const char *c = fid.c_str();
     uint64_t l = fid.length();
@@ -322,7 +333,7 @@ void FileClient2::sendFileStatusMessage(string fid, struct std::shared_ptr<File>
     Logger::info("Requested file status for: " + fid);
 }
 
-bool FileClient2::sendFilePartMessage(string fid, shared_ptr<File> f, unsigned int nextPartNr, Client *client)
+bool FileClient2::sendFilePartMessage(string fid, shared_ptr<File> f, unsigned int nextPartNr, Client2 *client)
 {
     char chunk[Filesystem::partLength];
     bool isLastPart = false;
@@ -362,8 +373,9 @@ void FileClient2::connect()
     if (state == disconnected)
     {
         listenPort = 2000 + rand() % 63000; // Pick random lisen port
-        client = new Client(serverAddress, serverPort, enc);
-        server = new Server(listenPort, cpQueue, enc);
+        client = new Client2(serverAddress, serverPort, enc);
+        client->init();
+        server = new Server2(listenPort, cpQueue, enc);
         server->start();
 
         setState(sendClientHello);
@@ -414,7 +426,7 @@ void FileClient2::stopHelloThread()
     }
 }
 
-void FileClient2::helloTask(unsigned short listenPort, bool reconnecting, Client *client)
+void FileClient2::helloTask(unsigned short listenPort, bool reconnecting, Client2 *client)
 {
     Logger::debug("Started hello thread.");
     while (getState() == sendClientHello && shouldHelloRun)
@@ -430,7 +442,7 @@ void FileClient2::helloTask(unsigned short listenPort, bool reconnecting, Client
     Logger::debug("Stopped hello thread.");
 }
 
-void FileClient2::sendClientHelloMessage(unsigned short listenPort, Client *client, unsigned char flags)
+void FileClient2::sendClientHelloMessage(unsigned short listenPort, Client2 *client, unsigned char flags)
 {
     ClientHelloMessage *msg = new ClientHelloMessage(listenPort, clientId, flags, enc->getPrime(), enc->getPrimitiveRoot(), enc->getPubKey());
     client->send(msg);
@@ -579,26 +591,27 @@ void FileClient2::onServerHelloMessage(ReadMessage *msg)
         unsigned char flags = ServerHelloMessage::getFlagsFromMessage(msg->buffer);
         if ((flags & 0b1000) == 0b1000)
         {
-            Logger::error("Client not accepted with unknown reason: " + to_string(flags));
+            Logger::error("Client2 not accepted with unknown reason: " + to_string(flags));
             disconnect();
             return;
         }
         else if ((flags & 0b0100) == 0b0100)
         {
-            Logger::warn("Client ID " + to_string(clientId) + " already taken. Changing ID");
+            Logger::warn("Client2 ID " + to_string(clientId) + " already taken. Changing ID");
             clientId = getRandomClientId();
             Logger::info("Changed client ID to: " + to_string(clientId));
             return;
         }
         else if ((flags & 0b0010) == 0b0010)
         {
-            Logger::error("Client not accepted. Server has too many clients. Try again later.");
+            Logger::error("Client2 not accepted. Server has too many clients. Try again later.");
             disconnect();
             return;
         }
 
         uploadPort = ServerHelloMessage::getPortFromMessage(msg->buffer);
-        uploadClient = new Client(serverAddress, uploadPort, enc);
+        uploadClient = new Client2(serverAddress, uploadPort, enc);
+        uploadClient->init();
 
         unsigned int seqNumber = ServerHelloMessage::getSeqNumberFromMessage(msg->buffer);
         sendAckMessage(seqNumber, uploadClient);
@@ -680,7 +693,7 @@ void FileClient2::onTimerTick(int identifier)
     }
 }
 
-void FileClient2::sendPingMessage(unsigned int plLength, unsigned int seqNumber, Client *client)
+void FileClient2::sendPingMessage(unsigned int plLength, unsigned int seqNumber, Client2 *client)
 {
     PingMessage *msg = new PingMessage(plLength, seqNumber, clientId);
     sendMessageQueue->pushSendMessage(seqNumber, *msg);
@@ -777,7 +790,7 @@ void FileClient2::printToDo()
     }
 }
 
-void FileClient2::sendAckMessage(unsigned int seqNumber, net::Client *client)
+void FileClient2::sendAckMessage(unsigned int seqNumber, net::Client2 *client)
 {
     AckMessage msg = AckMessage(seqNumber);
     client->send(&msg);
