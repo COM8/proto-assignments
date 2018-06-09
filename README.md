@@ -243,6 +243,14 @@ Payload Length [32 Bit]:<br/>
 Payload [X Byte]:<br/>
 	Defined via the ```Payload Length```
 
+## State charts:
+### FileClient:
+![FileClient state chart](./FileClientStateChart.svg)
+
+### FileServer:
+The server it selfe is stateless but it has ```FileServerClient``` objects with the following state chart:
+![FileServerClient state chart](./FileServerClientStateChart.svg)
+
 ## Process example:
 
 ```
