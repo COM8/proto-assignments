@@ -47,10 +47,14 @@ Pub Key [32 Bit]:<br/>
 ### Client-Hello-Handshake:
 The initial connection message that gets send by the client.
 ```
-0      4       8      24          56             88              120       152        184       984
-+------+-------+------+-----------+--------------+----------------+---------+----------+--------+
-| Type | Flags | Port | Client ID | Prime Number | Primitive Root | Pub Key | Checksum | UNUSED |
-+------+-------+------+-----------+--------------+----------------+---------+----------+--------+
+0      4       8      24          56             88              120        152
++------+-------+------+-----------+--------------+----------------+---------+
+| Type | Flags | Port | Client ID | Prime Number | Primitive Root | Pub Key |
++------+-------+------+-----------+--------------+----------------+---------+
+152        184               216                 1000
++----------+-----------------+----------+--------+
+| Checksum | Username Length | Username | UNUSED |
++----------+-----------------+----------+--------+
 ```
 
 Flags [4 Bit]:
@@ -72,8 +76,14 @@ Prime Number [32 Bit]:<br/>
 Primitive Root [32 Bit]:<br/>
 	The client primitive root for the Diffie Hellman encryption.
 
-UNUSED [800 Bit]:<br/>
-	To "prevent" DoS attacks.
+Username Length [32 Bit]:<br/>
+	Describes how long the the following Username is in byte.
+
+Username [X Byte]:<br/>
+	Defined via the ```Username Length```.
+
+UNUSED [816-X Bit]:<br/>
+	To "prevent" DoS attacks. Ensures the package is a least 1000 Bit long.
 
 ### Server-Hello-Handshake:
 Once the server received a ```Client-Hello-Handshake``` message he should reply with this message.
@@ -232,6 +242,40 @@ Payload Length [32 Bit]:<br/>
 
 Payload [X Byte]:<br/>
 	Defined via the ```Payload Length```.
+
+### Auth-Request:
+Send by the client to authentificate at the server.
+```
+0      4        8           40         72                104
++------+--------+-----------+----------+-----------------+----------+
+| Type | UNUSED | Client ID | Checksum | Password Length | Password |
++------+--------+-----------+----------+-----------------+----------+
+```
+
+Password Length [32 Bit]:<br/>
+	Describes how long the the following password is in byte.
+
+Password [X Byte]:<br/>
+	Defined via the ```Password Length```.
+
+### Auth-Result:
+Send by the server with the authentification result.
+```
+0      4       8           40         72
++------+-------+-----------+----------+
+| Type | Flags | Client ID | Checksum |
++------+-------+-----------+----------+
+```
+
+Flags [4 Bit]:
+```
+0000
+||||
+|||+-> Authentification successfull
+||+--> *UNUSED*
+|+---> *UNUSED*
++----> *UNUSED*
+```
 
 ## State charts:
 ### FileClient:
