@@ -31,7 +31,7 @@ enum FileServerState
 class FileServer2 : public TimerTickable
 {
 public:
-  FileServer2(unsigned short port);
+  FileServer2(unsigned short port, unsigned int maxPPS);
   ~FileServer2();
 
   FileServerState getState();
@@ -49,6 +49,7 @@ private:
   std::thread *consumerThread;
   std::unordered_map<std::string, FileServerUser *> users;
   Timer *cleanupTimer;
+  unsigned int maxPPS;
 
   FileServerUser *getUser(std::string userName);
   FileServerUser *addUser(std::string userName, std::string password);

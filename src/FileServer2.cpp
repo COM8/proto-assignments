@@ -3,9 +3,10 @@
 using namespace std;
 using namespace net;
 
-FileServer2::FileServer2(unsigned short port) : users()
+FileServer2::FileServer2(unsigned short port, unsigned int maxPPS) : users()
 {
     this->port = port;
+    this->maxPPS = maxPPS;
 
     this->stateMutex = new mutex();
     this->userMutex = new mutex();

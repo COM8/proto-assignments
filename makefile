@@ -4,6 +4,11 @@ DEBUG_DIR=debug
 SYNC_DIR=sync
 PORT=12345
 
+ARGS_CLIENT=-h localhost -p $(PORT) -f $(DEBUG_DIR) -u 42 -pass some_password
+ARGS_CLIENT_DEBUG="-h" "localhost" "-p" "$(PORT)" "-f" "$(DEBUG_DIR)" "-u" "42" "-pass" "some_password"
+ARGS_SERVER=-s -p $(PORT) -cc 0
+ARGS_SERVER_DEBUG="-s" "-p" "$(PORT)" "-cc" "0"
+
 default:
 	make clean
 	make debug
@@ -13,22 +18,22 @@ init:
 	git submodule update
 
 runClient:
-	./$(DEBUG_DIR)/csync -h localhost -p $(PORT) -f $(DEBUG_DIR)
+	./$(DEBUG_DIR)/csync $(ARGS_CLIENT)
 
 runServer:
-	./$(DEBUG_DIR)/csync -s -p $(PORT)
+	./$(DEBUG_DIR)/csync $(ARGS_SERVER)
 
 runDebugServer:
-	gdb --args ./$(DEBUG_DIR)/csync "-s" "-p" "$(PORT)"
+	gdb --args ./$(DEBUG_DIR)/csync $(ARGS_SERVER_DEBUG)
 
 runDebugClient:
-	gdb --args ./$(DEBUG_DIR)/csync "-h" "localhost" "-p" "$(PORT)" "-f" "$(DEBUG_DIR)"
+	gdb --args ./$(DEBUG_DIR)/csync $(ARGS_CLIENT_DEBUG)
 
 runMassifServer:
-	valgrind --tool=massif $(DEBUG_DIR)/csync "-s" "-p" "$(PORT)"
+	valgrind --tool=massif $(DEBUG_DIR)/csync $(ARGS_SERVER_DEBUG)
 
 runMassifClient:
-	valgrind --tool=massif $(DEBUG_DIR)/csync "-h" "localhost" "-p" "$(PORT)" "-f" "$(DEBUG_DIR)"
+	valgrind --tool=massif $(DEBUG_DIR)/csync $(ARGS_CLIENT_DEBUG)
 
 massifClient:
 	make default
