@@ -1,7 +1,7 @@
 # protocol-assignment-1
 
 ### ToDo:
-* Send file metadate e.g. rights, owner, creation date, ...
+* Send file metadata e.g. rights, owner, creation date, ...
 
 ### Important:
 * UDP MTU
