@@ -5,12 +5,13 @@ using namespace std;
 using namespace net;
 using namespace sec;
 
-FileServerClient::FileServerClient(unsigned int clientId, unsigned short portLocal, unsigned short portRemote, char *ipRemote, FileServerUser *user) : CLIENT_ID(clientId),
+FileServerClient::FileServerClient(unsigned int clientId, unsigned short portLocal, unsigned short portRemote, char *ipRemote, unsigned int maxPPS, FileServerUser *user) : CLIENT_ID(clientId),
                                                                                                                                                        PORT_LOCAL(portLocal),
                                                                                                                                                        PORT_REMOTE(portRemote),
                                                                                                                                                        IP_REMOTE(ipRemote)
 {
     this->user = user;
+    this->maxPPS = maxPPS;
 
     this->consumerThread = NULL;
     this->shouldConsumerRun = false;
@@ -18,7 +19,7 @@ FileServerClient::FileServerClient(unsigned int clientId, unsigned short portLoc
     this->cpQueue = new Queue<ReadMessage>();
     this->enc = NULL;
     this->udpServer = new Server2(PORT_LOCAL, cpQueue, enc);
-    this->udpClient = new Client2(IP_REMOTE, PORT_REMOTE, enc);
+    this->udpClient = new Client2(IP_REMOTE, PORT_REMOTE, maxPPS, enc);
     this->udpClient->init();
     this->lastMessageTime = time(NULL);
     this->curFID = "";

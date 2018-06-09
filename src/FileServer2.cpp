@@ -251,7 +251,7 @@ void FileServer2::onClientHelloMessage(ReadMessage *msg)
     unsigned int clientId = ClientHelloMessage::getClientIdFromMessage(msg->buffer);
     unsigned int portRemote = ClientHelloMessage::getPortFromMessage(msg->buffer);
     unsigned int portLocal = 2000 + clientId % 63000;
-    FileServerClient *client = new FileServerClient(clientId, portLocal, portRemote, msg->senderIp, user);
+    FileServerClient *client = new FileServerClient(clientId, portLocal, portRemote, msg->senderIp, maxPPS, user);
 
     if (findClient(clientId))
     {

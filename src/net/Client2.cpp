@@ -4,21 +4,31 @@ using namespace net;
 using namespace sec;
 using namespace std;
 
-Client2::Client2(string hostAddr, unsigned short port, DiffieHellman *enc)
+Client2::Client2(string hostAddr, unsigned short port, unsigned int maxPPS, DiffieHellman *enc)
 {
     this->hostAddr = hostAddr;
-    this->enc = enc;
     this->port = port;
+    this->maxPPS = maxPPS;
+    this->enc = enc;
 
     this->stateMutex = new mutex();
     this->state = uc_uninit;
     this->sockFD = -1;
     srand(time(NULL));
+    this->sendPCount = 0;
+    this->sendPCTimer = new Timer(true, 1000, this, 1);
+    this->sendPCTimer->start();
+    sem_init(&maxPPSSema, 0, maxPPS);
+    this->sendPCountMutex = new mutex();
 }
 
 Client2::~Client2()
 {
+    sendPCTimer->stop();
+    sem_destroy(&maxPPSSema);
     delete stateMutex;
+    delete sendPCTimer;
+    delete sendPCountMutex;
 }
 
 ClientState Client2::getState()
@@ -94,7 +104,7 @@ bool Client2::send(Message *msg)
     }
 
     // Print message:
-    if (ENABLE_UDP_CLIENT_DEBUG_OUTPUT)
+    if (ENABLE_UDP_CLIENT_DEBUG_OUTPUT || msg->bufferLength < 0)
     {
         AbstractMessage::printMessage(msg);
     }
@@ -114,6 +124,9 @@ bool Client2::send(Message *msg)
             enc->encrypt(msg->buffer, msg->bufferLength);
         }
 
+        // Wait for a slot to send the package:
+        waitToSend();
+
         if (sendto(sockFD, msg->buffer, msg->bufferLength, 0, (struct sockaddr *)&serverAddressStruct, sizeof(serverAddressStruct)) < 0)
         {
             Logger::error("UDP client failed to send message to: " + hostAddr + " on port: " + to_string(port) + " with error: " + string(strerror(errno)) + " lenght: " + to_string(msg->bufferLength));
@@ -121,4 +134,32 @@ bool Client2::send(Message *msg)
         }
     }
     return success;
+}
+
+void Client2::waitToSend()
+{
+    if (maxPPS <= UNLIMITED_PPS)
+    {
+        return;
+    }
+    Logger::debug("Requirering lock...");
+    sem_wait(&maxPPSSema);
+    Logger::debug("Received lock.");
+    unique_lock<mutex> mlock(*stateMutex);
+    sendPCount++;
+    mlock.unlock();
+}
+
+void Client2::onTimerTick(int identifier)
+{
+    if (identifier == 1)
+    {
+        unique_lock<mutex> mlock(*stateMutex);
+        while (sendPCount > 0)
+        {
+            sendPCount--;
+            sem_post(&maxPPSSema);
+        }
+        mlock.unlock();
+    }
 }

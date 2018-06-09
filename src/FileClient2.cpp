@@ -373,7 +373,7 @@ void FileClient2::connect()
     if (state == disconnected)
     {
         listenPort = 2000 + rand() % 63000; // Pick random lisen port
-        client = new Client2(serverAddress, serverPort, enc);
+        client = new Client2(serverAddress, serverPort, UNLIMITED_PPS, enc);
         client->init();
         server = new Server2(listenPort, cpQueue, enc);
         server->start();
@@ -610,7 +610,7 @@ void FileClient2::onServerHelloMessage(ReadMessage *msg)
         }
 
         uploadPort = ServerHelloMessage::getPortFromMessage(msg->buffer);
-        uploadClient = new Client2(serverAddress, uploadPort, enc);
+        uploadClient = new Client2(serverAddress, uploadPort, UNLIMITED_PPS, enc);
         uploadClient->init();
 
         unsigned int seqNumber = ServerHelloMessage::getSeqNumberFromMessage(msg->buffer);

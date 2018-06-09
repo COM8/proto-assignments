@@ -42,7 +42,7 @@ public:
   const char *IP_REMOTE;
   time_t lastMessageTime;
 
-  FileServerClient(unsigned int clientId, unsigned short portLocal, unsigned short portRemote, char *ipRemote, class FileServerUser *user);
+  FileServerClient(unsigned int clientId, unsigned short portLocal, unsigned short portRemote, char *ipRemote, unsigned int maxPPS, class FileServerUser *user);
   ~FileServerClient();
   void disconnect();
   FileServerClientState getState();
@@ -67,6 +67,7 @@ private:
   std::uint64_t curFIDLength;
   sec::DiffieHellman *enc;
   Timer *tTimer;
+  unsigned int maxPPS;
 
   void setState(FileServerClientState state);
   unsigned int getNextSeqNumber();
