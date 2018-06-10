@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>README.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: "Segoe WPC", "Segoe UI", "SFUIText-Light", "HelveticaNeue-Light", sans-serif, "Droid Sans Fallback";
+	font-size: 14px;
+	padding: 0 12px;
+	line-height: 22px;
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	color: #4080D0;
+	text-decoration: none;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+h1 code,
+h2 code,
+h3 code,
+h4 code,
+h5 code,
+h6 code {
+	font-size: inherit;
+	line-height: auto;
+}
+
+a:hover {
+	color: #4080D0;
+	text-decoration: underline;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left: 5px solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 14px;
+	line-height: 19px;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+.mac code {
+	font-size: 12px;
+	line-height: 18px;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+/** Theming */
+
+.vscode-light,
+.vscode-light pre code {
+	color: rgb(30, 30, 30);
+}
+
+.vscode-dark,
+.vscode-dark pre code {
+	color: #DDD;
+}
+
+.vscode-high-contrast,
+.vscode-high-contrast pre code {
+	color: white;
+}
+
+.vscode-light code {
+	color: #A31515;
+}
+
+.vscode-dark code {
+	color: #D7BA7D;
+}
+
+.vscode-light pre:not(.hljs),
+.vscode-light code > div {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre:not(.hljs),
+.vscode-dark code > div {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre:not(.hljs),
+.vscode-high-contrast code > div {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+.vscode-light blockquote,
+.vscode-dark blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.vscode-high-contrast blockquote {
+	background: transparent;
+	border-color: #fff;
+}
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family:  "Meiryo", "Segoe WPC", "Segoe UI", "SFUIText-Light", "HelveticaNeue-Light", sans-serif, "Droid Sans Fallback";
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+</head>
+<body>
+<h1 id="protocol-design-assignment">Protocol Design Assignment</h1>
+<h3 id="todo">ToDo</h3>
+<ul>
+<li>Send file metadata e.g. rights, owner, creation date, ...</li>
+</ul>
+<h3 id="important">Important</h3>
+<ul>
+<li>UDP MTU</li>
+<li>Don't create packages with a size of (bit-size mod 8) != 0. It makes it hard on the receiver side to interpret those!</li>
+</ul>
+<h2 id="protocol">Protocol</h2>
+<h3 id="general-field-descriptions">General field descriptions</h3>
+<p>Type [4 Bit]:<br/>
+0000 =&gt; Client-Hello-Handshake<br/>
+0001 =&gt; Server-Hello-Handshake<br/>
+0010 =&gt; File-Creation<br/>
+0011 =&gt; File-Transfer<br/>
+0100 =&gt; File-Status<br/>
+0101 =&gt; ACK<br/>
+0110 =&gt; Ping<br/>
+0111 =&gt; Transfer-Ended<br/>
+1000 =&gt; Auth-Request<br/>
+1001 =&gt; Auth-Result<br/></p>
+<p>Client ID [32 Bit]:<br/>
+An unique client id generated by the client on first contact.<br/>
+E.g. A random int</p>
+<p>Checksum [32 Bit]:<br/>
+CRC32 Algorithm <a href="https://en.wikipedia.org/wiki/Cyclic_redundancy_check">Wiki Link</a></p>
+<p>Sequence Number [32 bit]:<br/>
+Like TCP.</p>
+<p>FID Length [64 Bit]:<br/>
+The length of the <code>FID</code> field in bytes.</p>
+<p>FID [Defined in the <code>FID Length</code> filed]:
+The relative path to the file. Includes the file name e.g. <code>folder/file.txt</code>.</p>
+<p>FID Part Number [32 Bit]:<br/>
+The file part number.</p>
+<p>Pub Key [32 Bit]:<br/>
+The client public key for the Diffie Hellman encryption.</p>
+<h3 id="client-hello-handshake">Client-Hello-Handshake</h3>
+<p>The initial connection message that gets send by the client.</p>
+<pre class="hljs"><code><div>0      4       8      24          56             88              120        152
++------+-------+------+-----------+--------------+----------------+---------+
+| Type | Flags | Port | Client ID | Prime Number | Primitive Root | Pub Key |
++------+-------+------+-----------+--------------+----------------+---------+
+152        184               216                 1000
++----------+-----------------+----------+--------+
+| Checksum | Username Length | Username | UNUSED |
++----------+-----------------+----------+--------+
+</div></code></pre>
+<p>Flags [4 Bit]:</p>
+<pre class="hljs"><code><div>0000
+||||
+|||+-&gt; Connect requested
+||+--&gt; Reconnect
+|+---&gt; *UNUSED*
++----&gt; *UNUSED*
+</div></code></pre>
+<p>Port [16 Bit]:<br/>
+The port on which the client listens to server messages.</p>
+<p>Prime Number [32 Bit]:<br/>
+The client prime number for the Diffie Hellman encryption.</p>
+<p>Primitive Root [32 Bit]:<br/>
+The client primitive root for the Diffie Hellman encryption.</p>
+<p>Username Length [32 Bit]:<br/>
+Describes how long the the following Username is in byte.</p>
+<p>Username [X Byte]:<br/>
+Defined via the <code>Username Length</code>.</p>
+<p>UNUSED [816-X Bit]:<br/>
+To &quot;prevent&quot; DoS attacks. Ensures the package is a least 1000 Bit long.</p>
+<h3 id="server-hello-handshake">Server-Hello-Handshake</h3>
+<p>Once the server received a <code>Client-Hello-Handshake</code> message he should reply with this message.</p>
+<pre class="hljs"><code><div>0      4       8           40                72            88        120        152
++------+-------+-----------+-----------------+-------------+---------+----------+
+| Type | Flags | Client ID | Sequence Number | Upload-port | Pub Key | Checksum |
++------+-------+-----------+-----------------+-------------+---------+----------+
+</div></code></pre>
+<p>Upload-port [16 Bit]:<br/>
+The Port where the client should send all following messages to.</p>
+<p>Flags [4 Bit]:</p>
+<pre class="hljs"><code><div>0000
+||||
+|||+-&gt; Client accepted
+||+--&gt; Too many clients - connection revoked
+|+---&gt; Client ID taken - connection revoked
++----&gt; Invalid username - connection revoked
+</div></code></pre>
+<h3 id="file-creation">File-Creation</h3>
+<p>Marks the start of a file transfer. Tells the server to create the given file with the given path.
+Replaces existing files.</p>
+<pre class="hljs"><code><div>0      4           36                68          72              328        360          424
++------+-----------+-----------------+-----------+----------+----------+------------+-----+
+| Type | Client ID | Sequence Number | File Type | File MD5 | Checksum | FID Length | FID |
++------+-----------+-----------------+-----------+----------+----------+------------+-----+
+
+</div></code></pre>
+<p>File Type [4 Bit]:<br/></p>
+<pre class="hljs"><code><div>0000
+||||
+|||+-&gt; Folder
+||+--&gt; Delete folder
+|+---&gt; File
++----&gt; Delete file
+</div></code></pre>
+<p>File MD5 hash [256 Bit]:<br/>
+The file MD5 hash to check if the file was transmitted correctly. Unused for folders. <a href="https://en.wikipedia.org/wiki/MD5">Wiki Link</a></p>
+<h3 id="file-transfer">File-Transfer</h3>
+<p>The actual file transfer message containing the file content.</p>
+<pre class="hljs"><code><div>0      4           36                68      72                104
++------+-----------+-----------------+-------+-----------------+
+| Type | Client ID | Sequence Number | Flags | FID Part Number |
++------+-----------+-----------------+-------+-----------------+
+
+104            360        392              456
++--------------+----------+----------------+---------+
+| FID SHA3 256 | Checksum | Content Length | Content |
++--------------+----------+----------------+---------+
+</div></code></pre>
+<p>Flags [4 Bit]:</p>
+<pre class="hljs"><code><div>0000
+||||
+|||+-&gt; First package for the given file
+||+--&gt; File content
+|+---&gt; *UNUSED*
++----&gt; Last package for the file
+</div></code></pre>
+<p>FID SHA3 256 [256 Bit]:<br/>
+The SHA3 256 hash of the <code>FID</code> to identify which file gets.</p>
+<p>Content Length [max 900 Bit]:<br/>
+The length of the <code>Content</code> field.</p>
+<p>Content [defined in &quot;Content Length&quot; in Bit]:<br/>
+The actual file content.</p>
+<h3 id="file-status">File-Status</h3>
+<p>Used for requesting and responding the current file status bevor a file gets transfered.</p>
+<pre class="hljs"><code><div>0      4       8           40                72                     104
++------+-------+-----------+-----------------+----------------------+
+| Type | Flags | Client ID | Sequence Number | Last FID Part Number |
++------+-------+-----------+-----------------+----------------------+
+
+104        136          200
++----------+------------+-----+
+| Checksum | FID Length | FID |
++----------+------------+-----+
+</div></code></pre>
+<p>Flags [4 Bit]:</p>
+<pre class="hljs"><code><div>0000
+||||
+|||+-&gt; Request status of FID
+||+--&gt; FID status response
+|+---&gt; Restart sending file system
++----&gt; File = 0/Folder = 1
+</div></code></pre>
+<p>Last FID Part Number [32 Bit]:
+The last received <code>FID Part Number</code>. Ignored if <code>Request status of FID</code> is set.</p>
+<h3 id="ack">ACK</h3>
+<p>For acknowledging <code>Ping</code>, <code>File-Creation</code> and <code>File-Transfer</code> messages.</p>
+<pre class="hljs"><code><div>0      4                     36         68      72
++------+---------------------+----------+--------+
+| Type | ACK Sequence Number | Checksum | UNUSED |
++------+---------------------+----------+--------+
+</div></code></pre>
+<p>ACK Sequence Number [32 Bit]:<br/>
+The acknowledged <code>Sequence Number</code> or <code>Ping Sequence Number</code>.</p>
+<h3 id="transfer-ended">Transfer-Ended</h3>
+<p>Gets send by the client once he wants to end the transfer/close the connection.</p>
+<pre class="hljs"><code><div>0      4       8           40         72
++------+-------+-----------+----------+
+| Type | Flags | Client ID | Checksum |
++------+-------+-----------+----------+
+</div></code></pre>
+<p>Flags [4 Bit]:</p>
+<pre class="hljs"><code><div>0000
+||||
+|||+-&gt; Transfer finished
+||+--&gt; Cancelled by user
+|+---&gt; Error
++----&gt; *UNUSED*
+</div></code></pre>
+<h3 id="ping">Ping</h3>
+<p>This message is used for ensuring the opponent is still there. The opponent should acknowledge each received <code>Ping</code> message with an <code>Server-ACK</code>.Should get send by each side if there was no message exchange for more than 2 seconds.<br/>
+It also can be used for package loss and throughput tests with a modified <code>Payload Length</code>.</p>
+<pre class="hljs"><code><div>0      4                      36         68          100      104              136
++------+----------------------+-----------+----------+--------+----------------+---------+
+| Type | Ping Sequence Number | Client ID | Checksum | Unused | Payload Length | Payload |
++------+----------------------+-----------+----------+--------+----------------+---------+
+</div></code></pre>
+<p>Ping Sequence Number [32 Bit]<br/>
+An unique number for identifying each ping.</p>
+<p>Payload Length [32 Bit]:<br/>
+Describes how long the the following payload is in byte.</p>
+<p>Payload [X Byte]:<br/>
+Defined via the <code>Payload Length</code>.</p>
+<h3 id="auth-request">Auth-Request</h3>
+<p>Send by the client to authentificate at the server.</p>
+<pre class="hljs"><code><div>0      4        8           40                                       72         104
++------+--------+-----------+----------------------------------------+----------+
+| Type | UNUSED | Client ID | Server-Hello-Handshake Sequence Number | Checksum |
++------+--------+-----------+----------------------------------------+----------+
+104               136
++-----------------+----------+
+| Password Length | Password |
++-----------------+----------+
+</div></code></pre>
+<p>Server-Hello-Handshake Sequence Number [32 Bit]:<br/>
+The sequence number of the <code>Server-Hello-Handshake</code> message.</p>
+<p>Password Length [32 Bit]:<br/>
+Describes how long the the following password is in byte.</p>
+<p>Password [X Byte]:<br/>
+Defined via the <code>Password Length</code>.</p>
+<h3 id="auth-result">Auth-Result</h3>
+<p>Send by the server with the authentification result.</p>
+<pre class="hljs"><code><div>0      4       8           40                             72         104
++------+-------+-----------+------------------------------+----------+
+| Type | Flags | Client ID | Auth-Request Sequence Number | Checksum |
++------+-------+-----------+------------------------------+----------+
+</div></code></pre>
+<p>Flags [4 Bit]:</p>
+<pre class="hljs"><code><div>0000
+||||
+|||+-&gt; Authentification successfull
+||+--&gt; *UNUSED*
+|+---&gt; *UNUSED*
++----&gt; *UNUSED*
+</div></code></pre>
+<p>Auth-Request Sequence Number [32 Bit]:<br/>
+The Sequence number of the received ````Auth-Request``` message.</p>
+<h2 id="state-charts">State charts</h2>
+<h3 id="fileclient">FileClient</h3>
+<p><img src="file:///home/fabian/ownCloud/Uni/SS2018/Protokol Design/protocol-assignment-1/FileClientStateChart.svg" alt="FileClient state chart"></p>
+<h3 id="fileserver">FileServer</h3>
+<p>The server it selfe is stateless but it has <code>FileServerClient</code> objects with the following state chart:
+<img src="file:///home/fabian/ownCloud/Uni/SS2018/Protokol Design/protocol-assignment-1/FileServerClientStateChart.svg" alt="FileServerClient state chart"></p>
+<h2 id="process-example">Process example</h2>
+<pre class="hljs"><code><div>Client				  Server
+  |	Client-Hello-Handshake	    |
+  | ------------------------------&gt; | The clients starts the connection on the default port
+  |				    | and tells the server the port on which he listens for answers.
+  |				    | It also contains ```ClientStartConnection``` key exchange data.
+  |	Server-Hello-Handshake      |
+  | &lt;------------------------------ | The server responds with an upload port and the
+  |				    | ```onServerReceive``` key exchange data.
+  |	Auth-Request		    |
+  | ------------------------------&gt; | If the client got accepted he sends his password via the
+  |				    | now encrypted connection.
+  |	Auth-Result		    |
+  | &lt;------------------------------ | The server answers with the result of the authentification.
+  |				    | Now the connection is established.
+  |	File-Status		    |
+  | ------------------------------&gt; | The client requests the file status.
+  |				    |
+  |	Auth-Result		    |
+  | &lt;------------------------------ | The server responds with the current file status.
+  |				    |
+  |	File-Creation		    |
+  | ------------------------------&gt; | The client sends this message if the server does not has
+  |				    | the file yet.
+  |	Server-ACK  		    |
+  | &lt;------------------------------ | The server acks the ```File-Creation```.
+  |				    |
+  |	File-Transfer		    |
+  | ------------------------------&gt; | The client starts sending the file in chunks.
+  |				    |
+  |	Server-ACK  		    |
+  | &lt;------------------------------ | The server sends an ACK message for each message
+  |				    | it received from the client
+  |	File-Transfer		    |
+  | ------------------------------&gt; | The client sets the ```Last package for the file``` flag
+  |				    | to inform the server, it is the last file part.
+  |	Server-ACK  		    |
+  | &lt;------------------------------ |
+  |				    |
+  |	Transfer-Ended		    |
+  | ------------------------------&gt; | The client tells the server that he liks to close the connection.
+</div></code></pre>
+<h2 id="key-exhange">Key Exhange</h2>
+<pre class="hljs"><code><div>Client				  Server
+  |	ClientStartConnection	    |
+  | ------------------------------&gt; | Client calculates and sends P, G to the server.
+  |				    | 
+  |	onServerReceive             |
+  | &lt;------------------------------ | Server calculates it's shared key, public key and sends it's
+  |				    | public key to client.
+  |				    | Sets secureConnection to true.
+  |	onClientReceive		    |
+  | ------------------------------&gt; | Client calculates it's shared key.
+  |                                 | Sets secure connection to true.
+</div></code></pre>
+<p>Diffie-Hellman algorithm relies on <em>discrete logarithm problem.</em> It is very hard for computers to solve discrete logarithm thus it is a good candidate against brute force attacks. This implementation works like this:</p>
+<ul>
+<li>
+<p>Client and server have to have the common values <code>P</code> and <code>G</code>. P is a prime number and G is the primitive root of that number. As connections are initiated by client, both P and G is calculated by client. Before sending P and G, client generates a private key and calculates it's public key. <code>P , G and client's public key</code> are sent to server by the client at the beginning of the connection.</p>
+</li>
+<li>
+<p>Server receives P , G , and client's public key. It selects a private key for itself and calculates it own public key. At this calculation, server also successfully calculates the <code>shared key</code> that the encryption will be based on.</p>
+</li>
+<li>
+<p>Client receives server's public key and calculates the <code>shared key</code>. At this point both server and the client have the same shared key which has never transmitted through insecure channels.</p>
+</li>
+<li>
+<p>Exposed API of Encrypt and Decrypt uses that shared key to encrypt and decrypt messages.</p>
+</li>
+</ul>
+<p>More info can be found at: <a href="https://en.wikipedia.org/wiki/Diffie%E2%80%93Hellman_key_exchange">Wiki Link</a></p>
+<h2 id="file-syncronisation">File syncronisation</h2>
+<p>In order to do file sync we check periodically if there were files changed (It's planned to switch to Filsystem watcher to monitor for changes). To detect which files were changed we compare the <a href="https://en.wikipedia.org/wiki/Md5">MD5's</a> of the files to internally saved hashes of them on the last run.
+<br/><em>If the files weren't there in the prior</em> run, they get marked for complete transmission.
+<br/><em>If the hash changed</em> we chunk the data into 900 Byte blocks. For each block we will calculate the <a href="https://en.wikipedia.org/wiki/Cyclic_redundancy_check#CRC-32_algorithm">CRC32</a>. Afterward's it all CRC32 will get compared to the corresponding CRC32 of the previous run. If a CRC32 changed, it replaces the old CRC32 and the Part get's marked for transmission.
+<br/><em>If nothing changed</em>, nothing will be send.</p>
+
+</body>
+</html>
