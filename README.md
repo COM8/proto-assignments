@@ -246,11 +246,18 @@ Payload [X Byte]:<br/>
 ### Auth-Request:
 Send by the client to authentificate at the server.
 ```
-0      4        8           40                72         104               136
-+------+--------+-----------+-----------------+----------+-----------------+----------+
-| Type | UNUSED | Client ID | Sequence Number | Checksum | Password Length | Password |
-+------+--------+-----------+-----------------+----------+-----------------+----------+
+0      4        8           40                                       72         104
++------+--------+-----------+----------------------------------------+----------+
+| Type | UNUSED | Client ID | Server-Hello-Handshake Sequence Number | Checksum |
++------+--------+-----------+----------------------------------------+----------+
+104               136
++-----------------+----------+
+| Password Length | Password |
++-----------------+----------+
 ```
+
+Server-Hello-Handshake Sequence Number [32 Bit]:<br/>
+	The sequence number of the ```Server-Hello-Handshake``` message.
 
 Password Length [32 Bit]:<br/>
 	Describes how long the the following password is in byte.
