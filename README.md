@@ -1,15 +1,15 @@
-# protocol-assignment-1
+# Protocol Design Assignment
 
-### ToDo:
+### ToDo
 * Send file metadata e.g. rights, owner, creation date, ...
 
-### Important:
+### Important
 * UDP MTU
 * Don't create packages with a size of (bit-size mod 8) != 0. It makes it hard on the receiver side to interpret those!
 
-## Protocol:
+## Protocol
 
-### General field descriptions:
+### General field descriptions
 Type [4 Bit]:<br/>
 	0000 => Client-Hello-Handshake<br/>
 	0001 => Server-Hello-Handshake<br/>
@@ -44,7 +44,7 @@ FID Part Number [32 Bit]:<br/>
 Pub Key [32 Bit]:<br/>
 	The client public key for the Diffie Hellman encryption.
 
-### Client-Hello-Handshake:
+### Client-Hello-Handshake
 The initial connection message that gets send by the client.
 ```
 0      4       8      24          56             88              120        152
@@ -85,7 +85,7 @@ Username [X Byte]:<br/>
 UNUSED [816-X Bit]:<br/>
 	To "prevent" DoS attacks. Ensures the package is a least 1000 Bit long.
 
-### Server-Hello-Handshake:
+### Server-Hello-Handshake
 Once the server received a ```Client-Hello-Handshake``` message he should reply with this message.
 ```
 0      4       8           40                72            88        120        152
@@ -107,7 +107,7 @@ Flags [4 Bit]:
 +----> Invalid username - connection revoked
 ```
 
-### File-Creation:
+### File-Creation
 Marks the start of a file transfer. Tells the server to create the given file with the given path.
 Replaces existing files.
 ```
@@ -132,7 +132,7 @@ File MD5 hash [256 Bit]:<br/>
 	The file MD5 hash to check if the file was transmitted correctly. Unused for folders. [Wiki Link](https://en.wikipedia.org/wiki/MD5)
 
 
-### File-Transfer:
+### File-Transfer
 The actual file transfer message containing the file content.
 ```
 0      4           36                68      72                104
@@ -165,7 +165,7 @@ Content Length [max 900 Bit]:<br/>
 Content [defined in "Content Length" in Bit]:<br/>
 	The actual file content.
 
-### File-Status:
+### File-Status
 Used for requesting and responding the current file status bevor a file gets transfered.
 ```
 0      4       8           40                72                     104
@@ -192,8 +192,7 @@ Flags [4 Bit]:
 Last FID Part Number [32 Bit]:
 	The last received ```FID Part Number```. Ignored if ```Request status of FID``` is set.
 
-
-### ACK:
+### ACK
 For acknowledging ```Ping```, ```File-Creation``` and ```File-Transfer``` messages.
 ```
 0      4                     36         68      72
@@ -205,7 +204,7 @@ For acknowledging ```Ping```, ```File-Creation``` and ```File-Transfer``` messag
 ACK Sequence Number [32 Bit]:<br/>
 	The acknowledged ```Sequence Number``` or ```Ping Sequence Number```.
 
-### Transfer-Ended:
+### Transfer-Ended
 Gets send by the client once he wants to end the transfer/close the connection.
 ```
 0      4       8           40         72
@@ -224,7 +223,7 @@ Flags [4 Bit]:
 +----> *UNUSED*
 ```
 
-### Ping:
+### Ping
 This message is used for ensuring the opponent is still there. The opponent should acknowledge each received ```Ping``` message with an ```Server-ACK```.Should get send by each side if there was no message exchange for more than 2 seconds.<br/>
 It also can be used for package loss and throughput tests with a modified ```Payload Length```.
 ```
@@ -243,7 +242,7 @@ Payload Length [32 Bit]:<br/>
 Payload [X Byte]:<br/>
 	Defined via the ```Payload Length```.
 
-### Auth-Request:
+### Auth-Request
 Send by the client to authentificate at the server.
 ```
 0      4        8           40                                       72         104
@@ -265,7 +264,7 @@ Password Length [32 Bit]:<br/>
 Password [X Byte]:<br/>
 	Defined via the ```Password Length```.
 
-### Auth-Result:
+### Auth-Result
 Send by the server with the authentification result.
 ```
 0      4       8           40                             72         104
@@ -287,15 +286,15 @@ Flags [4 Bit]:
 Auth-Request Sequence Number [32 Bit]:<br/>
 	The Sequence number of the received ````Auth-Request``` message.
 
-## State charts:
-### FileClient:
+## State charts
+### FileClient
 ![FileClient state chart](./FileClientStateChart.svg)
 
-### FileServer:
+### FileServer
 The server it selfe is stateless but it has ```FileServerClient``` objects with the following state chart:
 ![FileServerClient state chart](./FileServerClientStateChart.svg)
 
-## Process example:
+## Process example
 
 ```
       Client				  Server
@@ -363,8 +362,8 @@ Diffie-Hellman algorithm relies on *discrete logarithm problem.* It is very hard
 
 More info can be found at: [https://en.wikipedia.org/wiki/Diffie%E2%80%93Hellman_key_exchange](https://en.wikipedia.org/wiki/Diffie%E2%80%93Hellman_key_exchange)
 
-##File syncronisation
+## File syncronisation
 In order to do file sync we check periodically if there were files changed (It's planned to switch to Filsystem watcher to monitor for changes). To detect which files were changed we compare the [MD5's](https://en.wikipedia.org/wiki/Md5) of the files to internally saved hashes of them on the last run. 
 <br/>_If the files weren't there in the prior_ run, they get marked for complete transmission.
-<br/>_If the hash changed_, chunk the data into 900 Byte blocks. For each block we will calculate the [CRC32](https://en.wikipedia.org/wiki/Cyclic_redundancy_check#CRC-32_algorithm). Afterward's it all CRC32 will get compared to the corresponding CRC32 of the previous run. If a CRC32 changed, it replaces the old CRC32 and the Part get's marked for transmission.
+<br/>_If the hash changed_ we chunk the data into 900 Byte blocks. For each block we will calculate the [CRC32](https://en.wikipedia.org/wiki/Cyclic_redundancy_check#CRC-32_algorithm). Afterward's it all CRC32 will get compared to the corresponding CRC32 of the previous run. If a CRC32 changed, it replaces the old CRC32 and the Part get's marked for transmission.
 <br/>_If nothing changed_, nothing will be send.
