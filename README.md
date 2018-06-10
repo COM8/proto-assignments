@@ -246,10 +246,10 @@ Payload [X Byte]:<br/>
 ### Auth-Request:
 Send by the client to authentificate at the server.
 ```
-0      4        8           40         72                104
-+------+--------+-----------+----------+-----------------+----------+
-| Type | UNUSED | Client ID | Checksum | Password Length | Password |
-+------+--------+-----------+----------+-----------------+----------+
+0      4        8           40                72         104               136
++------+--------+-----------+-----------------+----------+-----------------+----------+
+| Type | UNUSED | Client ID | Sequence Number | Checksum | Password Length | Password |
++------+--------+-----------+-----------------+----------+-----------------+----------+
 ```
 
 Password Length [32 Bit]:<br/>
@@ -261,10 +261,10 @@ Password [X Byte]:<br/>
 ### Auth-Result:
 Send by the server with the authentification result.
 ```
-0      4       8           40         72
-+------+-------+-----------+----------+
-| Type | Flags | Client ID | Checksum |
-+------+-------+-----------+----------+
+0      4       8           40                             72         104
++------+-------+-----------+------------------------------+----------+
+| Type | Flags | Client ID | Auth-Request Sequence Number | Checksum |
++------+-------+-----------+------------------------------+----------+
 ```
 
 Flags [4 Bit]:
@@ -276,6 +276,9 @@ Flags [4 Bit]:
 |+---> *UNUSED*
 +----> *UNUSED*
 ```
+
+Auth-Request Sequence Number [32 Bit]:<br/>
+	The Sequence number of the received ````Auth-Request``` message.
 
 ## State charts:
 ### FileClient:
