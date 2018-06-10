@@ -342,17 +342,17 @@ Client				  Server
 ## Key Exhange
 
 ```
-  Client				  Server
-|	ClientStartConnection	    |
-| ------------------------------> | Client calculates and sends P, G to the server.
-|				    | 
-|	onServerReceive             |
-| <------------------------------ | Server calculates it's shared key, public key and sends it's
-|				    | public key to client.
-|				    | Sets secureConnection to ```true```.
-|	onClientReceive		    |
-| ------------------------------> | Client calculates it's shared key.
-|                                   | Sets secure connection to ```true```.
+Client				  Server
+  |	ClientStartConnection	    |
+  | ------------------------------> | Client calculates and sends P, G to the server.
+  |				    | 
+  |	onServerReceive             |
+  | <------------------------------ | Server calculates it's shared key, public key and sends it's
+  |				    | public key to client.
+  |				    | Sets secureConnection to ```true```.
+  |	onClientReceive		    |
+  | ------------------------------> | Client calculates it's shared key.
+  |                                   | Sets secure connection to ```true```.
 
 
 ```
