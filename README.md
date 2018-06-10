@@ -300,39 +300,43 @@ The server it selfe is stateless but it has ```FileServerClient``` objects with 
       Client				  Server
 	|	Client-Hello-Handshake	    |
 	| --------------------------------> | The clients starts the connection on the default port
-	|				    | and tells the server the port on which he listens for answers
+	|				    | and tells the server the port on which he listens for answers.
+	|				    | It also contains ```ClientStartConnection``` key exchange data.
 	|	Server-Hello-Handshake      |
-	| <-------------------------------- | The server responds with a client ID and a port where the
-	|				    | server is listening for incoming transfer messages
+	| <-------------------------------- | The server responds with an upload port and the
+	|				    | ```onServerReceive``` key exchange data.
+	|	Auth-Request		    |
+	| --------------------------------> | If the client got accepted he sends his password via the
+	|				    | now encrypted connection.
+	|	Auth-Result		    |
+	| <-------------------------------- | The server answers with the result of the authentification.
+	|				    | Now the connection is established.
+	|	File-Status		    |
+	| --------------------------------> | The client requests the file status.
+	|				    |
+	|	Auth-Result		    |
+	| <-------------------------------- | The server responds with the current file status.
+	|				    |
 	|	File-Creation		    |
-	| --------------------------------> | The client sends this message to inform the server about
-	|				    | the new file that will be transferred
+	| --------------------------------> | The client sends this message if the server does not has
+	|				    | the file yet.
 	|	Server-ACK  		    |
-	| <-------------------------------- |
+	| <-------------------------------- | The server acks the ```File-Creation```.
 	|				    |
 	|	File-Transfer		    |
-	| --------------------------------> | The client starts sending the file
-	|				    |
-	|	File-Transfer		    |
-	| --------------------------------> |
-	|				    |
-	|	File-Transfer		    |
-	| --------------------------------> |
-	|				    |
-	|	File-Transfer		    |
-	| --------------------------------> |
+	| --------------------------------> | The client starts sending the file in chunks.
 	|				    |
 	|	Server-ACK  		    |
 	| <-------------------------------- | The server sends an ACK message for each message
 	|				    | it received from the client
-	|	Server-ACK  		    |
-	| <-------------------------------- |
-	|				    |
+	|	File-Transfer		    |
+	| --------------------------------> | The client sets the ```Last package for the file``` flag
+	|				    | to inform the server, it is the last file part.
 	|	Server-ACK  		    |
 	| <-------------------------------- |
 	|				    |
 	|	Transfer-Ended		    |
-	| --------------------------------> | The client tells the server that the transfer finished
+	| --------------------------------> | The client tells the server that he liks to close the connection.
 ```
 
 ## Key Exhange
@@ -340,14 +344,15 @@ The server it selfe is stateless but it has ```FileServerClient``` objects with 
 ```
       Client				  Server
 	|	ClientStartConnection	    |
-	| --------------------------------> | Client calculates and sends P,G, it's public key
+	| --------------------------------> | Client calculates and sends P, G to the server.
 	|				    | 
 	|	onServerReceive             |
-	| <-------------------------------- | Server calculates it's shared key,public key and sends it's public key to client
-	|				    | sets secureConnection to true
+	| <-------------------------------- | Server calculates it's shared key, public key and sends it's
+	|				    | public key to client.
+	|				    | Sets secureConnection to ```true```.
 	|	onClientReceive		    |
-	| --------------------------------> | Client calculates it's shared key
-	|                                   | sets secure connection to true
+	| --------------------------------> | Client calculates it's shared key.
+	|                                   | Sets secure connection to ```true```.
 
 
 ```
