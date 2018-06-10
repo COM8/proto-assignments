@@ -297,9 +297,9 @@ The server it selfe is stateless but it has ```FileServerClient``` objects with 
 ## Process example
 
 ```
-      Client				  Server
-	|	Client-Hello-Handshake	    |
-	| --------------------------------> | The clients starts the connection on the default port
+Client				  Server
+  |	Client-Hello-Handshake	    |
+  | ------------------------------> | The clients starts the connection on the default port
 	|				    | and tells the server the port on which he listens for answers.
 	|				    | It also contains ```ClientStartConnection``` key exchange data.
 	|	Server-Hello-Handshake      |
