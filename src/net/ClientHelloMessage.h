@@ -10,7 +10,7 @@ namespace net {
 		static const unsigned int CHECKSUM_OFFSET_BITS = 152;
 
 		ClientHelloMessage(unsigned short port, unsigned int clientId, unsigned char flags, unsigned long prime, unsigned long primRoot, unsigned long pubKey, unsigned char* userName, unsigned int usernameLength);
-		void createBuffer(struct Message* msg);
+		virtual void createBuffer(struct Message* msg);
 		static unsigned short getPortFromMessage(unsigned char* buffer);
 		static unsigned int getClientIdFromMessage(unsigned char* buffer);
 		static unsigned char getFlagsFromMessage(unsigned char* buffer);

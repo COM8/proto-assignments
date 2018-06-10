@@ -269,9 +269,9 @@ void FileClient2::sendFolderCreationMessage(shared_ptr<Folder> f, Client2 *clien
     const char *c = f->path.c_str();
     uint64_t l = f->path.length();
     int i = getNextSeqNumber();
-    FileCreationMessage msg = FileCreationMessage(clientId, i, 1, NULL, l, (unsigned char *)c);
+    FileCreationMessage *msg = new FileCreationMessage(clientId, i, 1, NULL, l, (unsigned char *)c);
 
-    client->send(&msg);
+    client->send(msg);
     sendMessageQueue->pushSendMessage(i, msg);
     Logger::info("Send folder creation for: \"" + f->path + "\"");
 }
@@ -281,9 +281,9 @@ void FileClient2::sendFolderDeletionMessage(string folderPath, Client2 *client)
     const char *c = folderPath.c_str();
     uint64_t l = folderPath.length();
     int i = getNextSeqNumber();
-    FileCreationMessage msg = FileCreationMessage(clientId, i, 2, NULL, l, (unsigned char *)c);
+    FileCreationMessage *msg = new FileCreationMessage(clientId, i, 2, NULL, l, (unsigned char *)c);
 
-    client->send(&msg);
+    client->send(msg);
     sendMessageQueue->pushSendMessage(i, msg);
     Logger::info("Send folder deletion for: \"" + folderPath + "\"");
 }
@@ -293,9 +293,9 @@ void FileClient2::sendFileDeletionMessage(string filePath, Client2 *client)
     const char *c = filePath.c_str();
     uint64_t l = filePath.length();
     int i = getNextSeqNumber();
-    FileCreationMessage msg = FileCreationMessage(clientId, i, 8, NULL, l, (unsigned char *)c);
+    FileCreationMessage *msg = new FileCreationMessage(clientId, i, 8, NULL, l, (unsigned char *)c);
 
-    client->send(&msg);
+    client->send(msg);
     sendMessageQueue->pushSendMessage(i, msg);
     Logger::info("Send file deletion for: \"" + filePath + "\"");
 }
@@ -305,9 +305,9 @@ void FileClient2::sendFileCreationMessage(string fid, std::shared_ptr<File> f, C
     const char *c = fid.c_str();
     uint64_t l = fid.length();
     unsigned int i = getNextSeqNumber();
-    FileCreationMessage msg = FileCreationMessage(clientId, i, 4, (unsigned char *)f->hash.get()->data(), l, (unsigned char *)c);
+    FileCreationMessage *msg = new FileCreationMessage(clientId, i, 4, (unsigned char *)f->hash.get()->data(), l, (unsigned char *)c);
 
-    client->send(&msg);
+    client->send(msg);
     sendMessageQueue->pushSendMessage(i, msg);
     Logger::info("Send file creation: " + fid);
 }
@@ -317,9 +317,9 @@ void FileClient2::sendFileStatusMessage(string fid, struct std::shared_ptr<File>
     const char *c = fid.c_str();
     uint64_t l = fid.length();
     unsigned int i = getNextSeqNumber();
-    FileStatusMessage msg = FileStatusMessage(clientId, i, 9, l, (unsigned char *)c);
+    FileStatusMessage *msg = new FileStatusMessage(clientId, i, 9, l, (unsigned char *)c);
 
-    client->send(&msg);
+    client->send(msg);
     sendMessageQueue->pushSendMessage(i, msg);
     Logger::info("Requested file status for: " + fid);
 }
@@ -345,9 +345,9 @@ bool FileClient2::sendFilePartMessage(string fid, shared_ptr<File> f, unsigned i
     }
 
     unsigned int i = getNextSeqNumber();
-    FileTransferMessage msg = FileTransferMessage(clientId, i, flags, nextPartNr, (unsigned char *)f->hash.get()->data(), (uint64_t)readCount, (unsigned char *)chunk);
+    FileTransferMessage *msg = new FileTransferMessage(clientId, i, flags, nextPartNr, (unsigned char *)f->hash.get()->data(), (uint64_t)readCount, (unsigned char *)chunk);
 
-    client->send(&msg);
+    client->send(msg);
     sendMessageQueue->pushSendMessage(i, msg);
     Logger::debug("Send file part " + to_string(nextPartNr) + ", length: " + to_string(readCount) + " for file: " + fid);
     if (isLastPart)
@@ -667,7 +667,7 @@ void FileClient2::onTimerTick(int identifier)
             else
             {
                 // Resend message:
-                uploadClient->send(&msg.msg);
+                uploadClient->send(msg.msg);
                 msg.sendCount++;
                 msg.sendTime = time(NULL);
                 sendMessageQueue->push(msg);
@@ -704,9 +704,9 @@ void FileClient2::onTimerTick(int identifier)
 
 void FileClient2::sendPingMessage(unsigned int plLength, unsigned int seqNumber, Client2 *client)
 {
-    PingMessage msg = PingMessage(plLength, seqNumber, clientId);
+    PingMessage *msg = new PingMessage(plLength, seqNumber, clientId);
 
-    client->send(&msg);
+    client->send(msg);
     sendMessageQueue->pushSendMessage(seqNumber, msg);
     Logger::debug("Ping");
 }
@@ -716,9 +716,9 @@ void FileClient2::sendAuthRequestMessage(unsigned int seqNumber, Client2 *client
     const char *c = clientPassword.c_str();
     unsigned int l = clientPassword.length();
 
-    AuthRequestMessage msg = AuthRequestMessage(clientId, l, (unsigned char *)c, seqNumber);
+    AuthRequestMessage *msg = new AuthRequestMessage(clientId, l, (unsigned char *)c, seqNumber);
 
-    client->send(&msg);
+    client->send(msg);
     sendMessageQueue->pushSendMessage(seqNumber, msg);
     Logger::debug("Send auth request with sequence number: " + to_string(seqNumber));
 }

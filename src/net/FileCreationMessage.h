@@ -10,7 +10,7 @@ namespace net {
 		static const unsigned int CHECKSUM_OFFSET_BITS = 328;
 
 		FileCreationMessage(unsigned int clientId, unsigned int seqNumber, unsigned char fileType, unsigned char* fileHash, uint64_t fIDLength, unsigned char* fID);
-		void createBuffer(struct Message* msg);
+		virtual void createBuffer(struct Message* msg);
 		static unsigned int getClientIdFromMessage(unsigned char* buffer);
 		static unsigned int getSeqNumberFromMessage(unsigned char* buffer);
 		static unsigned char getFileTypeFromMessage(unsigned char* buffer);

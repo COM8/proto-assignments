@@ -77,7 +77,7 @@ void FileServerClient::onTimerTick(int identifier)
                 else
                 {
                     // Resend message:
-                    udpClient->send(&msg.msg);
+                    udpClient->send(msg.msg);
                     msg.sendCount++;
                     msg.sendTime = time(NULL);
                     sendMessageQueue->push(msg);
@@ -340,8 +340,8 @@ void FileServerClient::onAuthRequestMessage(net::ReadMessage *msg)
 
 void FileServerClient::sendAuthResultMessage(unsigned int seqNumber, unsigned char flags)
 {
-    AuthResultMessage msg = AuthResultMessage(CLIENT_ID, flags, seqNumber);
-    udpClient->send(&msg);
+    AuthResultMessage *msg = new AuthResultMessage(CLIENT_ID, flags, seqNumber);
+    udpClient->send(msg);
     sendMessageQueue->pushSendMessage(seqNumber, msg);
 }
 
@@ -517,8 +517,8 @@ void FileServerClient::onFileStatusMessage(net::ReadMessage *msg)
 void FileServerClient::sendServerHelloMessage(unsigned char flags, unsigned long pubKey)
 {
     unsigned int seqNumber = getNextSeqNumber();
-    ServerHelloMessage msg = ServerHelloMessage(PORT_LOCAL, CLIENT_ID, seqNumber, flags, pubKey);
-    udpClient->send(&msg);
+    ServerHelloMessage *msg = new ServerHelloMessage(PORT_LOCAL, CLIENT_ID, seqNumber, flags, pubKey);
+    udpClient->send(msg);
     sendMessageQueue->pushSendMessage(seqNumber, msg);
 }
 
@@ -536,9 +536,9 @@ void FileServerClient::sendFileStatusAnswerMessage(unsigned int seqNumber, unsig
 
 void FileServerClient::sendPingMessage(unsigned int plLength, unsigned int seqNumber)
 {
-    PingMessage msg = PingMessage(plLength, seqNumber, CLIENT_ID);
+    PingMessage *msg = new PingMessage(plLength, seqNumber, CLIENT_ID);
 
-    udpClient->send(&msg);
+    udpClient->send(msg);
     sendMessageQueue->pushSendMessage(seqNumber, msg);
     Logger::debug("Ping");
 }

@@ -11,7 +11,7 @@ namespace net {
 
 		FileStatusMessage(unsigned int clientId, unsigned int seqNumber, unsigned int lastFIDPartNumber, unsigned char flags, uint64_t fIDLength, unsigned char* fID);
 		FileStatusMessage(unsigned int clientId, unsigned int seqNumber, unsigned char flags, uint64_t fIDLength, unsigned char* fID);
-		void createBuffer(struct Message* msg);
+		virtual void createBuffer(struct Message* msg);
 		static unsigned int getClientIdFromMessage(unsigned char* buffer);
 		static unsigned int getLastFIDPartNumberFromMessage(unsigned char* buffer);
 		static unsigned char getFlagsFromMessage(unsigned char* buffer);

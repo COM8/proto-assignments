@@ -9,7 +9,7 @@ namespace net {
 		static const unsigned int CHECKSUM_OFFSET_BITS = 36;
 
 		AckMessage(unsigned int seqNumber);
-		void createBuffer(struct Message* msg);
+		virtual void createBuffer(struct Message* msg);
 		static unsigned int getSeqNumberFromMessage(unsigned char* buffer);
 
 	private:

@@ -91,6 +91,7 @@ bool Client2::send(AbstractMessage *msg)
     {
         AbstractMessage::printByte(msg->getType());
         Logger::error("11-------------------------------------------- for type: ");
+        msg->createBuffer(&msgStruct);
     }
     bool result = send(&msgStruct);
 
