@@ -363,7 +363,7 @@ Diffie-Hellman algorithm relies on *discrete logarithm problem.* It is very hard
 
 - Exposed API of Encrypt and Decrypt uses that shared key to encrypt and decrypt messages.
 
-More info can be found at: [https://en.wikipedia.org/wiki/Diffie%E2%80%93Hellman_key_exchange](https://en.wikipedia.org/wiki/Diffie%E2%80%93Hellman_key_exchange)
+More info can be found at: [Wiki Link](https://en.wikipedia.org/wiki/Diffie%E2%80%93Hellman_key_exchange)
 
 ## File syncronisation
 In order to do file sync we check periodically if there were files changed (It's planned to switch to Filsystem watcher to monitor for changes). To detect which files were changed we compare the [MD5's](https://en.wikipedia.org/wiki/Md5) of the files to internally saved hashes of them on the last run. 
