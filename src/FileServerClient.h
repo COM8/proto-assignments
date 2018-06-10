@@ -50,7 +50,7 @@ public:
   void disconnect();
   FileServerClientState getState();
   void setDeclined(unsigned char flags);
-  void setAccepted(unsigned char flags, unsigned long prime, unsigned long primRoot, unsigned long pubKey);
+  void setAccepted(unsigned long prime, unsigned long primRoot, unsigned long pubKey);
   void onTimerTick(int identifier);
 
 private:
@@ -64,7 +64,7 @@ private:
   Queue<net::ReadMessage> *cpQueue;
   SendMessageQueue *sendMessageQueue;
   bool shouldConsumerRun;
-  std::thread *consumerThread;
+  std::thread consumerThread;
   std::string curFID;
   unsigned int lastFIDPartNumber;
   std::uint64_t curFIDLength;

@@ -32,7 +32,7 @@ namespace net {
 		AbstractMessage(unsigned char type);
 		AbstractMessage() = default;
 		~AbstractMessage();
-		char getType();
+		unsigned char getType();
 		void addChecksum(struct Message* msg, unsigned int checkSumOffsetBits);
 		static bool isChecksumValid(struct ReadMessage* msg, unsigned int checkSumOffsetBits);
 		static void printMessage(struct Message* msg);

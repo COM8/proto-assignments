@@ -13,7 +13,6 @@ FileServerClient::FileServerClient(unsigned int clientId, unsigned short portLoc
     this->user = user;
     this->maxPPS = maxPPS;
 
-    this->consumerThread = NULL;
     this->shouldConsumerRun = false;
     this->state = fsc_disconnected;
     this->cpQueue = new Queue<ReadMessage>();
@@ -110,7 +109,7 @@ void FileServerClient::setDeclined(unsigned char flags)
     sendServerHelloMessage(flags, -1);
     setState(fsc_disconnected);
 }
-void FileServerClient::setAccepted(unsigned char flags, unsigned long prime, unsigned long primRoot, unsigned long pubKey)
+void FileServerClient::setAccepted(unsigned long prime, unsigned long primRoot, unsigned long pubKey)
 {
     // Setup encryption:
     if (enc)
@@ -121,7 +120,6 @@ void FileServerClient::setAccepted(unsigned char flags, unsigned long prime, uns
     enc = new DiffieHellman();
     enc->onServerReceive(prime, primRoot, pubKey);
 
-    sendServerHelloMessage(flags, enc->getPubKey());
     setState(fsc_clientHello);
 }
 
@@ -154,7 +152,8 @@ void FileServerClient::setState(FileServerClientState state)
     case fsc_clientHello:
         startConsumerThread();
         udpServer->start();
-        setState(fsc_connected);
+        sendServerHelloMessage(0b0001, enc->getPubKey());
+        setState(fsc_awaitClientAuth);
         break;
 
     case fsc_awaitClientAuth:
@@ -194,29 +193,19 @@ void FileServerClient::setState(FileServerClientState state)
 void FileServerClient::startConsumerThread()
 {
     shouldConsumerRun = true;
-    if (consumerThread)
-    {
-        stopConsumerThread();
-    }
-    consumerThread = new thread(&FileServerClient::consumerTask, this);
+    consumerThread = thread(&FileServerClient::consumerTask, this);
 }
 
 void FileServerClient::stopConsumerThread()
 {
     shouldConsumerRun = false;
-    if (consumerThread && consumerThread->joinable() && consumerThread->get_id() != this_thread::get_id())
+    if (consumerThread.joinable() && consumerThread.get_id() != this_thread::get_id())
     {
         ReadMessage msg = ReadMessage();
         msg.msgType = 0xff;
         cpQueue->push(msg); // Push dummy message to wake up the consumer thread
-        consumerThread->join();
+        consumerThread.join();
     }
-
-    if (consumerThread)
-    {
-        delete consumerThread;
-    }
-    consumerThread = NULL;
 }
 
 void FileServerClient::consumerTask()
@@ -325,6 +314,12 @@ void FileServerClient::onAuthRequestMessage(net::ReadMessage *msg)
     }
 
     unsigned int seqNumber = AuthRequestMessage::getSeqNumberFromMessage(msg->buffer);
+    if (!sendMessageQueue->onSequenceNumberAck(seqNumber))
+    {
+        Logger::error("Invalid sequence number in AuthRequestMessage received: " + to_string(seqNumber) + ". Sequence number was not found!");
+        return;
+    }
+
     unsigned int passwordLength = AuthRequestMessage::getPasswordLengthFromMessage(msg->buffer);
     unsigned char *password = AuthRequestMessage::getPasswordFromMessage(msg->buffer, passwordLength);
     string passwordString = string((char *)password, passwordLength);
@@ -521,8 +516,10 @@ void FileServerClient::onFileStatusMessage(net::ReadMessage *msg)
 
 void FileServerClient::sendServerHelloMessage(unsigned char flags, unsigned long pubKey)
 {
-    ServerHelloMessage msg = ServerHelloMessage(PORT_LOCAL, CLIENT_ID, getNextSeqNumber(), flags, pubKey);
+    unsigned int seqNumber = getNextSeqNumber();
+    ServerHelloMessage msg = ServerHelloMessage(PORT_LOCAL, CLIENT_ID, seqNumber, flags, pubKey);
     udpClient->send(&msg);
+    sendMessageQueue->pushSendMessage(seqNumber, msg);
 }
 
 void FileServerClient::sendAckMessage(unsigned int seqNumber)

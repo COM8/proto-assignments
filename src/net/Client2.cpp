@@ -85,8 +85,13 @@ void Client2::init()
 
 bool Client2::send(AbstractMessage *msg)
 {
-    Message msgStruct = {};
+    Message msgStruct{};
     msg->createBuffer(&msgStruct);
+    if (msgStruct.bufferLength <= 0)
+    {
+        AbstractMessage::printByte(msg->getType());
+        Logger::error("11-------------------------------------------- for type: ");
+    }
     bool result = send(&msgStruct);
 
     // Cleanup:
@@ -104,7 +109,7 @@ bool Client2::send(Message *msg)
     }
 
     // Print message:
-    if (ENABLE_UDP_CLIENT_DEBUG_OUTPUT || msg->bufferLength < 0)
+    if (ENABLE_UDP_CLIENT_DEBUG_OUTPUT)
     {
         AbstractMessage::printMessage(msg);
     }

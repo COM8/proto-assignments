@@ -4,8 +4,8 @@ DEBUG_DIR=debug
 SYNC_DIR=sync
 PORT=12345
 
-ARGS_CLIENT=-h localhost -p $(PORT) -f $(DEBUG_DIR) -u 42 -pass some_password
-ARGS_CLIENT_DEBUG="-h" "localhost" "-p" "$(PORT)" "-f" "$(DEBUG_DIR)" "-u" "42" "-pass" "some_password"
+ARGS_CLIENT=-h localhost -p $(PORT) -f $(DEBUG_DIR) -u user0 -pass password0
+ARGS_CLIENT_DEBUG="-h" "localhost" "-p" "$(PORT)" "-f" "$(DEBUG_DIR)" "-u" "user0" "-pass" "password0"
 ARGS_SERVER=-s -p $(PORT) -cc 0
 ARGS_SERVER_DEBUG="-s" "-p" "$(PORT)" "-cc" "0"
 

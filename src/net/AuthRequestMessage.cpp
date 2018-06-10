@@ -12,8 +12,8 @@ AuthRequestMessage::AuthRequestMessage(unsigned int clientId, unsigned int passw
 
 void AuthRequestMessage::createBuffer(struct Message *msg)
 {
-    msg->buffer = new unsigned char[17+passwordLength]{};
-    msg->bufferLength = 17+passwordLength;
+    msg->buffer = new unsigned char[17 + passwordLength]{};
+    msg->bufferLength = 17 + passwordLength;
 
     // Add type:
     msg->buffer[0] |= type;
@@ -39,6 +39,11 @@ unsigned int AuthRequestMessage::getClientIdFromMessage(unsigned char *buffer)
     return getUnsignedIntFromMessage(buffer, 8);
 }
 
+unsigned int AuthRequestMessage::getSeqNumberFromMessage(unsigned char *buffer)
+{
+    return getUnsignedIntFromMessage(buffer, 40);
+}
+
 unsigned int AuthRequestMessage::getPasswordLengthFromMessage(unsigned char *buffer)
 {
     return getUnsignedIntFromMessage(buffer, 104);
@@ -46,10 +51,5 @@ unsigned int AuthRequestMessage::getPasswordLengthFromMessage(unsigned char *buf
 
 unsigned char *AuthRequestMessage::getPasswordFromMessage(unsigned char *buffer, unsigned int passwordLength)
 {
-    return getBytesWithOffset(buffer, 136, (uint64_t)passwordLength);
-}
-
-unsigned int AuthRequestMessage::getSeqNumberFromMessage(unsigned char *buffer)
-{
-	return getUnsignedIntFromMessage(buffer, 40);
+    return getBytesWithOffset(buffer, 136, (uint64_t)passwordLength * 8);
 }

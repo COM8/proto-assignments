@@ -60,9 +60,9 @@ class FileClient2 : public TimerTickable
     std::string serverAddress;
     std::mutex *seqNumberMutex;
     unsigned int seqNumber;
-    std::thread *helloThread;
+    std::thread helloThread;
     bool shouldHelloRun;
-    std::thread *consumerThread;
+    std::thread consumerThread;
     bool shouldConsumerRun;
     unsigned int clientId;
     std::string clientPassword;

@@ -11,7 +11,7 @@ AbstractMessage::~AbstractMessage() {
 	
 }
 
-char AbstractMessage::getType() {
+unsigned char AbstractMessage::getType() {
 	return type;
 }
 

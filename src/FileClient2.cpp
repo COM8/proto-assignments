@@ -18,10 +18,8 @@ FileClient2::FileClient2(string serverAddress, unsigned short serverPort, string
     this->stateMutex = new mutex();
     this->seqNumberMutex = new mutex();
     this->seqNumber = 0;
-    this->helloThread = NULL;
     this->shouldHelloRun = false;
     this->shouldConsumerRun = false;
-    this->consumerThread = NULL;
     this->client = NULL;
     this->uploadClient = NULL;
     this->server = NULL;
@@ -129,7 +127,6 @@ void FileClient2::setState(FileClient2State state)
 
     case clientAuth:
         tTimer->start();
-        sendAuthRequestMessage(getNextSeqNumber(), uploadClient);
         break;
 
     case connected:
@@ -395,27 +392,16 @@ void FileClient2::startSendingFS()
 
 void FileClient2::startHelloThread()
 {
-    if (helloThread)
-    {
-        stopHelloThread();
-    }
-
     shouldHelloRun = true;
-    helloThread = new thread(&FileClient2::helloTask, this, listenPort, reconnect, client);
+    helloThread = thread(&FileClient2::helloTask, this, listenPort, reconnect, client);
 }
 
 void FileClient2::stopHelloThread()
 {
     shouldHelloRun = false;
-    if (helloThread && helloThread->joinable() && helloThread->get_id() != this_thread::get_id())
+    if (helloThread.joinable() && helloThread.get_id() != this_thread::get_id())
     {
-        helloThread->join();
-    }
-
-    if (helloThread)
-    {
-        delete helloThread;
-        helloThread = NULL;
+        helloThread.join();
     }
 }
 
@@ -437,38 +423,27 @@ void FileClient2::helloTask(unsigned short listenPort, bool reconnecting, Client
 
 void FileClient2::sendClientHelloMessage(unsigned short listenPort, unsigned char flags, string username, Client2 *client)
 {
-    const char *c = username.c_str();
+    unsigned char *c = (unsigned char *)username.c_str();
     unsigned int l = username.length();
-    ClientHelloMessage msg = ClientHelloMessage(listenPort, clientId, flags, enc->getPrime(), enc->getPrimitiveRoot(), enc->getPubKey(), (unsigned char *)c, l);
+    ClientHelloMessage msg = ClientHelloMessage(listenPort, clientId, flags, enc->getPrime(), enc->getPrimitiveRoot(), enc->getPubKey(), c, l);
     client->send(&msg);
 }
 
 void FileClient2::startConsumerThread()
 {
-    if (consumerThread)
-    {
-        stopConsumerThread();
-    }
-
     shouldConsumerRun = true;
-    consumerThread = new thread(&FileClient2::consumerTask, this);
+    consumerThread = thread(&FileClient2::consumerTask, this);
 }
 
 void FileClient2::stopConsumerThread()
 {
     shouldConsumerRun = false;
-    if (consumerThread && consumerThread->joinable() && consumerThread->get_id() != this_thread::get_id())
+    if (consumerThread.joinable() && consumerThread.get_id() != this_thread::get_id())
     {
         ReadMessage msg = ReadMessage();
         msg.msgType = 0xff;
         cpQueue->push(msg); // Push dummy message to wake up the consumer thread
-        consumerThread->join();
-    }
-
-    if (consumerThread)
-    {
-        delete consumerThread;
-        consumerThread = NULL;
+        consumerThread.join();
     }
 }
 
@@ -647,7 +622,7 @@ void FileClient2::onServerHelloMessage(ReadMessage *msg)
         uploadClient->init();
 
         unsigned int seqNumber = ServerHelloMessage::getSeqNumberFromMessage(msg->buffer);
-        sendAckMessage(seqNumber, uploadClient);
+        sendAuthRequestMessage(seqNumber, uploadClient);
 
         setState(clientAuth);
     }
@@ -741,7 +716,7 @@ void FileClient2::sendAuthRequestMessage(unsigned int seqNumber, Client2 *client
     const char *c = clientPassword.c_str();
     unsigned int l = clientPassword.length();
 
-    AuthRequestMessage msg = AuthRequestMessage(clientId, l, (unsigned char *)c, getNextSeqNumber());
+    AuthRequestMessage msg = AuthRequestMessage(clientId, l, (unsigned char *)c, seqNumber);
 
     client->send(&msg);
     sendMessageQueue->pushSendMessage(seqNumber, msg);

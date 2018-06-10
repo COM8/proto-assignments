@@ -88,7 +88,7 @@ UNUSED [816-X Bit]:<br/>
 ### Server-Hello-Handshake:
 Once the server received a ```Client-Hello-Handshake``` message he should reply with this message.
 ```
-0      4       8           40                56            88        120        152
+0      4       8           40                72            88        120        152
 +------+-------+-----------+-----------------+-------------+---------+----------+
 | Type | Flags | Client ID | Sequence Number | Upload-port | Pub Key | Checksum |
 +------+-------+-----------+-----------------+-------------+---------+----------+

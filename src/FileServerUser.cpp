@@ -2,10 +2,10 @@
 
 using namespace std;
 
-FileServerUser::FileServerUser(string userName, string password) : clients(), USER_NAME(userName), PASSWORD(password)
+FileServerUser::FileServerUser(string username, string password) : clients(), USERNAME(username), PASSWORD(password)
 {
     this->clientsMutex = new mutex();
-    this->fS = new FilesystemServer("sync/" + USER_NAME + "/");
+    this->fS = new FilesystemServer("sync/" + username + "/");
 }
 
 FileServerUser::~FileServerUser()
@@ -18,7 +18,7 @@ FileServerUser::~FileServerUser()
 
 void FileServerUser::deleteAllClients()
 {
-    Logger::info("Started deleting all clients for username: " + USER_NAME);
+    Logger::info("Started deleting all clients for username: " + USERNAME);
     std::unique_lock<std::mutex> mlock(*clientsMutex);
     auto i = clients.begin();
     while (i != clients.end())
@@ -28,7 +28,7 @@ void FileServerUser::deleteAllClients()
         i = clients.erase(i);
     }
     mlock.unlock();
-    Logger::info("Finished deleting all clients for username: " + USER_NAME);
+    Logger::info("Finished deleting all clients for username: " + USERNAME);
 }
 
 void FileServerUser::removeClient(FileServerClient *client)

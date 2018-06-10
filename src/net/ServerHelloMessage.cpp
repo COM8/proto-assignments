@@ -30,7 +30,7 @@ void ServerHelloMessage::createBuffer(struct Message *msg)
 	setBufferUnsignedInt(msg, seqNumber, 40);
 
 	// Add port:
-	setBufferUnsignedShort(msg, port, 56);
+	setBufferUnsignedShort(msg, port, 72);
 
 	// Public key:
 	setBufferUnsignedInt(msg, pubKey, 88);
@@ -51,7 +51,7 @@ unsigned int ServerHelloMessage::getClientIdFromMessage(unsigned char *buffer)
 
 unsigned short ServerHelloMessage::getPortFromMessage(unsigned char *buffer)
 {
-	return getUnsignedShortFromMessage(buffer, 56);
+	return getUnsignedShortFromMessage(buffer, 72);
 }
 
 unsigned long ServerHelloMessage::getPubKeyFromMessage(unsigned char *buffer)

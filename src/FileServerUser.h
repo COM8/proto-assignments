@@ -11,11 +11,11 @@
 class FileServerUser
 {
 public:
-  const std::string USER_NAME;
+  const std::string USERNAME;
   const std::string PASSWORD;
   FilesystemServer *fS;
 
-  FileServerUser(std::string userName, std::string password);
+  FileServerUser(std::string username, std::string password);
   FileServerUser();
   ~FileServerUser();
 

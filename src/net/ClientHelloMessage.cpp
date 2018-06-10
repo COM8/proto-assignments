@@ -17,8 +17,8 @@ ClientHelloMessage::ClientHelloMessage(unsigned short port, unsigned int clientI
 
 void ClientHelloMessage::createBuffer(struct Message *msg)
 {
-	msg->buffer = new unsigned char[125]{};
-	msg->bufferLength = 125;
+	msg->buffer = new unsigned char[1000]{};
+	msg->bufferLength = 1000;
 
 	// Add type:
 	msg->buffer[0] |= type;
@@ -66,11 +66,6 @@ unsigned int ClientHelloMessage::getClientIdFromMessage(unsigned char *buffer)
 	return getUnsignedIntFromMessage(buffer, 24);
 }
 
-unsigned long ClientHelloMessage::getPubKeyFromMessage(unsigned char *buffer)
-{
-	return getUnsignedIntFromMessage(buffer, 120);
-}
-
 unsigned long ClientHelloMessage::getPrimeNumberFromMessage(unsigned char *buffer)
 {
 	return getUnsignedIntFromMessage(buffer, 56);
@@ -81,11 +76,17 @@ unsigned long ClientHelloMessage::getPrimitiveRootFromMessage(unsigned char *buf
 	return getUnsignedIntFromMessage(buffer, 88);
 }
 
+unsigned long ClientHelloMessage::getPubKeyFromMessage(unsigned char *buffer)
+{
+	return getUnsignedIntFromMessage(buffer, 120);
+}
+
 unsigned int ClientHelloMessage::getUsernameLengthFromMessage(unsigned char *buffer)
 {
 	return getUnsignedIntFromMessage(buffer, 184);
 }
 
-unsigned char *ClientHelloMessage::getUsernameFromMessage(unsigned char *buffer, unsigned int usernameLength) {
-	return getBytesWithOffset(buffer, 216, (uint64_t)usernameLength);
+unsigned char *ClientHelloMessage::getUsernameFromMessage(unsigned char *buffer, unsigned int usernameLength)
+{
+	return getBytesWithOffset(buffer, 216, (uint64_t)usernameLength * 8);
 }

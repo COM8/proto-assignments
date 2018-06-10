@@ -95,7 +95,7 @@ void FileServer2::onTimerTick(int identifier)
                 i->second->clanupClients();
                 if (i->second->isEmpty())
                 {
-                    Logger::info("Removing user \"" + i->second->USER_NAME + "\" because he does not contain any clients.");
+                    Logger::info("Removing user \"" + i->second->USERNAME + "\" because he does not contain any clients.");
                     delete i->second;
                     i = users.erase(i);
                 }
@@ -287,7 +287,7 @@ void FileServer2::onClientHelloMessage(ReadMessage *msg)
     unsigned long primRoot = ClientHelloMessage::getPrimitiveRootFromMessage(msg->buffer);
     unsigned long pubKey = ClientHelloMessage::getPubKeyFromMessage(msg->buffer);
 
-    client->setAccepted(0b0001, prime, primRoot, pubKey);
+    client->setAccepted(prime, primRoot, pubKey);
     user->addClient(client);
     cout << "New client with id: " << client->CLIENT_ID << " accepted on port: " << client->PORT_REMOTE << endl;
 }
