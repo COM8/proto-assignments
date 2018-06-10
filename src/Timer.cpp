@@ -130,7 +130,10 @@ void Timer::timerTask()
             mlock.unlock();
             if (tT)
             {
-                Logger::debug("Timer ticked: " + to_string(identifier));
+                if (ENABLE_TIMER_TICKED_DEBUG_OUTPUT)
+                {
+                    Logger::debug("Timer ticked: " + to_string(identifier));
+                }
                 tT->onTimerTick(identifier);
             }
             if (!tick)

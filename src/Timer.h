@@ -6,6 +6,7 @@
 #include <atomic>
 #include "TimerTickable.h"
 #include "Logger.h"
+#include "Consts.h"
 
 enum TimerState {
     t_stop,

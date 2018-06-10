@@ -3,7 +3,7 @@
 using namespace net;
 using namespace std;
 
-FileTransferMessage::FileTransferMessage(unsigned int clientId, unsigned int seqNumber, unsigned char flags, unsigned int fidPartNumber, unsigned char *fileHash, uint64_t contentLength, unsigned char *content) : AbstractMessage(3 << 4)
+FileTransferMessage::FileTransferMessage(unsigned int clientId, unsigned int seqNumber, unsigned char flags, unsigned int fidPartNumber, unsigned char *fileHash, uint64_t contentLength, unsigned char *content) : AbstractMessage(FILE_TRANSFER_MESSAGE_ID << 4)
 {
 	this->clientId = clientId;
 	this->seqNumber = seqNumber;

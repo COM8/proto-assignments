@@ -5,6 +5,9 @@
 #define MAX_MESSAGE_TIMEOUT_COUNT 8
 #define MAX_PING_MESSAGE_TIMEOUT_COUNT 3
 
+// Debug:
+#define ENABLE_TIMER_TICKED_DEBUG_OUTPUT false
+
 // UDP-Server:
 #define BUF_SIZE 2048
 #define ENABLE_UDP_SERVER_DEBUG_OUTPUT false
@@ -16,6 +19,18 @@
 // Filesystem:
 #define MAX_CONTENT_LENGTH 1000
 #define MAX_HASH_PART_SIZE_BYTE 16777216
+
+// Message IDs:
+#define CLIENT_HELLO_MESSAGE_ID 0
+#define SERVER_HELLO_MESSAGE_ID 1
+#define FILE_CREATION_MESSAGE_ID 2
+#define FILE_TRANSFER_MESSAGE_ID 3
+#define FILE_STATUS_MESSAGE_ID 4
+#define ACK_MESSAGE_ID 5
+#define PING_MESSAGE_ID 6
+#define TRANSFER_ENDED_MESSAGE_ID 7
+#define AUTH_REQUEST_MESSAGE_ID 8
+#define AUTH_RESULT_MESSAGE_ID 9
 
 // CRC:
 // Source: https://github.com/gcc-mirror/gcc/blob/master/libiberty/crc32.c

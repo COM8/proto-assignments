@@ -3,7 +3,7 @@
 using namespace net;
 using namespace std;
 
-PingMessage::PingMessage(unsigned int plLength, unsigned int seqNumber, unsigned int clientId) : AbstractMessage(6 << 4) { // 01100000
+PingMessage::PingMessage(unsigned int plLength, unsigned int seqNumber, unsigned int clientId) : AbstractMessage(PING_MESSAGE_ID << 4) {
 	this->plLength = plLength;
 	this->seqNumber = seqNumber;
 	this->clientId = clientId;

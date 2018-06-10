@@ -15,6 +15,8 @@
 #include "net/FileStatusMessage.h"
 #include "net/PingMessage.h"
 #include "net/AckMessage.h"
+#include "net/AuthRequestMessage.h"
+#include "net/AuthResultMessage.h"
 #include "sec/DiffieHellman.h"
 #include "Timer.h"
 #include "TimerTickable.h"
@@ -24,12 +26,13 @@ enum FileServerClientState
 {
   fsc_disconnected = 0,
   fsc_clientHello = 1,
-  fsc_awaitHandshAck = 2,
-  fsc_connected = 3,
-  fsc_sendingChanges = 4,
-  fsc_awaitingAck = 5,
-  fsc_ping = 6,
-  fsc_error = 7
+  fsc_awaitClientAuth = 2,
+  fsc_awaitServerAuthAck = 3,
+  fsc_connected = 4,
+  fsc_sendingChanges = 5,
+  fsc_awaitingAck = 6,
+  fsc_ping = 7,
+  fsc_error = 8
 };
 
 class FileServerClient : TimerTickable
@@ -79,10 +82,12 @@ private:
   void sendAckMessage(unsigned int seqNumber);
   void sendFileStatusAnswerMessage(unsigned int seqNumber, unsigned int lastFIDPartNumber, unsigned char flags, uint64_t fIDLength, unsigned char *fID);
   void sendPingMessage(unsigned int plLength, unsigned int seqNumber);
+  void sendAuthResultMessage(unsigned int seqNumber, unsigned char flags);
   void onPingMessage(net::ReadMessage *msg);
   void onAckMessage(net::ReadMessage *msg);
   void onFileCreationMessage(net::ReadMessage *msg);
   void onFileTransferMessage(net::ReadMessage *msg);
   void onTransferEndedMessage(net::ReadMessage *msg);
   void onFileStatusMessage(net::ReadMessage *msg);
+  void onAuthRequestMessage(net::ReadMessage *msg);
 };

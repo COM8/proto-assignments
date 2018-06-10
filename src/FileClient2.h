@@ -15,6 +15,8 @@
 #include "net/FileCreationMessage.h"
 #include "net/FileTransferMessage.h"
 #include "net/FileStatusMessage.h"
+#include "net/AuthRequestMessage.h"
+#include "net/AuthResultMessage.h"
 #include "Queue.h"
 #include "WorkingSet.h"
 #include "Timer.h"
@@ -27,7 +29,7 @@ enum FileClient2State
 {
     disconnected = 0,
     sendClientHello = 1,
-    handshake = 2,
+    clientAuth = 2,
     connected = 3,
     ping = 4,
     reqestedFileStatus = 5,
@@ -98,8 +100,10 @@ class FileClient2 : public TimerTickable
     void sendPingMessage(unsigned int plLength, unsigned int seqNumber, net::Client2 *client);
     void sendFileStatusMessage(std::string fid, std::shared_ptr<File>, net::Client2 *client);
     void sendAckMessage(unsigned int seqNumber, net::Client2 *client);
+    void sendAuthRequestMessage(unsigned int seqNumber, net::Client2 *client);
     void onServerHelloMessage(net::ReadMessage *msg);
     void onFileStatusMessage(net::ReadMessage *msg);
     void onAckMessage(net::ReadMessage *msg);
     void onPingMessage(net::ReadMessage *msg);
+    void onAuthResultMessage(net::ReadMessage *msg);
 };

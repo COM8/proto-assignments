@@ -6,9 +6,9 @@ using namespace net;
 using namespace sec;
 
 FileServerClient::FileServerClient(unsigned int clientId, unsigned short portLocal, unsigned short portRemote, char *ipRemote, unsigned int maxPPS, FileServerUser *user) : CLIENT_ID(clientId),
-                                                                                                                                                       PORT_LOCAL(portLocal),
-                                                                                                                                                       PORT_REMOTE(portRemote),
-                                                                                                                                                       IP_REMOTE(ipRemote)
+                                                                                                                                                                            PORT_LOCAL(portLocal),
+                                                                                                                                                                            PORT_REMOTE(portRemote),
+                                                                                                                                                                            IP_REMOTE(ipRemote)
 {
     this->user = user;
     this->maxPPS = maxPPS;
@@ -57,17 +57,14 @@ void FileServerClient::onTimerTick(int identifier)
     {
         switch (getState())
         {
-        case fsc_awaitHandshAck:
-            Logger::warn("Client (" + to_string(CLIENT_ID) + ") handshake failed with timeout!");
-            setState(fsc_error);
-            break;
-
         case fsc_connected:
             setState(fsc_ping);
             break;
 
         case fsc_ping:
         case fsc_awaitingAck:
+        case fsc_awaitClientAuth:
+        case fsc_awaitServerAuthAck:
             list<struct SendMessage> *msgs = new list<struct SendMessage>();
             sendMessageQueue->popNotAckedMessages(MAX_ACK_TIME_IN_S, msgs);
 
@@ -160,8 +157,12 @@ void FileServerClient::setState(FileServerClientState state)
         setState(fsc_connected);
         break;
 
-    case fsc_awaitHandshAck:
+    case fsc_awaitClientAuth:
         tTimer->start();
+        break;
+
+    case fsc_awaitServerAuthAck:
+        tTimer->reset();
         break;
 
     case fsc_connected:
@@ -233,32 +234,36 @@ void FileServerClient::consumerTask()
 
         switch (msg.msgType)
         {
-        case 2:
+        case FILE_CREATION_MESSAGE_ID:
             onFileCreationMessage(&msg);
             break;
 
-        case 3:
+        case FILE_TRANSFER_MESSAGE_ID:
             onFileTransferMessage(&msg);
             break;
 
-        case 4:
+        case FILE_STATUS_MESSAGE_ID:
             onFileStatusMessage(&msg);
             break;
 
-        case 5:
+        case ACK_MESSAGE_ID:
             onAckMessage(&msg);
             break;
 
-        case 6:
+        case PING_MESSAGE_ID:
             onPingMessage(&msg);
             break;
 
-        case 7:
+        case TRANSFER_ENDED_MESSAGE_ID:
             onTransferEndedMessage(&msg);
             break;
 
+        case AUTH_REQUEST_MESSAGE_ID:
+            onAuthRequestMessage(&msg);
+            break;
+
         default:
-            Logger::warn("Client " + to_string(CLIENT_ID) + " received an unknown message type: " + to_string((int)msg.msgType));
+            Logger::warn("Server client " + to_string(CLIENT_ID) + " received an unknown message type: " + to_string((int)msg.msgType));
             break;
         }
     }
@@ -296,6 +301,53 @@ void FileServerClient::onAckMessage(net::ReadMessage *msg)
 
     unsigned int seqNumber = AckMessage::getSeqNumberFromMessage(msg->buffer);
     Logger::debug("Acked: " + to_string(seqNumber));
+
+    if (getState() == fsc_awaitServerAuthAck)
+    {
+        setState(fsc_connected);
+    }
+}
+
+void FileServerClient::onAuthRequestMessage(net::ReadMessage *msg)
+{
+    // Check if the checksum of the received message is valid else drop it:
+    if (!AbstractMessage::isChecksumValid(msg, AuthRequestMessage::CHECKSUM_OFFSET_BITS))
+    {
+        return;
+    }
+
+    // Check if client ID is valid:
+    unsigned int clientId = AuthRequestMessage::getClientIdFromMessage(msg->buffer);
+    if (CLIENT_ID != clientId)
+    {
+        Logger::warn("Invalid client id received for AuthRequestMessage! Ignoring message.");
+        return;
+    }
+
+    unsigned int seqNumber = AuthRequestMessage::getSeqNumberFromMessage(msg->buffer);
+    unsigned int passwordLength = AuthRequestMessage::getPasswordLengthFromMessage(msg->buffer);
+    unsigned char *password = AuthRequestMessage::getPasswordFromMessage(msg->buffer, passwordLength);
+    string passwordString = string((char *)password, passwordLength);
+
+    // Check if password is correct:
+    if (passwordString.compare(user->PASSWORD))
+    {
+        Logger::warn("Client " + to_string(CLIENT_ID) + " send an invalid password.");
+        sendAuthResultMessage(seqNumber, 0b0000);
+        setState(fsc_error);
+    }
+    else
+    {
+        sendAuthResultMessage(seqNumber, 0b0001);
+        setState(fsc_awaitServerAuthAck);
+    }
+}
+
+void FileServerClient::sendAuthResultMessage(unsigned int seqNumber, unsigned char flags)
+{
+    AuthResultMessage msg = AuthResultMessage(CLIENT_ID, flags, seqNumber);
+    udpClient->send(&msg);
+    sendMessageQueue->pushSendMessage(seqNumber, msg);
 }
 
 void FileServerClient::onFileCreationMessage(net::ReadMessage *msg)
@@ -310,7 +362,7 @@ void FileServerClient::onFileCreationMessage(net::ReadMessage *msg)
     unsigned int clientId = FileCreationMessage::getClientIdFromMessage(msg->buffer);
     if (CLIENT_ID != clientId)
     {
-        Logger::warn("Invalid client id received!");
+        Logger::warn("Invalid client id received for FileCreationMessage! Ignoring message.");
         return;
     }
 
@@ -487,10 +539,9 @@ void FileServerClient::sendFileStatusAnswerMessage(unsigned int seqNumber, unsig
 
 void FileServerClient::sendPingMessage(unsigned int plLength, unsigned int seqNumber)
 {
-    PingMessage *msg = new PingMessage(plLength, seqNumber, CLIENT_ID);
-    sendMessageQueue->pushSendMessage(seqNumber, *msg);
+    PingMessage msg = PingMessage(plLength, seqNumber, CLIENT_ID);
 
-    udpClient->send(msg);
-    delete msg;
+    udpClient->send(&msg);
+    sendMessageQueue->pushSendMessage(seqNumber, msg);
     Logger::debug("Ping");
 }

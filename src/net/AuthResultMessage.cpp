@@ -2,7 +2,7 @@
 
 using namespace net;
 
-AuthResultMessage::AuthResultMessage(unsigned int clientId, unsigned char flags, unsigned int seqNumber) : AbstractMessage(9 << 4) {
+AuthResultMessage::AuthResultMessage(unsigned int clientId, unsigned char flags, unsigned int seqNumber) : AbstractMessage(AUTH_RESULT_MESSAGE_ID << 4) {
 	this->clientId = clientId;
 	this->flags = flags;
 	this->seqNumber = seqNumber;

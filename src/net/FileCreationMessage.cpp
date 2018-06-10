@@ -3,8 +3,8 @@
 using namespace net;
 using namespace std;
 
-FileCreationMessage::FileCreationMessage(unsigned int clientId, unsigned int seqNumber, unsigned char fileType, unsigned char *fileHash, uint64_t fIDLength, unsigned char *fID) : AbstractMessage(2 << 4)
-{ // 00100000
+FileCreationMessage::FileCreationMessage(unsigned int clientId, unsigned int seqNumber, unsigned char fileType, unsigned char *fileHash, uint64_t fIDLength, unsigned char *fID) : AbstractMessage(FILE_CREATION_MESSAGE_ID << 4)
+{
 	this->clientId = clientId;
 	this->seqNumber = seqNumber;
 	this->fileType = fileType;

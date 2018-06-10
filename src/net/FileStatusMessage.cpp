@@ -3,7 +3,7 @@
 using namespace net;
 using namespace std;
 
-FileStatusMessage::FileStatusMessage(unsigned int clientId, unsigned int seqNumber, unsigned int lastFIDPartNumber, unsigned char flags, uint64_t fIDLength, unsigned char *fID) : AbstractMessage(4 << 4)
+FileStatusMessage::FileStatusMessage(unsigned int clientId, unsigned int seqNumber, unsigned int lastFIDPartNumber, unsigned char flags, uint64_t fIDLength, unsigned char *fID) : AbstractMessage(FILE_STATUS_MESSAGE_ID << 4)
 {
 	this->clientId = clientId;
 	this->lastFIDPartNumber = lastFIDPartNumber;

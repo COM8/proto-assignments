@@ -3,7 +3,7 @@
 using namespace net;
 using namespace std;
 
-AckMessage::AckMessage(unsigned int seqNumber) : AbstractMessage(5 << 4) { // 01010000
+AckMessage::AckMessage(unsigned int seqNumber) : AbstractMessage(ACK_MESSAGE_ID << 4) {
 	this->seqNumber = seqNumber;
 }
 

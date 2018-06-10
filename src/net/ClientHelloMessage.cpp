@@ -3,7 +3,7 @@
 using namespace net;
 using namespace std;
 
-ClientHelloMessage::ClientHelloMessage(unsigned short port, unsigned int clientId, unsigned char flags, unsigned long prime, unsigned long primRoot, unsigned long pubKey, unsigned char *userName, unsigned int usernameLength) : AbstractMessage(1 << 4)
+ClientHelloMessage::ClientHelloMessage(unsigned short port, unsigned int clientId, unsigned char flags, unsigned long prime, unsigned long primRoot, unsigned long pubKey, unsigned char *userName, unsigned int usernameLength) : AbstractMessage(CLIENT_HELLO_MESSAGE_ID << 4)
 {
 	this->port = port;
 	this->clientId = clientId;

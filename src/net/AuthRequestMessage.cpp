@@ -2,7 +2,7 @@
 
 using namespace net;
 
-AuthRequestMessage::AuthRequestMessage(unsigned int clientId, unsigned int passwordLength, unsigned char *password, unsigned int seqNumber) : AbstractMessage(8 << 4)
+AuthRequestMessage::AuthRequestMessage(unsigned int clientId, unsigned int passwordLength, unsigned char *password, unsigned int seqNumber) : AbstractMessage(AUTH_REQUEST_MESSAGE_ID << 4)
 {
     this->clientId = clientId;
     this->passwordLength = passwordLength;

@@ -2,7 +2,7 @@
 
 using namespace net;
 
-TransferEndedMessage::TransferEndedMessage(unsigned int clientId, unsigned char flags) : AbstractMessage(7 << 4) {
+TransferEndedMessage::TransferEndedMessage(unsigned int clientId, unsigned char flags) : AbstractMessage(TRANSFER_ENDED_MESSAGE_ID << 4) {
 	this->clientId = clientId;
 	this->flags = flags;
 }

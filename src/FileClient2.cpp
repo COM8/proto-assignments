@@ -127,9 +127,9 @@ void FileClient2::setState(FileClient2State state)
         startHelloThread();
         break;
 
-    case handshake:
-        Logger::info("Connected to: " + serverAddress + " on port: " + to_string(uploadPort));
-        setState(connected);
+    case clientAuth:
+        tTimer->start();
+        sendAuthRequestMessage(getNextSeqNumber(), uploadClient);
         break;
 
     case connected:
@@ -263,9 +263,8 @@ void FileClient2::sendNextFilePart()
 
 void FileClient2::sendTransferEndedMessage(unsigned char flags, Client2 *client)
 {
-    TransferEndedMessage *msg = new TransferEndedMessage(clientId, flags);
-    client->send(msg);
-    delete msg;
+    TransferEndedMessage msg = TransferEndedMessage(clientId, flags);
+    client->send(&msg);
 }
 
 void FileClient2::sendFolderCreationMessage(shared_ptr<Folder> f, Client2 *client)
@@ -273,11 +272,10 @@ void FileClient2::sendFolderCreationMessage(shared_ptr<Folder> f, Client2 *clien
     const char *c = f->path.c_str();
     uint64_t l = f->path.length();
     int i = getNextSeqNumber();
-    FileCreationMessage *msg = new FileCreationMessage(clientId, i, 1, NULL, l, (unsigned char *)c);
-    sendMessageQueue->pushSendMessage(i, *msg);
+    FileCreationMessage msg = FileCreationMessage(clientId, i, 1, NULL, l, (unsigned char *)c);
 
-    client->send(msg);
-    delete msg;
+    client->send(&msg);
+    sendMessageQueue->pushSendMessage(i, msg);
     Logger::info("Send folder creation for: \"" + f->path + "\"");
 }
 
@@ -286,11 +284,10 @@ void FileClient2::sendFolderDeletionMessage(string folderPath, Client2 *client)
     const char *c = folderPath.c_str();
     uint64_t l = folderPath.length();
     int i = getNextSeqNumber();
-    FileCreationMessage *msg = new FileCreationMessage(clientId, i, 2, NULL, l, (unsigned char *)c);
-    sendMessageQueue->pushSendMessage(i, *msg);
+    FileCreationMessage msg = FileCreationMessage(clientId, i, 2, NULL, l, (unsigned char *)c);
 
-    client->send(msg);
-    delete msg;
+    client->send(&msg);
+    sendMessageQueue->pushSendMessage(i, msg);
     Logger::info("Send folder deletion for: \"" + folderPath + "\"");
 }
 
@@ -299,11 +296,10 @@ void FileClient2::sendFileDeletionMessage(string filePath, Client2 *client)
     const char *c = filePath.c_str();
     uint64_t l = filePath.length();
     int i = getNextSeqNumber();
-    FileCreationMessage *msg = new FileCreationMessage(clientId, i, 8, NULL, l, (unsigned char *)c);
-    sendMessageQueue->pushSendMessage(i, *msg);
+    FileCreationMessage msg = FileCreationMessage(clientId, i, 8, NULL, l, (unsigned char *)c);
 
-    client->send(msg);
-    delete msg;
+    client->send(&msg);
+    sendMessageQueue->pushSendMessage(i, msg);
     Logger::info("Send file deletion for: \"" + filePath + "\"");
 }
 
@@ -312,11 +308,10 @@ void FileClient2::sendFileCreationMessage(string fid, std::shared_ptr<File> f, C
     const char *c = fid.c_str();
     uint64_t l = fid.length();
     unsigned int i = getNextSeqNumber();
-    FileCreationMessage *msg = new FileCreationMessage(clientId, i, 4, (unsigned char *)f->hash.get()->data(), l, (unsigned char *)c);
-    sendMessageQueue->pushSendMessage(i, *msg);
+    FileCreationMessage msg = FileCreationMessage(clientId, i, 4, (unsigned char *)f->hash.get()->data(), l, (unsigned char *)c);
 
-    client->send(msg);
-    delete msg;
+    client->send(&msg);
+    sendMessageQueue->pushSendMessage(i, msg);
     Logger::info("Send file creation: " + fid);
 }
 
@@ -325,11 +320,10 @@ void FileClient2::sendFileStatusMessage(string fid, struct std::shared_ptr<File>
     const char *c = fid.c_str();
     uint64_t l = fid.length();
     unsigned int i = getNextSeqNumber();
-    FileStatusMessage *msg = new FileStatusMessage(clientId, i, 9, l, (unsigned char *)c);
-    sendMessageQueue->pushSendMessage(i, *msg);
+    FileStatusMessage msg = FileStatusMessage(clientId, i, 9, l, (unsigned char *)c);
 
-    client->send(msg);
-    delete msg;
+    client->send(&msg);
+    sendMessageQueue->pushSendMessage(i, msg);
     Logger::info("Requested file status for: " + fid);
 }
 
@@ -354,11 +348,10 @@ bool FileClient2::sendFilePartMessage(string fid, shared_ptr<File> f, unsigned i
     }
 
     unsigned int i = getNextSeqNumber();
-    FileTransferMessage *msg = new FileTransferMessage(clientId, i, flags, nextPartNr, (unsigned char *)f->hash.get()->data(), (uint64_t)readCount, (unsigned char *)chunk);
-    sendMessageQueue->pushSendMessage(i, *msg);
+    FileTransferMessage msg = FileTransferMessage(clientId, i, flags, nextPartNr, (unsigned char *)f->hash.get()->data(), (uint64_t)readCount, (unsigned char *)chunk);
 
-    client->send(msg);
-    delete msg;
+    client->send(&msg);
+    sendMessageQueue->pushSendMessage(i, msg);
     Logger::debug("Send file part " + to_string(nextPartNr) + ", length: " + to_string(readCount) + " for file: " + fid);
     if (isLastPart)
     {
@@ -446,9 +439,8 @@ void FileClient2::sendClientHelloMessage(unsigned short listenPort, unsigned cha
 {
     const char *c = username.c_str();
     unsigned int l = username.length();
-    ClientHelloMessage *msg = new ClientHelloMessage(listenPort, clientId, flags, enc->getPrime(), enc->getPrimitiveRoot(), enc->getPubKey(), (unsigned char *)c, l);
-    client->send(msg);
-    delete msg;
+    ClientHelloMessage msg = ClientHelloMessage(listenPort, clientId, flags, enc->getPrime(), enc->getPrimitiveRoot(), enc->getPubKey(), (unsigned char *)c, l);
+    client->send(&msg);
 }
 
 void FileClient2::startConsumerThread()
@@ -477,6 +469,41 @@ void FileClient2::stopConsumerThread()
     {
         delete consumerThread;
         consumerThread = NULL;
+    }
+}
+
+void FileClient2::onAuthResultMessage(net::ReadMessage *msg)
+{
+    // Check if checksum is valid:
+    if (!AbstractMessage::isChecksumValid(msg, AuthResultMessage::CHECKSUM_OFFSET_BITS))
+    {
+        return;
+    }
+
+    // Check sequence number:
+    unsigned int seqNumber = AuthResultMessage::getSeqNumberFromMessage(msg->buffer);
+    if (!sendMessageQueue->onSequenceNumberAck(seqNumber))
+    {
+        Logger::error("Invalid sequence number in AuthResultMessage received: " + to_string(seqNumber) + ". Sequence number was not found!");
+        return;
+    }
+    else
+    {
+        sendAckMessage(seqNumber, uploadClient);
+        Logger::debug("Acked sequence number in AuthResultMessage: " + to_string(seqNumber));
+    }
+
+    unsigned char flags = AuthResultMessage::getFlagsFromMessage(msg->buffer);
+    if ((flags & 0b0001) == 0b0001)
+    {
+        Logger::info("Authentification successfull!");
+        Logger::info("Connected to: " + serverAddress + " on port: " + to_string(uploadPort));
+        setState(connected);
+    }
+    else
+    {
+        Logger::error("Authentification failed with: " + to_string(flags));
+        disconnect();
     }
 }
 
@@ -544,20 +571,24 @@ void FileClient2::consumerTask()
 
         switch (msg.msgType)
         {
-        case 2:
+        case SERVER_HELLO_MESSAGE_ID:
             onServerHelloMessage(&msg);
             break;
 
-        case 4:
+        case FILE_STATUS_MESSAGE_ID:
             onFileStatusMessage(&msg);
             break;
 
-        case 5:
+        case ACK_MESSAGE_ID:
             onAckMessage(&msg);
             break;
 
-        case 6:
+        case PING_MESSAGE_ID:
             onPingMessage(&msg);
+            break;
+
+        case AUTH_RESULT_MESSAGE_ID:
+            onAuthResultMessage(&msg);
             break;
 
             /*case 7:
@@ -618,7 +649,7 @@ void FileClient2::onServerHelloMessage(ReadMessage *msg)
         unsigned int seqNumber = ServerHelloMessage::getSeqNumberFromMessage(msg->buffer);
         sendAckMessage(seqNumber, uploadClient);
 
-        setState(handshake);
+        setState(clientAuth);
     }
     else
     {
@@ -644,6 +675,7 @@ void FileClient2::onTimerTick(int identifier)
 
     case reqestedFileStatus:
     case awaitingAck:
+    case clientAuth:
     {
         list<struct SendMessage> *msgs = new list<struct SendMessage>();
         sendMessageQueue->popNotAckedMessages(MAX_ACK_TIME_IN_S, msgs);
@@ -697,12 +729,23 @@ void FileClient2::onTimerTick(int identifier)
 
 void FileClient2::sendPingMessage(unsigned int plLength, unsigned int seqNumber, Client2 *client)
 {
-    PingMessage *msg = new PingMessage(plLength, seqNumber, clientId);
-    sendMessageQueue->pushSendMessage(seqNumber, *msg);
+    PingMessage msg = PingMessage(plLength, seqNumber, clientId);
 
-    client->send(msg);
-    delete msg;
+    client->send(&msg);
+    sendMessageQueue->pushSendMessage(seqNumber, msg);
     Logger::debug("Ping");
+}
+
+void FileClient2::sendAuthRequestMessage(unsigned int seqNumber, Client2 *client)
+{
+    const char *c = clientPassword.c_str();
+    unsigned int l = clientPassword.length();
+
+    AuthRequestMessage msg = AuthRequestMessage(clientId, l, (unsigned char *)c, getNextSeqNumber());
+
+    client->send(&msg);
+    sendMessageQueue->pushSendMessage(seqNumber, msg);
+    Logger::debug("Send auth request with sequence number: " + to_string(seqNumber));
 }
 
 void FileClient2::onAckMessage(ReadMessage *msg)

@@ -154,7 +154,7 @@ void FileServer2::consumerTask()
 
         switch (msg.msgType)
         {
-        case 1:
+        case CLIENT_HELLO_MESSAGE_ID:
             onClientHelloMessage(&msg);
             break;
 
