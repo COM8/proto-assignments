@@ -352,3 +352,10 @@ Diffie-Hellman algorithm relies on *discrete logarithm problem.* It is very hard
 - Exposed API of Encrypt and Decrypt uses that shared key to encrypt and decrypt messages.
 
 More info can be found at: [https://en.wikipedia.org/wiki/Diffie%E2%80%93Hellman_key_exchange](https://en.wikipedia.org/wiki/Diffie%E2%80%93Hellman_key_exchange)
+  
+### Fast Reconnect
+- If client disconnects abruptly, there is no need to calculate shared keys again. Use `clientTryFastConnect()` to check whether you have already calculated to shared key. If you have, send your public key again to the server, so that you make sure you have the same set of calculations.
+
+- Server receives the public key and puts it in `serverReceiveFastConnect(unsigned long clientPub)`, if the client's public key and server's other public key are the same ,return true, so that encryption and decryption can continue normally without any breach.
+
+- This operation does not spend any time on prime generation or logarithm calculation and is `O(1)`.

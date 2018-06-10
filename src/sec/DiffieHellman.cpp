@@ -125,3 +125,17 @@ vector<unsigned long> DiffieHellman::get_primes(unsigned long max){
             else
                 return (((long long int)pow(a, b)) % P);
 }
+
+bool DiffieHellman::clientTryFastConnect(){
+   return this->key!=""?true:false;
+   //if there is a key, that means we have already made the calculations. So send client's public key again for cross checking.
+   //this->myPub
+
+}
+
+bool DiffieHellman::serverReceiveFastConnect(unsigned long clientPub){
+    //client public key is servers other pub
+    //that means calculations are the same, thus use the same shared key.
+   
+    return clientPub==this->otherPub?true:false;
+}

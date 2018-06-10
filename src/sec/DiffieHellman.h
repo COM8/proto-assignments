@@ -25,6 +25,9 @@ class DiffieHellman{
         unsigned long getPrime();
         unsigned long getPrimitiveRoot();
         unsigned long getPubKey();
+
+        bool clientTryFastConnect();
+        bool serverReceiveFastConnect(unsigned long clientPub);
         
     private:
         std::string key;
