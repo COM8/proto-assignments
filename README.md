@@ -349,10 +349,10 @@ Client				  Server
   |	onServerReceive             |
   | <------------------------------ | Server calculates it's shared key, public key and sends it's
   |				    | public key to client.
-  |				    | Sets secureConnection to ```true```.
+  |				    | Sets secureConnection to true.
   |	onClientReceive		    |
   | ------------------------------> | Client calculates it's shared key.
-  |                                   | Sets secure connection to ```true```.
+  |                                 | Sets secure connection to true.
 
 
 ```
