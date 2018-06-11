@@ -313,6 +313,14 @@ class WorkingSet
         curFileMutex.unlock();
     }
 
+    bool curFileExists() {
+        bool t = true;
+        if(!this->getCurFileFile()) {
+            t = false;
+        }
+        return t;
+    }
+
     std::string getCurFID() {
         curFileMutex.lock();
         std::string temp = "";

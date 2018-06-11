@@ -792,7 +792,7 @@ void FileClient2::printToDo()
         cout << "Delete folders: " << curWorkingSet->getDelFolders()->size() << endl;
         cout << "Current file: ";
         curWorkingSet->unlockCurFile();
-        if (curWorkingSet->getCurNextPart()>= 0)
+        if (curWorkingSet->curFileExists())
         {
             cout << "FID: " << curWorkingSet->getCurFID() << ", Part: " << curWorkingSet->getCurNextPart() << endl;
         }
