@@ -45,6 +45,14 @@ public:
     static bool exists(std::string path);
     };
 
+/*
+    1. init class
+    2. getWorkingset()
+    3. sendChanges of working set
+    4. writeChanges
+    5. goto 2.
+*/
+
 class FilesystemClient: Filesystem {
 private:
     std::list<std::shared_ptr<Folder>> folders;
@@ -59,11 +67,19 @@ public:
     int genMap(std::string path);
     int genMap(std::string path, std::unordered_map <std::string, std::shared_ptr<File>> *files, std::list<std::shared_ptr<Folder>> *folders, std::list<std::string> *deleteFile, std::list<std::string> *deleteFolder);
     int readFile(std::string FID, char *buffer, unsigned int partNr, bool *isLastPart);
+    int writeFilePart(std::string FID, char* buffer, unsigned int partNr, unsigned int length);
     void close();
     WorkingSet* getWorkingSet();
 	std::string filesToString();
     std::string foldersToString();
 };
+/*
+   1. init class
+   2. change Files
+   3. getWorkingset
+   4. sync changes across clients
+   5. goto 2
+   */
 
 class FilesystemServer: Filesystem {
 private:
@@ -86,7 +102,9 @@ public:
     void delFolder(std::string path);
     void delFile(std::string FID);
     unsigned int getLastPart(std::string FID);
-    int writeFilePart(std::string FID, char* buffer, unsigned int partNr, unsigned int length);
+    int writeFilePart(std::string FID, char* buffer, unsigned int partNr, unsigned int length, unsigned int userID);
     void clearDirecotry();
+    WorkingSet* getWorkingSet();
+    int readFile(std::string FID, char* buffer, unsigned int partNr, bool *isLastPart);
     void close();
     };
