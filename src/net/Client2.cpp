@@ -26,6 +26,10 @@ Client2::~Client2()
 {
     sendPCTimer->stop();
     sem_destroy(&maxPPSSema);
+    if (sockFD > 0)
+    {
+        close(sockFD);
+    }
     delete stateMutex;
     delete sendPCTimer;
     delete sendPCountMutex;
@@ -87,12 +91,6 @@ bool Client2::send(AbstractMessage *msg)
 {
     Message msgStruct{};
     msg->createBuffer(&msgStruct);
-    if (msgStruct.bufferLength <= 0)
-    {
-        AbstractMessage::printByte(msg->getType());
-        Logger::error("11-------------------------------------------- for type: ");
-        msg->createBuffer(&msgStruct);
-    }
     bool result = send(&msgStruct);
 
     // Cleanup:

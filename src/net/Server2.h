@@ -9,6 +9,7 @@
 #include <cerrno>
 #include <string>
 #include <thread>
+#include <unistd.h>
 #include "sec/DiffieHellman.h"
 #include "Logger.h"
 #include "Queue.h"

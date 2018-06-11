@@ -21,6 +21,10 @@ Server2::Server2(unsigned short port, Queue<ReadMessage> *cpQueue, DiffieHellman
 Server2::~Server2()
 {
     stop();
+    if (sockFD > 0)
+    {
+        close(sockFD);
+    }
     delete stateMutex;
 }
 

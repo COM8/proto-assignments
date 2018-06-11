@@ -315,7 +315,7 @@ class WorkingSet
 
     bool curFileExists() {
         bool t = true;
-        if(!this->getCurFileFile()) {
+        if(!this->curFile) {
             t = false;
         }
         return t;
