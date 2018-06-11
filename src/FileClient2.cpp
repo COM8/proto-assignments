@@ -806,7 +806,6 @@ void FileClient2::printToDo()
         curWorkingSet->unlockDelFolders();
         curWorkingSet->unlockFiles();
         curWorkingSet->unlockFolders();
-        cout << "unlock all" << endl;
     }
 }
 

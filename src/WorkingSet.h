@@ -186,7 +186,7 @@ class WorkingSet
     std::unordered_map<std::string, std::shared_ptr<File>> files;
     std::list<std::string> deleteFolder;
     std::list<std::string> deleteFile;
-    std::unique_ptr<std::pair<std::string, std::shared_ptr<File>>> curFile = NULL;
+    std::unique_ptr<std::pair<std::string, std::shared_ptr<File>>> curFile;
 
   public:
     WorkingSet(std::unordered_map<std::string, std::shared_ptr<File>> files, std::list<std::shared_ptr<Folder>> folders, std::list<std::string> deleteFile, std::list<std::string> deleteFolder)
@@ -195,6 +195,8 @@ class WorkingSet
         this->folders = folders;
         this->deleteFile = deleteFile;
         this->deleteFolder = deleteFolder;
+
+        this->curFile = NULL;
     }
 
     bool isEmpty()
@@ -262,14 +264,12 @@ class WorkingSet
 
     std::unordered_map<std::string, std::shared_ptr<File>> *getFiles()
     {
-        std::cout << "wub wub" << std::endl;
         filesMutex.lock();
         return &this->files;
     }
 
     void unlockFiles()
     {
-        std::cout << "unlock" << std::endl;
         filesMutex.unlock();
     }
 
@@ -316,7 +316,7 @@ class WorkingSet
     std::string getCurFID() {
         curFileMutex.lock();
         std::string temp = "";
-        if(!this->getCurFileFile()) {
+        if(this->curFile) {
             temp = this->curFile->first;
         }
         curFileMutex.unlock();
@@ -342,7 +342,7 @@ class WorkingSet
         }
         std::shared_ptr<File> t = curFile->second;
         return t;
-        }
+    }
 
     void unlockCurFile()
     {
