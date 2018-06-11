@@ -175,7 +175,8 @@ void FileClient2::sendNextFilePart()
     std::list<std::string> *delFiles = curWorkingSet->getDelFiles();
 
     // Continue file transfer:
-    int curFilePartNr = curWorkingSet->getCurFilePartNr();
+    int curFilePartNr = curWorkingSet->getCurNextPart();
+    curWorkingSet->unlockCurFile();
     if (curFilePartNr >= 0)
     {
         string fid = curWorkingSet->getCurFID();
@@ -184,12 +185,11 @@ void FileClient2::sendNextFilePart()
         bool lastPartSend = sendFilePartMessage(fid, curFile, curFilePartNr, uploadClient);
         curWorkingSet->unlockCurFile();
 
-        curWorkingSet->setCurFilePartNr(++curFilePartNr);
-
+        curWorkingSet->getCurFileFile()->np->acknowledgePart(curFilePartNr);
+        curWorkingSet->unlockCurFile();
         if (lastPartSend)
         {
             files->erase(curWorkingSet->getCurFID());
-            curWorkingSet->setCurFilePartNr(-1);
         }
     }
     // Delete file:
@@ -220,7 +220,6 @@ void FileClient2::sendNextFilePart()
     else if (!files->empty())
     {
         curWorkingSet->setCurFile(files->begin()->first, files->begin()->second);
-        curWorkingSet->setCurFilePartNr(0);
 
         string fid = curWorkingSet->getCurFID();
         shared_ptr<File> curFile = curWorkingSet->getCurFileFile();
@@ -527,8 +526,8 @@ void FileClient2::onFileStatusMessage(net::ReadMessage *msg)
         curWorkingSet->unlockCurFile();
     }
     else
-    {
-        curWorkingSet->setCurFilePartNr(lastFIDPartNumber);
+    {   curWorkingSet->getCurFileFile()->np->acknowledgePart(lastFIDPartNumber);
+        curWorkingSet->unlockCurFile();
         setState(sendingFS);
     }
 }
@@ -792,9 +791,10 @@ void FileClient2::printToDo()
         cout << "Delete files: " << curWorkingSet->getDelFiles()->size() << endl;
         cout << "Delete folders: " << curWorkingSet->getDelFolders()->size() << endl;
         cout << "Current file: ";
-        if (curWorkingSet->getCurFilePartNr() >= 0)
+        curWorkingSet->unlockCurFile();
+        if (curWorkingSet->getCurNextPart()>= 0)
         {
-            cout << "FID: " << curWorkingSet->getCurFID() << ", Part: " << curWorkingSet->getCurFilePartNr() << endl;
+            cout << "FID: " << curWorkingSet->getCurFID() << ", Part: " << curWorkingSet->getCurNextPart() << endl;
         }
         else
         {
@@ -802,11 +802,11 @@ void FileClient2::printToDo()
         }
 
         // Unlock workingset:
-        curWorkingSet->unlockCurFile();
         curWorkingSet->unlockDelFiles();
         curWorkingSet->unlockDelFolders();
         curWorkingSet->unlockFiles();
         curWorkingSet->unlockFolders();
+        cout << "unlock all" << endl;
     }
 }
 

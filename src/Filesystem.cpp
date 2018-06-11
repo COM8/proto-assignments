@@ -56,6 +56,7 @@ void Filesystem::calcSHA256(const string FID, char* buffer)
 	}
 }
 
+
 long unsigned int Filesystem::filesize(const string FID)
 {
 	ifstream file(FID, ifstream::ate | ifstream::binary);
@@ -135,6 +136,7 @@ int FilesystemClient::genMap(string path, unordered_map <string, shared_ptr<File
 				else
 				{
 					shared_ptr<File> f = genFile(temp);
+					f->sendCompleteFile();
 					this->files[temp] = f;
 					(*files)[temp] = f;
 				}
@@ -443,7 +445,7 @@ void FilesystemServer::clearDirecotry()
 	}
 }
 
-int FilesystemServer::writeFilePart(string FID, char *buffer, unsigned int partNr, unsigned int length)
+int FilesystemServer::writeFilePart(string FID, char *buffer, unsigned int partNr, unsigned int length, unsigned int userID)
 {
 	if (!exists(this->path + FID))
 	{

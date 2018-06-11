@@ -4,9 +4,12 @@
 #include <fstream>
 #include <mutex>
 #include <memory>
-#include <Logger.h>
+#include "Logger.h"
+#include "Consts.h"
 
 #pragma once
+
+
 
 struct NextPart{
     std::list<std::pair<unsigned int, unsigned int>> content;
@@ -26,6 +29,10 @@ struct NextPart{
             return this->content.begin()->first;
         }
         return -1;
+    }
+    void addHoleFile(unsigned int length) {
+        this->content.clear();
+        this->content.push_back(std::pair<unsigned int, unsigned int> (0, length));
     }
     void addPart(unsigned int partNr) {
         if(!this->isempty()){
@@ -145,16 +152,18 @@ struct File
     bool isOpen = false;
     unsigned int size;
     std::ifstream fd;
-    unsigned int last_part;
+    std::unique_ptr<NextPart> np= std::make_unique<NextPart>(NextPart());
     File(std::string name, unsigned int size){
         this->name = name;
         this->hash = hash;
-        this->size = size;
     }
     File(){}
     File(std::string FID) {
         this->name = FID;
 
+    }
+    void sendCompleteFile() {
+        this->np->addHoleFile(this->size%MAX_CONTENT_LENGTH == 0 ? this->size/MAX_CONTENT_LENGTH: (this->size/MAX_CONTENT_LENGTH));
     }
     static std::shared_ptr<struct File> genPointer(std::string name, unsigned int size) {
         return std::make_shared<struct File>(File(name, size));
@@ -177,8 +186,7 @@ class WorkingSet
     std::unordered_map<std::string, std::shared_ptr<File>> files;
     std::list<std::string> deleteFolder;
     std::list<std::string> deleteFile;
-    std::unique_ptr<std::pair<std::string, std::shared_ptr<File>>> curFile;
-    int curFilePartNr = -1;
+    std::unique_ptr<std::pair<std::string, std::shared_ptr<File>>> curFile = NULL;
 
   public:
     WorkingSet(std::unordered_map<std::string, std::shared_ptr<File>> files, std::list<std::shared_ptr<Folder>> folders, std::list<std::string> deleteFile, std::list<std::string> deleteFolder)
@@ -254,12 +262,14 @@ class WorkingSet
 
     std::unordered_map<std::string, std::shared_ptr<File>> *getFiles()
     {
+        std::cout << "wub wub" << std::endl;
         filesMutex.lock();
         return &this->files;
     }
 
     void unlockFiles()
     {
+        std::cout << "unlock" << std::endl;
         filesMutex.unlock();
     }
 
@@ -305,23 +315,41 @@ class WorkingSet
 
     std::string getCurFID() {
         curFileMutex.lock();
-        std::string temp = this->curFile->first;
+        std::string temp = "";
+        if(!this->getCurFileFile()) {
+            temp = this->curFile->first;
+        }
         curFileMutex.unlock();
         return temp;
     }
 
+    unsigned int getCurNextPart() {
+        curFileMutex.lock();
+        if(!this->curFile){
+            curFileMutex.unlock();
+            return -1;
+        }
+        unsigned int ret;
+        ret = this->curFile->second->np->getNextPart();
+        curFileMutex.unlock();
+        return ret;
+    }
+
     std::shared_ptr<File> getCurFileFile() {
         curFileMutex.lock();
+        if (!this->curFile) {
+            return NULL;
+        }
         std::shared_ptr<File> t = curFile->second;
         return t;
-    }
+        }
 
     void unlockCurFile()
     {
         curFileMutex.unlock();
     }
 
-    void setCurFilePartNr(int i)
+    /*void setCurFilePartNr(int i)
     {
         curFileParMutex.lock();
         curFilePartNr = i;
@@ -334,5 +362,5 @@ class WorkingSet
         int i = curFilePartNr;
         curFileParMutex.unlock();
         return i;
-    }
+    }*/
 };

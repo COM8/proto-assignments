@@ -102,7 +102,7 @@ public:
     void delFolder(std::string path);
     void delFile(std::string FID);
     unsigned int getLastPart(std::string FID);
-    int writeFilePart(std::string FID, char* buffer, unsigned int partNr, unsigned int length, unsigned int userID);
+    int writeFilePart(std::string FID, char* buffer, unsigned int partNr, unsigned int length, unsigned int clientID);
     void clearDirecotry();
     WorkingSet* getWorkingSet();
     int readFile(std::string FID, char* buffer, unsigned int partNr, bool *isLastPart);
