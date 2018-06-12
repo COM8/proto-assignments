@@ -1,3 +1,5 @@
+#pragma once
+
 #include <unordered_map>
 #include <list>
 #include <string>
@@ -6,10 +8,7 @@
 #include <memory>
 #include "Logger.h"
 #include "Consts.h"
-
-#pragma once
-
-
+#include "FileCreationMessage.h"
 
 struct NextPart{
     std::list<std::pair<unsigned int, unsigned int>> content;

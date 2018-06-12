@@ -11,6 +11,7 @@
 #include <lib/hash-library/md5.h>
 #include "Logger.h"
 #include "Consts.h"
+#include "ClientsToDo.h"
 
 
 struct ServerFile {
@@ -86,6 +87,7 @@ private:
     std::string path = "";
     std::unordered_map <std::string, bool> folders;
     std::unordered_map <std::string, std::unique_ptr<ServerFile>> files;
+    ClientsToDo* clientsToDo;
     void createPath();
     void folderClean(std::string path);
     void fileClean(std::string file);
@@ -96,7 +98,7 @@ private:
     void saveFolderFile();
     void saveFileFile();
 public:
-    FilesystemServer(std::string path);
+    FilesystemServer(std::string path, ClientsToDo* clientsToDo);
     void genFile(std::string FID, char* hash);
     void genFolder(std::string path);
     void delFolder(std::string path);

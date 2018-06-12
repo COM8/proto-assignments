@@ -7,6 +7,8 @@
 #include "Filesystem.h"
 #include "Logger.h"
 #include "FileServerClient.h"
+#include "WorkingSet.h"
+#include "ClientsToDo.h"
 
 class FileServerUser
 {
@@ -28,6 +30,7 @@ public:
 private:
   std::unordered_map<unsigned int, FileServerClient *> clients;
   std::mutex *clientsMutex;
+  ClientsToDo clientsToDo;
 
   void deleteAllClients();
 };

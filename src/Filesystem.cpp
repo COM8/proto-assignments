@@ -260,9 +260,10 @@ string FilesystemClient::foldersToString()
 	return temp;
 }
 
-FilesystemServer::FilesystemServer(string path)
+FilesystemServer::FilesystemServer(string path, ClientsToDo* clientsToDo)
 {
 	this->path = path;
+	this->clientsToDo = clientsToDo;
 	if (!exists(path))
 	{
 		createPath();

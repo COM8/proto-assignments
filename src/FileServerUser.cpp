@@ -5,7 +5,8 @@ using namespace std;
 FileServerUser::FileServerUser(string username, string password) : clients(), USERNAME(username), PASSWORD(password)
 {
     this->clientsMutex = new mutex();
-    this->fS = new FilesystemServer("sync/" + username + "/");
+    this->clientsToDo = ClientsToDo();
+    this->fS = new FilesystemServer("sync/" + username + "/", &clientsToDo);
 }
 
 FileServerUser::~FileServerUser()
