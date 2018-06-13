@@ -65,6 +65,25 @@ long unsigned int Filesystem::filesize(const string FID)
 	return ret;
 }
 
+//todo add crc32 here, may not update md5
+int FilesystemClient::writeFilePart(std::string FID, char* buffer, unsigned int partNr, unsigned int length) {
+	if(this->files[FID]) {
+		this->files[FID] = File::genPointer(FID);
+		}
+	fstream tmp((this->path + FID), fstream::out |fstream::in | fstream::binary);
+	if(tmp) {
+		tmp.seekg(partNr * partLength, tmp.beg);
+		tmp.write(buffer, length > partLength ? partLength : length);
+		tmp.close();
+		this->files[FID]->size = filesize(FID);
+		calcSHA256(FID, this->files[FID]->hash);
+		return partNr;
+	}
+	else{
+		return -1;
+	}
+}
+
 WorkingSet *FilesystemClient::getWorkingSet()
 {
 	unordered_map<string, shared_ptr<File>> files;
