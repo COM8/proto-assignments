@@ -23,7 +23,6 @@ void Filesystem::calcSHA256(const string FID, shared_ptr<array<char,32>> buffer)
 	calcSHA256(FID, buffer.get()->data());
 	}
 
-//toDo
 void Filesystem::calcSHA256(const string FID, char* buffer)
 {
 	Logger::debug("Caluclating md5 of "+ FID);
@@ -55,7 +54,6 @@ void Filesystem::calcSHA256(const string FID, char* buffer)
 		}
 	}
 }
-
 
 long unsigned int Filesystem::filesize(const string FID)
 {
@@ -91,9 +89,6 @@ WorkingSet *FilesystemClient::getWorkingSet()
 	list<string> deleteFile;
 	list<shared_ptr<Folder>> folders;
 	genMap(this->path, &files, &folders, &deleteFile, &deleteFolder);
-
-	// Only add the folder if it contains files:
-	// ToDo: Fix me
 	if (!files.empty() || !folders.empty())
 	{
 		shared_ptr<Folder> f = Folder::genPointer(path);
@@ -118,7 +113,6 @@ WorkingSet *FilesystemClient::getWorkingSet()
 	}
 	return new WorkingSet(files, folders, deleteFile, deleteFolder);
 }
-
 int FilesystemClient::genMap(string path, unordered_map <string, shared_ptr<File>> *files, list<shared_ptr<Folder>> *folders, list<string> *deleteFile, list<string> *deleteFolder)
 {
 	if (Filesystem::exists(path))

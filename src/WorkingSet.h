@@ -8,7 +8,7 @@
 #include <memory>
 #include "Logger.h"
 #include "Consts.h"
-#include "FileCreationMessage.h"
+#include "net/FileCreationMessage.h"
 
 struct NextPart{
     std::list<std::pair<unsigned int, unsigned int>> content;
