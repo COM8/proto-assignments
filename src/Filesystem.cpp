@@ -4,7 +4,7 @@ namespace fs = std::experimental::filesystem;
 
 using namespace std;
 
-FilesystemClient::FilesystemClient(std::string p)
+FilesystemClient::FilesystemClient(string p)
 {
 	path = p;
 }
@@ -427,7 +427,7 @@ void FilesystemServer::fileClean(string file)
 	system(("rm " + file + " -f").c_str());
 }
 
-void FilesystemServer::genFile(std::string FID, char *hash)
+void FilesystemServer::genFile(string FID, char *hash)
 {
 	if (this->files[(this->path + FID)] == 0)
 	{
@@ -488,6 +488,37 @@ int FilesystemServer::writeFilePart(string FID, char *buffer, unsigned int partN
 	else
 	{
 		return -1;
+	}
+}
+
+int FilesystemServer::readFile(string FID, char* buffer, unsigned int partNr) {
+	if(this->files[FID]) {
+		if(exists(this->path + FID)) {
+			Logger::warn("adding unkonwn File to the Filesystem");
+			this->files[FID] = ServerFile::genPointer();
+		}else {
+			Logger::error("Filesystem can't find: " + FID);
+			return -2;
+		}
+	}else {
+		if(exists(this->path + FID)) {
+
+		}else {
+			Logger::error(FID+ " is unknown by the Server");
+			return -2;
+		}
+	}
+	ifstream tmp = ifstream(this->path + FID, ifstream::ate | ifstream::binary);
+	if(!tmp) {
+		Logger::error("Error opening " + FID);
+		return -1;
+	}else {
+		tmp.seekg(partLength*partNr, tmp.beg);
+		int retLength = (filesize(this->path + FID) > (partLength * (partNr +1) ? partLength: filesize(this->path) - partLength * partNr));
+		retLength < 0 ? 0 : retLength;
+		tmp.read(buffer, retLength);
+		tmp.close();
+		return retLength;
 	}
 }
 

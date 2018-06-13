@@ -25,6 +25,7 @@ void ClientsToDo::addClient(unsigned int clientId)
     mlock.unlock();
 }
 
+//moved mutex unlock one line up, else it would never be reached
 ClientToDo *ClientsToDo::getClientToDos(unsigned int clientId)
 {
     unique_lock<mutex> mlock(*clientsToDoMapMutex);
@@ -33,8 +34,8 @@ ClientToDo *ClientsToDo::getClientToDos(unsigned int clientId)
     {
         return NULL;
     }
-    return &(iter->second);
     mlock.unlock();
+    return &(iter->second);
 }
 
 void ClientsToDo::addToDoForAllExcept(TodoEntry toDo, unsigned int ignoredClientId)

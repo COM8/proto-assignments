@@ -32,6 +32,9 @@ struct ServerFile {
     static std::unique_ptr<struct ServerFile> genPointer(char* hash, unsigned int last_part) {
         return std::make_unique<struct ServerFile>(ServerFile(hash, last_part));
     }
+    static std::unique_ptr<struct ServerFile> genPointer() {
+        return std::make_unique<struct ServerFile>();
+    }
     };
 
 
@@ -107,6 +110,6 @@ public:
     int writeFilePart(std::string FID, char* buffer, unsigned int partNr, unsigned int length, unsigned int clientID);
     void clearDirecotry();
     WorkingSet* getWorkingSet();
-    int readFile(std::string FID, char* buffer, unsigned int partNr, bool *isLastPart);
+    int readFile(std::string FID, char* buffer, unsigned int partNr);
     void close();
     };
