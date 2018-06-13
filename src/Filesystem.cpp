@@ -514,8 +514,8 @@ int FilesystemServer::readFile(string FID, char* buffer, unsigned int partNr) {
 		return -1;
 	}else {
 		tmp.seekg(partLength*partNr, tmp.beg);
-		int retLength = (filesize(this->path + FID) > (partLength * (partNr +1) ? partLength: filesize(this->path) - partLength * partNr));
-		retLength < 0 ? 0 : retLength;
+		int retLength = (filesize(this->path + FID) > (partLength * (partNr +1)) ? partLength: filesize(this->path) - partLength * partNr);
+		retLength= retLength < 0 ? 0 : retLength;
 		tmp.read(buffer, retLength);
 		tmp.close();
 		return retLength;

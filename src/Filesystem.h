@@ -62,6 +62,7 @@ private:
     std::list<std::shared_ptr<Folder>> folders;
     std::string path;
     bool isInFolders(std::string path);
+    
 
 public:
     FilesystemClient(std::string p);
