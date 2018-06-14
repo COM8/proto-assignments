@@ -8,7 +8,8 @@
 #include <fstream>
 #include <cstring>
 #include <WorkingSet.h>
-#include <lib/hash-library/md5.h>
+#include "lib/hash-library/md5.h"
+#include "lib/hash-library/crc32.h"
 #include "Logger.h"
 #include "Consts.h"
 #include "ClientsToDo.h"
@@ -46,6 +47,7 @@ public:
     static long unsigned int filesize(const std::string FID);
     static void calcSHA256(const std::string FID, std::shared_ptr<std::array<char,32>> buffer);
     static void calcSHA256(const std::string FID, char* buffer);
+    static void calcCRC32(char* in, char* out);
     static bool exists(std::string path);
     };
 
@@ -62,6 +64,8 @@ private:
     std::list<std::shared_ptr<Folder>> folders;
     std::string path;
     bool isInFolders(std::string path);
+    void compareFiles(std::string FID, std::shared_ptr<File> f);
+    void genCRC32(std::string FID, std::shared_ptr<File> f);
     
 
 public:

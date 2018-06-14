@@ -55,12 +55,44 @@ void Filesystem::calcSHA256(const string FID, char* buffer)
 	}
 }
 
+void Filesystem::calcCRC32(char* in, char* out) {
+	CRC32 c3;
+	strcpy(out, c3(in).c_str());
+	return;
+}
+
 long unsigned int Filesystem::filesize(const string FID)
 {
 	ifstream file(FID, ifstream::ate | ifstream::binary);
 	long unsigned int ret = file.tellg();
 	file.close();
 	return ret;
+}
+
+void FilesystemClient::compareFiles(string FID, shared_ptr<File> f) {
+	unsigned int i = 0;
+	char *buffer = new char[partLength];
+	char *tmpcrc = new char[4];
+	bool *n = new bool;
+	while(readFile(FID, buffer, i,n)!=0){
+		calcCRC32(buffer, tmpcrc);
+		if(!f->crcMap[i]) {
+			if(strcmp(tmpcrc, f->crcMap[i].get()->data())!= 0) {
+				f->np->addPart(i);
+				shared_ptr<array<char,4>> t = make_shared<array<char,4>>();
+				strcpy(t.get()->data(), tmpcrc);
+				f->crcMap[i] = t;
+			}
+		}else {
+			f->np->addPart(i);
+			shared_ptr<array<char,4>> t = make_shared<array<char,4>>();
+			strcpy(t.get()->data(), tmpcrc);
+			f->crcMap[i] = t;
+		}
+		i++;
+		}
+	delete[] buffer;
+	delete n;
 }
 
 //todo add crc32 here, may not update md5
@@ -113,6 +145,7 @@ WorkingSet *FilesystemClient::getWorkingSet()
 	}
 	return new WorkingSet(files, folders, deleteFile, deleteFolder);
 }
+
 int FilesystemClient::genMap(string path, unordered_map <string, shared_ptr<File>> *files, list<shared_ptr<Folder>> *folders, list<string> *deleteFile, list<string> *deleteFolder)
 {
 	if (Filesystem::exists(path))
@@ -136,13 +169,9 @@ int FilesystemClient::genMap(string path, unordered_map <string, shared_ptr<File
 				{
 					char *hash = new char[32];
 					calcSHA256(temp, hash);
-					if (strcmp(this->files[temp]->hash->data(), hash) == 1)
+					if (strcmp(this->files[temp]->hash->data(), hash) != 0)
 					{
-						deleteFile->push_back(temp);
-						this->files.erase(temp);
-						shared_ptr<File> f = genFile(temp);
-						this->files[temp] = f;
-						(*files)[temp] = f;
+						compareFiles(temp, this->files[temp]);
 					}
 					delete hash;
 				}

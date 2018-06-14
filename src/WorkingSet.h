@@ -151,6 +151,7 @@ struct File
     bool isOpen = false;
     unsigned int size;
     std::ifstream fd;
+    std::unordered_map<unsigned int, std::shared_ptr<std::array<char, 4>>> crcMap;
     std::unique_ptr<NextPart> np= std::make_unique<NextPart>(NextPart());
     File(std::string name, unsigned int size){
         this->name = name;
