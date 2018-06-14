@@ -37,7 +37,7 @@ void FileTransferMessage::createBuffer(struct Message *msg)
 	setBufferUint64_t(msg, contentLength, 136);
 
 	// Add content:
-	setBufferValue(msg, content, contentLength, 168);
+	setBufferValue(msg, content, contentLength, 200);
 
 	// Add checksum:
 	addChecksum(msg, CHECKSUM_OFFSET_BITS);
@@ -70,5 +70,5 @@ uint64_t FileTransferMessage::getContentLengthFromMessage(unsigned char *buffer)
 
 unsigned char *FileTransferMessage::getContentFromMessage(unsigned char *buffer, uint64_t fIDLength)
 {
-	return getBytesWithOffset(buffer, 168, fIDLength * 8);
+	return getBytesWithOffset(buffer, 200, fIDLength * 8);
 }
