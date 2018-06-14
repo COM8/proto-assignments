@@ -139,7 +139,7 @@ The actual file transfer message containing the file content.
 | Type | Flags | Client ID | Sequence Number | FID Part Number |
 +------+-------+-----------+-----------------+-----------------+
 
-104        136              168
+104        136              200
 +----------+----------------+---------+
 | Checksum | Content Length | Content |
 +----------+----------------+---------+

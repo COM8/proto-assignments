@@ -38,7 +38,7 @@ unsigned int AbstractClient::getNextSeqNumber()
 void AbstractClient::sendFileTransferMessage(unsigned char flags, unsigned int fidPartNumber, uint64_t contentLength, unsigned char *content, string fid, Client2 *client)
 {
     unsigned int i = getNextSeqNumber();
-    FileTransferMessage *msg = new FileTransferMessage(clientId, i, flags, fidPartNumber, (uint64_t)contentLength, (unsigned char *)content);
+    FileTransferMessage *msg = new FileTransferMessage(clientId, i, flags, fidPartNumber, contentLength, content);
 
     client->send(msg);
     sendMessageQueue->pushSendMessage(i, msg);
@@ -153,6 +153,7 @@ void AbstractClient::sendServerHelloMessage(unsigned short portLocal, unsigned c
     ServerHelloMessage *msg = new ServerHelloMessage(portLocal, clientId, seqNumber, flags, pubKey);
     client->send(msg);
     sendMessageQueue->pushSendMessage(seqNumber, msg);
+    Logger::debug("Send server hello to client: " + to_string(clientId));
 }
 
 void AbstractClient::sendFileStatusAnswerMessage(unsigned int seqNumber, unsigned int lastFIDPartNumber, unsigned char flags, uint64_t fIDLength, unsigned char *fID, Client2 *client)

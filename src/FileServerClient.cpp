@@ -99,7 +99,7 @@ void FileServerClient::disconnect()
 
 void FileServerClient::setDeclined(unsigned char flags)
 {
-    sendServerHelloMessage(flags, -1, PORT_LOCAL, udpClient);
+    sendServerHelloMessage(PORT_LOCAL, flags, -1, udpClient);
     setState(fsc_disconnected);
 }
 void FileServerClient::setAccepted(unsigned long prime, unsigned long primRoot, unsigned long pubKey)
@@ -145,7 +145,7 @@ void FileServerClient::setState(FileServerClientState state)
     case fsc_clientHello:
         startConsumerThread();
         udpServer->start();
-        sendServerHelloMessage(0b0001, enc->getPubKey(), PORT_LOCAL, udpClient);
+        sendServerHelloMessage(PORT_LOCAL, 0b0001, enc->getPubKey(), udpClient);
         setState(fsc_awaitClientAuth);
         break;
 
@@ -334,7 +334,7 @@ void FileServerClient::onAuthRequestMessage(net::ReadMessage *msg)
     }
     else
     {
-        Logger::info("Client " + to_string(clientId) + "successfull auth.");
+        Logger::info("Client " + to_string(clientId) + " successfull auth.");
         sendAuthResultMessage(seqNumber, 0b0001, udpClient);
         setState(fsc_awaitServerAuthAck);
     }
