@@ -109,7 +109,6 @@ Flags [4 Bit]:
 
 ### File-Creation
 Marks the start of a file transfer. Tells the server to create the given file with the given path.
-Replaces existing files.
 ```
 0      4           36                68          72              328        360          424
 +------+-----------+-----------------+-----------+----------+----------+------------+-----+
@@ -135,15 +134,15 @@ File MD5 hash [256 Bit]:<br/>
 ### File-Transfer
 The actual file transfer message containing the file content.
 ```
-0      4           36                68      72                104
-+------+-----------+-----------------+-------+-----------------+
-| Type | Client ID | Sequence Number | Flags | FID Part Number |
-+------+-----------+-----------------+-------+-----------------+
+0      4       8           40                72                104
++------+-------+-----------+-----------------+-----------------+
+| Type | Flags | Client ID | Sequence Number | FID Part Number |
++------+-------+-----------+-----------------+-----------------+
 
-104            360        392              456
-+--------------+----------+----------------+---------+
-| FID SHA3 256 | Checksum | Content Length | Content |
-+--------------+----------+----------------+---------+
+104        136              168
++----------+----------------+---------+
+| Checksum | Content Length | Content |
++----------+----------------+---------+
 ```
 
 Flags [4 Bit]:
@@ -152,12 +151,9 @@ Flags [4 Bit]:
 ||||
 |||+-> First package for the given file
 ||+--> File content
-|+---> *UNUSED*
+|+---> Delta Sync
 +----> Last package for the file
 ```
-
-FID SHA3 256 [256 Bit]:<br/>
-	The SHA3 256 hash of the ```FID``` to identify which file gets.
 
 Content Length [max 900 Bit]:<br/>
 	The length of the ```Content``` field.

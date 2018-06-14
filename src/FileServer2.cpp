@@ -289,5 +289,5 @@ void FileServer2::onClientHelloMessage(ReadMessage *msg)
 
     client->setAccepted(prime, primRoot, pubKey);
     user->addClient(client);
-    cout << "New client with id: " << client->CLIENT_ID << " accepted on port: " << client->PORT_REMOTE << endl;
+    cout << "New client with id: " << client->clientId << " on port: " << client->PORT_REMOTE << endl;
 }

@@ -26,6 +26,7 @@ public:
   void removeClient(FileServerClient *client);
   void clanupClients();
   bool isEmpty();
+  ClientToDo *getClientToDo(unsigned int clientId);
 
 private:
   std::unordered_map<unsigned int, FileServerClient *> clients;

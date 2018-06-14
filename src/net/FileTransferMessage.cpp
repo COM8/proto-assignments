@@ -3,12 +3,11 @@
 using namespace net;
 using namespace std;
 
-FileTransferMessage::FileTransferMessage(unsigned int clientId, unsigned int seqNumber, unsigned char flags, unsigned int fidPartNumber, unsigned char *fileHash, uint64_t contentLength, unsigned char *content) : AbstractMessage(FILE_TRANSFER_MESSAGE_ID << 4)
+FileTransferMessage::FileTransferMessage(unsigned int clientId, unsigned int seqNumber, unsigned char flags, unsigned int fidPartNumber, uint64_t contentLength, unsigned char *content) : AbstractMessage(FILE_TRANSFER_MESSAGE_ID << 4)
 {
 	this->clientId = clientId;
 	this->seqNumber = seqNumber;
 	this->flags = flags;
-	this->fileHash = fileHash;
 	this->contentLength = contentLength;
 	this->content = content;
 	this->fidPartNumber = fidPartNumber;
@@ -16,32 +15,29 @@ FileTransferMessage::FileTransferMessage(unsigned int clientId, unsigned int seq
 
 void FileTransferMessage::createBuffer(struct Message *msg)
 {
-	msg->buffer = new unsigned char[57 + contentLength]{};
-	msg->bufferLength = 57 + contentLength;
+	msg->buffer = new unsigned char[21 + contentLength]{};
+	msg->bufferLength = 21 + contentLength;
 
 	// Add type:
 	msg->buffer[0] |= type;
 
+	// Add flags:
+	msg->buffer[0] |= flags;
+
 	// Add client id:
-	setBufferUnsignedInt(msg, clientId, 4);
+	setBufferUnsignedInt(msg, clientId, 8);
 
 	// Add sequence number:
-	setBufferUnsignedInt(msg, seqNumber, 36);
-
-	// Add flags:
-	msg->buffer[8] |= flags; // 68 bit offset
+	setBufferUnsignedInt(msg, seqNumber, 40);
 
 	// Add FID part number:
 	setBufferUnsignedInt(msg, fidPartNumber, 72);
 
-	// Add file hash:
-	setBufferValue(msg, fileHash, 32, 104);
-
 	// Add content length:
-	setBufferUint64_t(msg, contentLength, 392);
+	setBufferUint64_t(msg, contentLength, 136);
 
 	// Add content:
-	setBufferValue(msg, content, contentLength, 456);
+	setBufferValue(msg, content, contentLength, 168);
 
 	// Add checksum:
 	addChecksum(msg, CHECKSUM_OFFSET_BITS);
@@ -49,17 +45,17 @@ void FileTransferMessage::createBuffer(struct Message *msg)
 
 unsigned int FileTransferMessage::getClientIdFromMessage(unsigned char *buffer)
 {
-	return getUnsignedIntFromMessage(buffer, 4);
+	return getUnsignedIntFromMessage(buffer, 8);
 }
 
 unsigned int FileTransferMessage::getSeqNumberFromMessage(unsigned char *buffer)
 {
-	return getUnsignedIntFromMessage(buffer, 36);
+	return getUnsignedIntFromMessage(buffer, 40);
 }
 
 unsigned char FileTransferMessage::getFlagsFromMessage(unsigned char *buffer)
 {
-	return buffer[8] & 0xF; // 68 bit offset
+	return buffer[0] & 0xF; // 4 bit offset
 }
 
 unsigned int FileTransferMessage::getFIDPartNumberFromMessage(unsigned char *buffer)
@@ -67,17 +63,12 @@ unsigned int FileTransferMessage::getFIDPartNumberFromMessage(unsigned char *buf
 	return getUnsignedIntFromMessage(buffer, 72);
 }
 
-unsigned char *FileTransferMessage::getFileHashFromMessage(unsigned char *buffer)
-{
-	return getBytesWithOffset(buffer, 104, 256);
-}
-
 uint64_t FileTransferMessage::getContentLengthFromMessage(unsigned char *buffer)
 {
-	return getUnsignedInt64FromMessage(buffer, 392);
+	return getUnsignedInt64FromMessage(buffer, 136);
 }
 
 unsigned char *FileTransferMessage::getContentFromMessage(unsigned char *buffer, uint64_t fIDLength)
 {
-	return getBytesWithOffset(buffer, 456, fIDLength * 8);
+	return getBytesWithOffset(buffer, 168, fIDLength * 8);
 }

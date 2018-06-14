@@ -2,6 +2,7 @@
 
 #include <mutex>
 #include <unordered_map>
+#include <string>
 #include "WorkingSet.h"
 
 struct TodoEntry
@@ -19,7 +20,9 @@ public:
   ClientToDo();
   ~ClientToDo();
   void addToDo(TodoEntry toDo);
-  void removeToDo(TodoEntry toDo);
+  void removeToDo(std::string fid);
+  TodoEntry *getNext();
+  bool isEmpty();
 
 private:
   ClientToDoMap clientToDoMap;

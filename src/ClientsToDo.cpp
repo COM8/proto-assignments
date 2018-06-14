@@ -1,6 +1,7 @@
 #include "ClientsToDo.h"
 
 using namespace std;
+using namespace net;
 
 ClientsToDo::ClientsToDo()
 {
@@ -82,9 +83,31 @@ void ClientToDo::addToDo(TodoEntry toDo)
     mlock.unlock();
 }
 
-void ClientToDo::removeToDo(TodoEntry toDo)
+bool ClientToDo::isEmpty()
 {
     unique_lock<mutex> mlock(*clientToDoMapMutex);
-    clientToDoMap.erase(toDo.fid);
+    bool result = clientToDoMap.empty();
+    mlock.unlock();
+    return result;
+}
+
+TodoEntry *ClientToDo::getNext()
+{
+    unique_lock<mutex> mlock(*clientToDoMapMutex);
+    ClientToDoMap::iterator iter = clientToDoMap.begin();
+    if (iter == clientToDoMap.end())
+    {
+        mlock.unlock();
+        return NULL;
+    }
+    TodoEntry *entry = &(iter->second);
+    mlock.unlock();
+    return entry;
+}
+
+void ClientToDo::removeToDo(string fid)
+{
+    unique_lock<mutex> mlock(*clientToDoMapMutex);
+    clientToDoMap.erase(fid);
     mlock.unlock();
 }

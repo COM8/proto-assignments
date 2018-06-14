@@ -5,22 +5,9 @@
 #include <time.h>
 #include "net/Client2.h"
 #include "net/Server2.h"
-#include "Queue.h"
 #include "Filesystem.h"
-#include "net/AbstractMessage.h"
-#include "net/ServerHelloMessage.h"
-#include "net/FileCreationMessage.h"
-#include "net/FileTransferMessage.h"
-#include "net/TransferEndedMessage.h"
-#include "net/FileStatusMessage.h"
-#include "net/PingMessage.h"
-#include "net/AckMessage.h"
-#include "net/AuthRequestMessage.h"
-#include "net/AuthResultMessage.h"
-#include "sec/DiffieHellman.h"
-#include "Timer.h"
-#include "TimerTickable.h"
-#include "Consts.h"
+#include "ClientsToDo.h"
+#include "AbstractClient.h"
 
 enum FileServerClientState
 {
@@ -35,11 +22,37 @@ enum FileServerClientState
   fsc_error = 8
 };
 
-class FileServerClient : TimerTickable
+struct ToDoHelper
+{
+  bool sendCreationMsg;
+  TodoEntry *curToDo;
+  ClientToDo *clientToDo;
+
+  ToDoHelper()
+  {
+    curToDo = NULL;
+    clientToDo = NULL;
+    sendCreationMsg = false;
+  }
+
+  void loadNext()
+  {
+    sendCreationMsg = false;
+    if (clientToDo)
+    {
+      curToDo = clientToDo->getNext();
+    }
+    else
+    {
+      curToDo = NULL;
+    }
+  }
+};
+
+class FileServerClient : public AbstractClient
 {
 
 public:
-  const unsigned int CLIENT_ID;
   const unsigned short PORT_LOCAL;
   const unsigned short PORT_REMOTE;
   const char *IP_REMOTE;
@@ -52,37 +65,22 @@ public:
   void setDeclined(unsigned char flags);
   void setAccepted(unsigned long prime, unsigned long primRoot, unsigned long pubKey);
   void onTimerTick(int identifier);
+  void onMessageReceived(net::ReadMessage *msg);
 
 private:
   class FileServerUser *user;
   FileServerClientState state;
   std::mutex stateMutex;
-  std::mutex *seqNumberMutex;
-  unsigned int seqNumber;
   net::Client2 *udpClient;
   net::Server2 *udpServer;
-  Queue<net::ReadMessage> *cpQueue;
-  SendMessageQueue *sendMessageQueue;
-  bool shouldConsumerRun;
-  std::thread consumerThread;
   std::string curFID;
   unsigned int lastFIDPartNumber;
   std::uint64_t curFIDLength;
-  sec::DiffieHellman *enc;
-  Timer *tTimer;
   unsigned int maxPPS;
+  ToDoHelper toDoHelper;
 
   void setState(FileServerClientState state);
-  unsigned int getNextSeqNumber();
   void onDisconnectedOrErrorState();
-  void consumerTask();
-  void startConsumerThread();
-  void stopConsumerThread();
-  void sendServerHelloMessage(unsigned char flags, unsigned long pubKey);
-  void sendAckMessage(unsigned int seqNumber);
-  void sendFileStatusAnswerMessage(unsigned int seqNumber, unsigned int lastFIDPartNumber, unsigned char flags, uint64_t fIDLength, unsigned char *fID);
-  void sendPingMessage(unsigned int plLength, unsigned int seqNumber);
-  void sendAuthResultMessage(unsigned int seqNumber, unsigned char flags);
   void onPingMessage(net::ReadMessage *msg);
   void onAckMessage(net::ReadMessage *msg);
   void onFileCreationMessage(net::ReadMessage *msg);
@@ -90,4 +88,5 @@ private:
   void onTransferEndedMessage(net::ReadMessage *msg);
   void onFileStatusMessage(net::ReadMessage *msg);
   void onAuthRequestMessage(net::ReadMessage *msg);
+  void sendNextClientToDo();
 };

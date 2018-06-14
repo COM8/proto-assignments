@@ -32,10 +32,15 @@ void FileServerUser::deleteAllClients()
     Logger::info("Finished deleting all clients for username: " + USERNAME);
 }
 
+ClientToDo *FileServerUser::getClientToDo(unsigned int clientId)
+{
+    return clientsToDo.getClientToDos(clientId);
+}
+
 void FileServerUser::removeClient(FileServerClient *client)
 {
     std::unique_lock<std::mutex> mlock(*clientsMutex);
-    clients.erase(client->CLIENT_ID);
+    clients.erase(client->clientId);
     delete client;
     mlock.unlock();
 }
@@ -60,7 +65,7 @@ void FileServerUser::clanupClients()
         // If last message is older than 10 seconds:
         if (!i->second || i->second->getState() == fsc_error || difftime(now, i->second->lastMessageTime) > 10)
         {
-            Logger::info("Removing client " + to_string(i->second->CLIENT_ID) + " for inactivity.");
+            Logger::info("Removing client " + to_string(i->second->clientId) + " for inactivity.");
             delete i->second;
             i = clients.erase(i);
         }
@@ -89,10 +94,11 @@ void FileServerUser::addClient(FileServerClient *client)
 {
     std::unique_lock<std::mutex> mlock(*clientsMutex);
 
-    if (clients[client->CLIENT_ID])
+    if (clients[client->clientId])
     {
-        delete clients[client->CLIENT_ID];
+        delete clients[client->clientId];
     }
-    clients[client->CLIENT_ID] = client;
+    clients[client->clientId] = client;
+    clientsToDo.addClient(client->clientId);
     mlock.unlock();
 }

@@ -8,6 +8,7 @@ namespace net
 
 enum FileType
 {
+	ft_none = 0b0000,
 	ft_folder = 0b0001,
 	ft_del_folder = 0b0010,
 	ft_file = 0b0100,

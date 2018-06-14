@@ -5,7 +5,7 @@ using namespace std;
 using namespace net;
 using namespace sec;
 
-FileServerClient::FileServerClient(unsigned int clientId, unsigned short portLocal, unsigned short portRemote, char *ipRemote, unsigned int maxPPS, FileServerUser *user) : CLIENT_ID(clientId),
+FileServerClient::FileServerClient(unsigned int clientId, unsigned short portLocal, unsigned short portRemote, char *ipRemote, unsigned int maxPPS, FileServerUser *user) : AbstractClient(clientId),
                                                                                                                                                                             PORT_LOCAL(portLocal),
                                                                                                                                                                             PORT_REMOTE(portRemote),
                                                                                                                                                                             IP_REMOTE(ipRemote)
@@ -13,10 +13,7 @@ FileServerClient::FileServerClient(unsigned int clientId, unsigned short portLoc
     this->user = user;
     this->maxPPS = maxPPS;
 
-    this->shouldConsumerRun = false;
     this->state = fsc_disconnected;
-    this->cpQueue = new Queue<ReadMessage>();
-    this->enc = NULL;
     this->udpServer = new Server2(PORT_LOCAL, cpQueue, enc);
     this->udpClient = new Client2(IP_REMOTE, PORT_REMOTE, maxPPS, enc);
     this->udpClient->init();
@@ -25,29 +22,14 @@ FileServerClient::FileServerClient(unsigned int clientId, unsigned short portLoc
     this->curFIDLength = 0;
     this->lastFIDPartNumber = 0;
     this->state = fsc_disconnected;
-    this->tTimer = new Timer(true, 1000, this, 1);
-    this->sendMessageQueue = new SendMessageQueue();
-    this->seqNumber = 0;
-    this->seqNumberMutex = new mutex();
+    this->toDoHelper = ToDoHelper();
 }
 
 FileServerClient::~FileServerClient()
 {
     setState(fsc_error);
-    delete tTimer;
-    delete cpQueue;
     delete udpClient;
     delete udpServer;
-    delete sendMessageQueue;
-    delete seqNumberMutex;
-}
-
-unsigned int FileServerClient::getNextSeqNumber()
-{
-    unique_lock<mutex> mlock(*seqNumberMutex);
-    unsigned int i = seqNumber++;
-    mlock.unlock();
-    return i;
 }
 
 void FileServerClient::onTimerTick(int identifier)
@@ -57,7 +39,18 @@ void FileServerClient::onTimerTick(int identifier)
         switch (getState())
         {
         case fsc_connected:
-            setState(fsc_ping);
+            if (!toDoHelper.clientToDo)
+            {
+                toDoHelper.clientToDo = user->getClientToDo(clientId);
+            }
+            if (!toDoHelper.clientToDo || toDoHelper.clientToDo->isEmpty())
+            {
+                setState(fsc_ping);
+            }
+            else
+            {
+                setState(fsc_sendingChanges);
+            }
             break;
 
         case fsc_ping:
@@ -106,7 +99,7 @@ void FileServerClient::disconnect()
 
 void FileServerClient::setDeclined(unsigned char flags)
 {
-    sendServerHelloMessage(flags, -1);
+    sendServerHelloMessage(flags, -1, PORT_LOCAL, udpClient);
     setState(fsc_disconnected);
 }
 void FileServerClient::setAccepted(unsigned long prime, unsigned long primRoot, unsigned long pubKey)
@@ -139,7 +132,7 @@ void FileServerClient::setState(FileServerClientState state)
         mlock.unlock();
         return;
     }
-    Logger::debug("[FileServerClient " + to_string(CLIENT_ID) + "]: " + to_string(this->state) + " -> " + to_string(state));
+    Logger::debug("[FileServerClient " + to_string(clientId) + "]: " + to_string(this->state) + " -> " + to_string(state));
     this->state = state;
     mlock.unlock();
 
@@ -152,7 +145,7 @@ void FileServerClient::setState(FileServerClientState state)
     case fsc_clientHello:
         startConsumerThread();
         udpServer->start();
-        sendServerHelloMessage(0b0001, enc->getPubKey());
+        sendServerHelloMessage(0b0001, enc->getPubKey(), PORT_LOCAL, udpClient);
         setState(fsc_awaitClientAuth);
         break;
 
@@ -170,6 +163,7 @@ void FileServerClient::setState(FileServerClientState state)
 
     case fsc_sendingChanges:
         tTimer->stop();
+        sendNextClientToDo();
         break;
 
     case fsc_awaitingAck:
@@ -190,73 +184,80 @@ void FileServerClient::setState(FileServerClientState state)
     }
 }
 
-void FileServerClient::startConsumerThread()
+void FileServerClient::sendNextClientToDo()
 {
-    shouldConsumerRun = true;
-    consumerThread = thread(&FileServerClient::consumerTask, this);
-}
-
-void FileServerClient::stopConsumerThread()
-{
-    shouldConsumerRun = false;
-    if (consumerThread.joinable() && consumerThread.get_id() != this_thread::get_id())
+    if (!toDoHelper.curToDo)
     {
-        ReadMessage msg = ReadMessage();
-        msg.msgType = 0xff;
-        cpQueue->push(msg); // Push dummy message to wake up the consumer thread
-        consumerThread.join();
+        toDoHelper.loadNext();
+    }
+
+    if (!toDoHelper.curToDo)
+    {
+        setState(fsc_connected);
+        return;
+    }
+
+    switch (toDoHelper.curToDo->type)
+    {
+    case ft_folder:
+    case ft_del_folder:
+    case ft_del_file:
+        setState(fsc_awaitingAck);
+        break;
+
+    case ft_file:
+        if (toDoHelper.sendCreationMsg)
+        {
+            toDoHelper.sendCreationMsg = true;
+        }
+        setState(fsc_awaitingAck);
+        break;
+
+    case ft_none:
+    default:
+        setState(fsc_connected);
+        break;
     }
 }
 
-void FileServerClient::consumerTask()
+void FileServerClient::onMessageReceived(net::ReadMessage *msg)
 {
-    Logger::debug("Started server client consumer thread.");
-    while (shouldConsumerRun)
+    lastMessageTime = time(NULL);
+
+    switch (msg->msgType)
     {
-        ReadMessage msg = cpQueue->pop();
-        if (!shouldConsumerRun)
-        {
-            return;
-        }
+    case FILE_CREATION_MESSAGE_ID:
+        onFileCreationMessage(msg);
+        break;
 
-        lastMessageTime = time(NULL);
+    case FILE_TRANSFER_MESSAGE_ID:
+        onFileTransferMessage(msg);
+        break;
 
-        switch (msg.msgType)
-        {
-        case FILE_CREATION_MESSAGE_ID:
-            onFileCreationMessage(&msg);
-            break;
+    case FILE_STATUS_MESSAGE_ID:
+        onFileStatusMessage(msg);
+        break;
 
-        case FILE_TRANSFER_MESSAGE_ID:
-            onFileTransferMessage(&msg);
-            break;
+    case ACK_MESSAGE_ID:
+        onAckMessage(msg);
+        break;
 
-        case FILE_STATUS_MESSAGE_ID:
-            onFileStatusMessage(&msg);
-            break;
+    case PING_MESSAGE_ID:
+        onPingMessage(msg);
+        break;
 
-        case ACK_MESSAGE_ID:
-            onAckMessage(&msg);
-            break;
+    case TRANSFER_ENDED_MESSAGE_ID:
+        onTransferEndedMessage(msg);
+        break;
 
-        case PING_MESSAGE_ID:
-            onPingMessage(&msg);
-            break;
+    case AUTH_REQUEST_MESSAGE_ID:
+        onAuthRequestMessage(msg);
+        break;
 
-        case TRANSFER_ENDED_MESSAGE_ID:
-            onTransferEndedMessage(&msg);
-            break;
-
-        case AUTH_REQUEST_MESSAGE_ID:
-            onAuthRequestMessage(&msg);
-            break;
-
-        default:
-            Logger::warn("Server client " + to_string(CLIENT_ID) + " received an unknown message type: " + to_string((int)msg.msgType));
-            break;
-        }
+    default:
+        Logger::warn("Server client " + to_string(clientId) + " received an unknown message type: " + to_string((int)msg->msgType));
+        break;
     }
-    Logger::debug("Stopped server client consumer thread.");
 }
 
 void FileServerClient::onPingMessage(net::ReadMessage *msg)
@@ -269,14 +270,14 @@ void FileServerClient::onPingMessage(net::ReadMessage *msg)
 
     // Check if client ID is valid:
     unsigned int clientId = PingMessage::getClientIdFromMessage(msg->buffer);
-    if (CLIENT_ID != clientId)
+    if (clientId != clientId)
     {
         Logger::warn("Invalid client id received!");
         return;
     }
 
     unsigned int seqNum = PingMessage::getSeqNumberFromMessage(msg->buffer);
-    sendAckMessage(seqNum);
+    sendAckMessage(seqNum, udpClient);
     Logger::debug("PONG " + to_string(clientId));
 }
 
@@ -307,7 +308,7 @@ void FileServerClient::onAuthRequestMessage(net::ReadMessage *msg)
 
     // Check if client ID is valid:
     unsigned int clientId = AuthRequestMessage::getClientIdFromMessage(msg->buffer);
-    if (CLIENT_ID != clientId)
+    if (clientId != clientId)
     {
         Logger::warn("Invalid client id received for AuthRequestMessage! Ignoring message.");
         return;
@@ -327,22 +328,16 @@ void FileServerClient::onAuthRequestMessage(net::ReadMessage *msg)
     // Check if password is correct:
     if (passwordString.compare(user->PASSWORD))
     {
-        Logger::warn("Client " + to_string(CLIENT_ID) + " send an invalid password.");
-        sendAuthResultMessage(seqNumber, 0b0000);
+        Logger::warn("Client " + to_string(clientId) + " send an invalid password.");
+        sendAuthResultMessage(seqNumber, 0b0000, udpClient);
         setState(fsc_error);
     }
     else
     {
-        sendAuthResultMessage(seqNumber, 0b0001);
+        Logger::info("Client " + to_string(clientId) + "successfull auth.");
+        sendAuthResultMessage(seqNumber, 0b0001, udpClient);
         setState(fsc_awaitServerAuthAck);
     }
-}
-
-void FileServerClient::sendAuthResultMessage(unsigned int seqNumber, unsigned char flags)
-{
-    AuthResultMessage *msg = new AuthResultMessage(CLIENT_ID, flags, seqNumber);
-    udpClient->send(msg);
-    sendMessageQueue->pushSendMessage(seqNumber, msg);
 }
 
 void FileServerClient::onFileCreationMessage(net::ReadMessage *msg)
@@ -355,7 +350,7 @@ void FileServerClient::onFileCreationMessage(net::ReadMessage *msg)
 
     // Check if client ID is valid:
     unsigned int clientId = FileCreationMessage::getClientIdFromMessage(msg->buffer);
-    if (CLIENT_ID != clientId)
+    if (clientId != clientId)
     {
         Logger::warn("Invalid client id received for FileCreationMessage! Ignoring message.");
         return;
@@ -363,7 +358,7 @@ void FileServerClient::onFileCreationMessage(net::ReadMessage *msg)
 
     // Send ack:
     unsigned int seqNumber = FileCreationMessage::getSeqNumberFromMessage(msg->buffer);
-    sendAckMessage(seqNumber);
+    sendAckMessage(seqNumber, udpClient);
 
     // Create file/folder:
     unsigned char fileType = FileCreationMessage::getFileTypeFromMessage(msg->buffer);
@@ -412,7 +407,7 @@ void FileServerClient::onFileTransferMessage(net::ReadMessage *msg)
 
     // Check if client ID is valid:
     unsigned int clientId = FileTransferMessage::getClientIdFromMessage(msg->buffer);
-    if (CLIENT_ID != clientId)
+    if (clientId != clientId)
     {
         Logger::warn("Invalid client id received!");
         return;
@@ -420,7 +415,7 @@ void FileServerClient::onFileTransferMessage(net::ReadMessage *msg)
 
     // Send ack:
     unsigned int seqNumber = FileTransferMessage::getSeqNumberFromMessage(msg->buffer);
-    sendAckMessage(seqNumber);
+    sendAckMessage(seqNumber, udpClient);
 
     // Write file:
     char flags = FileTransferMessage::getFlagsFromMessage(msg->buffer);
@@ -429,7 +424,7 @@ void FileServerClient::onFileTransferMessage(net::ReadMessage *msg)
         unsigned int partNumber = FileTransferMessage::getFIDPartNumberFromMessage(msg->buffer);
         uint64_t contLength = FileTransferMessage::getContentLengthFromMessage(msg->buffer);
         unsigned char *content = FileTransferMessage::getContentFromMessage(msg->buffer, contLength);
-        int result = user->fS->writeFilePart(curFID, (char *)content, partNumber, contLength, CLIENT_ID);
+        int result = user->fS->writeFilePart(curFID, (char *)content, partNumber, contLength, clientId);
         Logger::debug("Wrote file part: " + to_string(contLength) + ", length: " + to_string(contLength) + " for file: \"" + curFID + "\" with result: " + to_string(result));
         if ((flags & 0b1000) == 0b1000)
         {
@@ -453,7 +448,7 @@ void FileServerClient::onTransferEndedMessage(net::ReadMessage *msg)
 
     // Check if client ID is valid:
     unsigned int clientId = TransferEndedMessage::getClientIdFromMessage(msg->buffer);
-    if (CLIENT_ID != clientId)
+    if (clientId != clientId)
     {
         Logger::warn("Invalid client id received!");
         return;
@@ -493,7 +488,7 @@ void FileServerClient::onFileStatusMessage(net::ReadMessage *msg)
 
     // Check if client ID is valid:
     unsigned int clientId = FileStatusMessage::getClientIdFromMessage(msg->buffer);
-    if (CLIENT_ID != clientId)
+    if (clientId != clientId)
     {
         Logger::warn("Invalid client id received!");
         return;
@@ -509,36 +504,7 @@ void FileServerClient::onFileStatusMessage(net::ReadMessage *msg)
     unsigned char flags = 0b0010;
     flags |= (recFlags & 0b1000);
 
-    sendFileStatusAnswerMessage(seqNumber, lastPart, flags, curFIDLength, (unsigned char *)curFID.c_str());
+    sendFileStatusAnswerMessage(seqNumber, lastPart, flags, curFIDLength, (unsigned char *)curFID.c_str(), udpClient);
 
     delete[] fid;
-}
-
-void FileServerClient::sendServerHelloMessage(unsigned char flags, unsigned long pubKey)
-{
-    unsigned int seqNumber = getNextSeqNumber();
-    ServerHelloMessage *msg = new ServerHelloMessage(PORT_LOCAL, CLIENT_ID, seqNumber, flags, pubKey);
-    udpClient->send(msg);
-    sendMessageQueue->pushSendMessage(seqNumber, msg);
-}
-
-void FileServerClient::sendAckMessage(unsigned int seqNumber)
-{
-    AckMessage msg = AckMessage(seqNumber);
-    udpClient->send(&msg);
-}
-
-void FileServerClient::sendFileStatusAnswerMessage(unsigned int seqNumber, unsigned int lastFIDPartNumber, unsigned char flags, uint64_t fIDLength, unsigned char *fID)
-{
-    FileStatusMessage msg = FileStatusMessage(CLIENT_ID, seqNumber, lastFIDPartNumber, flags, fIDLength, fID);
-    udpClient->send(&msg);
-}
-
-void FileServerClient::sendPingMessage(unsigned int plLength, unsigned int seqNumber)
-{
-    PingMessage *msg = new PingMessage(plLength, seqNumber, CLIENT_ID);
-
-    udpClient->send(msg);
-    sendMessageQueue->pushSendMessage(seqNumber, msg);
-    Logger::debug("Ping");
 }

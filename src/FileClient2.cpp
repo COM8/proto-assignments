@@ -4,7 +4,7 @@ using namespace net;
 using namespace std;
 using namespace sec;
 
-FileClient2::FileClient2(string serverAddress, unsigned short serverPort, string username, string clientPassword, FilesystemClient *fS)
+FileClient2::FileClient2(string serverAddress, unsigned short serverPort, string username, string clientPassword, FilesystemClient *fS) : AbstractClient(123456789)
 {
     this->serverAddress = serverAddress;
     this->serverPort = serverPort;
@@ -16,55 +16,33 @@ FileClient2::FileClient2(string serverAddress, unsigned short serverPort, string
 
     this->state = disconnected;
     this->stateMutex = new mutex();
-    this->seqNumberMutex = new mutex();
-    this->seqNumber = 0;
     this->shouldHelloRun = false;
-    this->shouldConsumerRun = false;
     this->client = NULL;
     this->uploadClient = NULL;
     this->server = NULL;
-    this->cpQueue = new Queue<ReadMessage>();
-    this->sendMessageQueue = new SendMessageQueue();
     this->reconnect = false;
     this->msgTimeoutCount = 0;
     this->uploadPort = 0;
     this->transferFinished = false;
-    this->tTimer = new Timer(true, TIMER_TICK_INTERVALL_MS, this, 1);
     this->curWorkingSet = fS->getWorkingSet();
     this->clientId = getRandomClientId();
-    this->enc = NULL;
 }
 
 FileClient2::~FileClient2()
 {
     disconnect();
     stopHelloThread();
-    stopConsumerThread();
-    tTimer->stop();
 
     delete stateMutex;
-    delete seqNumberMutex;
     delete client;
     delete uploadClient;
     delete server;
-    delete cpQueue;
-    delete sendMessageQueue;
     delete curWorkingSet;
-    delete tTimer;
-    delete enc;
 }
 
 unsigned int FileClient2::getRandomClientId()
 {
     return rand();
-}
-
-unsigned int FileClient2::getNextSeqNumber()
-{
-    unique_lock<mutex> mlock(*seqNumberMutex);
-    unsigned int i = seqNumber++;
-    mlock.unlock();
-    return i;
 }
 
 FileClient2State FileClient2::getState()
@@ -257,72 +235,6 @@ void FileClient2::sendNextFilePart()
     curWorkingSet->unlockDelFolders();
 }
 
-void FileClient2::sendTransferEndedMessage(unsigned char flags, Client2 *client)
-{
-    TransferEndedMessage msg = TransferEndedMessage(clientId, flags);
-    client->send(&msg);
-}
-
-void FileClient2::sendFolderCreationMessage(shared_ptr<Folder> f, Client2 *client)
-{
-    const char *c = f->path.c_str();
-    uint64_t l = f->path.length();
-    int i = getNextSeqNumber();
-    FileCreationMessage *msg = new FileCreationMessage(clientId, i, 1, NULL, l, (unsigned char *)c);
-
-    client->send(msg);
-    sendMessageQueue->pushSendMessage(i, msg);
-    Logger::info("Send folder creation for: \"" + f->path + "\"");
-}
-
-void FileClient2::sendFolderDeletionMessage(string folderPath, Client2 *client)
-{
-    const char *c = folderPath.c_str();
-    uint64_t l = folderPath.length();
-    int i = getNextSeqNumber();
-    FileCreationMessage *msg = new FileCreationMessage(clientId, i, 2, NULL, l, (unsigned char *)c);
-
-    client->send(msg);
-    sendMessageQueue->pushSendMessage(i, msg);
-    Logger::info("Send folder deletion for: \"" + folderPath + "\"");
-}
-
-void FileClient2::sendFileDeletionMessage(string filePath, Client2 *client)
-{
-    const char *c = filePath.c_str();
-    uint64_t l = filePath.length();
-    int i = getNextSeqNumber();
-    FileCreationMessage *msg = new FileCreationMessage(clientId, i, 8, NULL, l, (unsigned char *)c);
-
-    client->send(msg);
-    sendMessageQueue->pushSendMessage(i, msg);
-    Logger::info("Send file deletion for: \"" + filePath + "\"");
-}
-
-void FileClient2::sendFileCreationMessage(string fid, std::shared_ptr<File> f, Client2 *client)
-{
-    const char *c = fid.c_str();
-    uint64_t l = fid.length();
-    unsigned int i = getNextSeqNumber();
-    FileCreationMessage *msg = new FileCreationMessage(clientId, i, 4, (unsigned char *)f->hash.get()->data(), l, (unsigned char *)c);
-
-    client->send(msg);
-    sendMessageQueue->pushSendMessage(i, msg);
-    Logger::info("Send file creation: " + fid);
-}
-
-void FileClient2::sendFileStatusMessage(string fid, struct std::shared_ptr<File> f, Client2 *client)
-{
-    const char *c = fid.c_str();
-    uint64_t l = fid.length();
-    unsigned int i = getNextSeqNumber();
-    FileStatusMessage *msg = new FileStatusMessage(clientId, i, 9, l, (unsigned char *)c);
-
-    client->send(msg);
-    sendMessageQueue->pushSendMessage(i, msg);
-    Logger::info("Requested file status for: " + fid);
-}
-
 bool FileClient2::sendFilePartMessage(string fid, shared_ptr<File> f, unsigned int nextPartNr, Client2 *client)
 {
     char chunk[Filesystem::partLength];
@@ -343,12 +255,8 @@ bool FileClient2::sendFilePartMessage(string fid, shared_ptr<File> f, unsigned i
         flags |= 8;
     }
 
-    unsigned int i = getNextSeqNumber();
-    FileTransferMessage *msg = new FileTransferMessage(clientId, i, flags, nextPartNr, (unsigned char *)f->hash.get()->data(), (uint64_t)readCount, (unsigned char *)chunk);
+    sendFileTransferMessage(flags, nextPartNr, readCount, (unsigned char *)chunk, fid, uploadClient);
 
-    client->send(msg);
-    sendMessageQueue->pushSendMessage(i, msg);
-    Logger::debug("Send file part " + to_string(nextPartNr) + ", length: " + to_string(readCount) + " for file: " + fid);
     if (isLastPart)
     {
         Logger::info("Finished sending: " + fid);
@@ -418,32 +326,6 @@ void FileClient2::helloTask(unsigned short listenPort, bool reconnecting, Client
         sleep(1); // Sleep for 1 second
     }
     Logger::debug("Stopped hello thread.");
-}
-
-void FileClient2::sendClientHelloMessage(unsigned short listenPort, unsigned char flags, string username, Client2 *client)
-{
-    unsigned char *c = (unsigned char *)username.c_str();
-    unsigned int l = username.length();
-    ClientHelloMessage msg = ClientHelloMessage(listenPort, clientId, flags, enc->getPrime(), enc->getPrimitiveRoot(), enc->getPubKey(), c, l);
-    client->send(&msg);
-}
-
-void FileClient2::startConsumerThread()
-{
-    shouldConsumerRun = true;
-    consumerThread = thread(&FileClient2::consumerTask, this);
-}
-
-void FileClient2::stopConsumerThread()
-{
-    shouldConsumerRun = false;
-    if (consumerThread.joinable() && consumerThread.get_id() != this_thread::get_id())
-    {
-        ReadMessage msg = ReadMessage();
-        msg.msgType = 0xff;
-        cpQueue->push(msg); // Push dummy message to wake up the consumer thread
-        consumerThread.join();
-    }
 }
 
 void FileClient2::onAuthResultMessage(net::ReadMessage *msg)
@@ -526,55 +408,45 @@ void FileClient2::onFileStatusMessage(net::ReadMessage *msg)
         curWorkingSet->unlockCurFile();
     }
     else
-    {   curWorkingSet->getCurFileFile()->np->acknowledgePart(lastFIDPartNumber);
+    {
+        curWorkingSet->getCurFileFile()->np->acknowledgePart(lastFIDPartNumber);
         curWorkingSet->unlockCurFile();
         setState(sendingFS);
     }
 }
 
-void FileClient2::consumerTask()
+void FileClient2::onMessageReceived(ReadMessage *msg)
 {
-    Logger::debug("Started consumer thread.");
-    while (shouldConsumerRun)
+    switch (msg->msgType)
     {
-        ReadMessage msg = cpQueue->pop();
-        if (!shouldConsumerRun)
-        {
-            break;
-        }
+    case SERVER_HELLO_MESSAGE_ID:
+        onServerHelloMessage(msg);
+        break;
 
-        switch (msg.msgType)
-        {
-        case SERVER_HELLO_MESSAGE_ID:
-            onServerHelloMessage(&msg);
-            break;
+    case FILE_STATUS_MESSAGE_ID:
+        onFileStatusMessage(msg);
+        break;
 
-        case FILE_STATUS_MESSAGE_ID:
-            onFileStatusMessage(&msg);
-            break;
+    case ACK_MESSAGE_ID:
+        onAckMessage(msg);
+        break;
 
-        case ACK_MESSAGE_ID:
-            onAckMessage(&msg);
-            break;
+    case PING_MESSAGE_ID:
+        onPingMessage(msg);
+        break;
 
-        case PING_MESSAGE_ID:
-            onPingMessage(&msg);
-            break;
+    case AUTH_RESULT_MESSAGE_ID:
+        onAuthResultMessage(msg);
+        break;
 
-        case AUTH_RESULT_MESSAGE_ID:
-            onAuthResultMessage(&msg);
-            break;
-
-            /*case 7:
+        /*case 7:
             onTransferEndedMessage(&msg);
             break;*/
 
-        default:
-            Logger::warn("Unknown message type received: " + to_string(msg.msgType));
-            break;
-        }
+    default:
+        Logger::warn("Unknown message type received: " + to_string(msg->msgType));
+        break;
     }
-    Logger::debug("Stopend consumer thread.");
 }
 
 void FileClient2::onServerHelloMessage(ReadMessage *msg)
@@ -621,7 +493,7 @@ void FileClient2::onServerHelloMessage(ReadMessage *msg)
         uploadClient->init();
 
         unsigned int seqNumber = ServerHelloMessage::getSeqNumberFromMessage(msg->buffer);
-        sendAuthRequestMessage(seqNumber, uploadClient);
+        sendAuthRequestMessage(seqNumber, clientPassword, uploadClient);
 
         setState(clientAuth);
     }
@@ -699,27 +571,6 @@ void FileClient2::onTimerTick(int identifier)
     default:
         break;
     }
-}
-
-void FileClient2::sendPingMessage(unsigned int plLength, unsigned int seqNumber, Client2 *client)
-{
-    PingMessage *msg = new PingMessage(plLength, seqNumber, clientId);
-
-    client->send(msg);
-    sendMessageQueue->pushSendMessage(seqNumber, msg);
-    Logger::debug("Ping");
-}
-
-void FileClient2::sendAuthRequestMessage(unsigned int seqNumber, Client2 *client)
-{
-    const char *c = clientPassword.c_str();
-    unsigned int l = clientPassword.length();
-
-    AuthRequestMessage *msg = new AuthRequestMessage(clientId, l, (unsigned char *)c, seqNumber);
-
-    client->send(msg);
-    sendMessageQueue->pushSendMessage(seqNumber, msg);
-    Logger::debug("Send auth request with sequence number: " + to_string(seqNumber));
 }
 
 void FileClient2::onAckMessage(ReadMessage *msg)
@@ -807,10 +658,4 @@ void FileClient2::printToDo()
         curWorkingSet->unlockFiles();
         curWorkingSet->unlockFolders();
     }
-}
-
-void FileClient2::sendAckMessage(unsigned int seqNumber, net::Client2 *client)
-{
-    AckMessage msg = AckMessage(seqNumber);
-    client->send(&msg);
 }
