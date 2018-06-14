@@ -29,6 +29,7 @@ struct NextPart{
         }
         return -1;
     }
+
     void addHoleFile(unsigned int length) {
         this->content.clear();
         this->content.push_back(std::pair<unsigned int, unsigned int> (0, length));

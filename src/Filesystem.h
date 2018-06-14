@@ -33,9 +33,9 @@ struct ServerFile {
     static std::unique_ptr<struct ServerFile> genPointer(char* hash, unsigned int last_part) {
         return std::make_unique<struct ServerFile>(ServerFile(hash, last_part));
     }
-    static std::unique_ptr<struct ServerFile> genPointer() {
-        return std::make_unique<struct ServerFile>();
-    }
+    //static std::unique_ptr<struct ServerFile> genPointer() {
+    //    return std::make_unique<struct ServerFile>();
+    //}
     };
 
 

@@ -390,11 +390,15 @@ void FilesystemServer::saveFileFile()
 	fstream tmp((this->path + ".csync.files"), fstream::out | fstream::in | fstream::binary | fstream::trunc);
 	for (auto const &ent1 : this->files)
 	{
-		tmp.write(intToArray(ent1.first.length()), 4);
-		tmp.write(ent1.first.c_str(), ent1.first.length());
-		unsigned int last_part = ent1.second.get()->last_part;
-		tmp.write(intToArray(last_part), 4);
-		tmp.write(ent1.second.get()->hash.get()->data(), 32);
+		if(!(ent1.first.compare(this->path+".csync.files") || ent1.first.compare(this->path+".csync.folders"))) {
+			tmp.write(intToArray(ent1.first.length()), 4);
+			tmp.write(ent1.first.c_str(), ent1.first.length());
+			unsigned int last_part = ent1.second->last_part;
+			tmp.write(intToArray(last_part), 4);
+			tmp.write(ent1.second.get()->hash->data(), 32);
+		}
+		else {
+		}
 	}
 	tmp.close();
 }
@@ -503,11 +507,11 @@ int FilesystemServer::writeFilePart(string FID, char *buffer, unsigned int partN
 		tmp.seekp(partNr * partLength, tmp.beg);
 		tmp.write(buffer, length > partLength ? partLength : length);
 		tmp.close();
-		/*unsigned int last_part = this->files[this->path + FID].get()->last_part;
+		unsigned int last_part = this->files[this->path + FID].get()->last_part;
 		if (last_part + 1 == partNr)
 		{
 			this->files[this->path + FID].get()->last_part = last_part + 1;
-		}*/
+		}
 		return 0;
 	}
 	else
@@ -520,7 +524,7 @@ int FilesystemServer::readFile(string FID, char* buffer, unsigned int partNr) {
 	if(this->files[FID]) {
 		if(exists(this->path + FID)) {
 			Logger::warn("adding unkonwn File to the Filesystem");
-			this->files[FID] = ServerFile::genPointer();
+			this->files[FID] = ServerFile::genPointer(0);
 		}else {
 			Logger::error("Filesystem can't find: " + FID);
 			return -2;
