@@ -78,6 +78,7 @@ void FilesystemClient::compareFiles(string FID, shared_ptr<File> f) {
 		calcCRC32(buffer, tmpcrc);
 		if(!f->crcMap[i]) {
 			if(strcmp(tmpcrc, f->crcMap[i].get()->data())!= 0) {
+				Logger::debug("Found File Delta: " + FID + ": " + to_string(i));
 				f->np->addPart(i);
 				shared_ptr<array<char,4>> t = make_shared<array<char,4>>();
 				strcpy(t.get()->data(), tmpcrc);
@@ -85,6 +86,7 @@ void FilesystemClient::compareFiles(string FID, shared_ptr<File> f) {
 			}
 		}else {
 			f->np->addPart(i);
+			Logger::debug("Added file part: "+ FID+ ": " + to_string(i));
 			shared_ptr<array<char,4>> t = make_shared<array<char,4>>();
 			strcpy(t.get()->data(), tmpcrc);
 			f->crcMap[i] = t;
@@ -501,11 +503,11 @@ int FilesystemServer::writeFilePart(string FID, char *buffer, unsigned int partN
 		tmp.seekp(partNr * partLength, tmp.beg);
 		tmp.write(buffer, length > partLength ? partLength : length);
 		tmp.close();
-		unsigned int last_part = this->files[this->path + FID].get()->last_part;
+		/*unsigned int last_part = this->files[this->path + FID].get()->last_part;
 		if (last_part + 1 == partNr)
 		{
 			this->files[this->path + FID].get()->last_part = last_part + 1;
-		}
+		}*/
 		return 0;
 	}
 	else
