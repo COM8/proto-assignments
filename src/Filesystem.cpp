@@ -152,7 +152,7 @@ int FilesystemClient::genMap(string path, unordered_map <string, shared_ptr<File
 {
 	if (Filesystem::exists(path))
 	{
-		for (auto const &p : fs::directory_iterator(path))
+		for (auto &p : fs::recursive_directory_iterator(path))
 		{
 			if (fs::is_directory(p))
 			{
@@ -162,7 +162,7 @@ int FilesystemClient::genMap(string path, unordered_map <string, shared_ptr<File
 					folders->push_back(f);
 					this->folders.push_back(f);
 				}
-				genMap(p.path().string(), files, folders, deleteFile, deleteFolder);
+				//genMap(p.path().string(), files, folders, deleteFile, deleteFolder);
 			}
 			else
 			{
@@ -247,12 +247,12 @@ int FilesystemClient::genMap(string path)
 {
 	if (Filesystem::exists(path))
 	{
-		for (auto const &p : fs::directory_iterator(path))
+		for (auto const &p : fs::recursive_directory_iterator(path))
 		{
 			if (fs::is_directory(p))
 			{
 				this->folders.push_back(Folder::genPointer(p.path().string()));
-				genMap(p.path().string());
+				//genMap(p.path().string());
 			}
 			else
 			{
