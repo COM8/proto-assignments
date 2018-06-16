@@ -404,7 +404,7 @@ void FileClient2::onFileStatusMessage(net::ReadMessage *msg)
         string fid = curWorkingSet->getCurFID();
         shared_ptr<File> curFile = curWorkingSet->getCurFileFile();
         setState(awaitingAck);
-        sendFileCreationMessage(fid, curFile, uploadClient);
+        sendFileCreationMessage(fid, (unsigned char *)curFile->hash.get()->data(), uploadClient);
         curWorkingSet->unlockCurFile();
     }
     else

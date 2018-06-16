@@ -87,12 +87,12 @@ void AbstractClient::sendFileDeletionMessage(string filePath, Client2 *client)
     Logger::info("Send file deletion for: \"" + filePath + "\"");
 }
 
-void AbstractClient::sendFileCreationMessage(string fid, std::shared_ptr<File> f, Client2 *client)
+void AbstractClient::sendFileCreationMessage(string fid, unsigned char *hash, Client2 *client)
 {
     const char *c = fid.c_str();
     uint64_t l = fid.length();
     unsigned int i = getNextSeqNumber();
-    FileCreationMessage *msg = new FileCreationMessage(clientId, i, 4, (unsigned char *)f->hash.get()->data(), l, (unsigned char *)c);
+    FileCreationMessage *msg = new FileCreationMessage(clientId, i, 4, hash, l, (unsigned char *)c);
 
     client->send(msg);
     sendMessageQueue->pushSendMessage(i, msg);

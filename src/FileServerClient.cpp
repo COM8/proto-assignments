@@ -202,6 +202,7 @@ void FileServerClient::sendNextClientToDo()
     case ft_folder:
     case ft_del_folder:
     case ft_del_file:
+        //sendFileCreationMessage(toDoHelper.curToDo->fid, )
         setState(fsc_awaitingAck);
         break;
 

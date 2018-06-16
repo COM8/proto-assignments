@@ -44,7 +44,7 @@ protected:
   void sendFileDeletionMessage(std::string file, net::Client2 *client);
   void sendTransferEndedMessage(unsigned char flags, net::Client2 *client);
   void sendFolderCreationMessage(std::shared_ptr<Folder> f, net::Client2 *client);
-  void sendFileCreationMessage(std::string fid, std::shared_ptr<File> f, net::Client2 *client);
+  void sendFileCreationMessage(std::string fid, unsigned char *hash, net::Client2 *client);
   void sendFileTransferMessage(unsigned char flags, unsigned int fidPartNumber, uint64_t contentLength, unsigned char *content, std::string fid, net::Client2 *client);
   void sendClientHelloMessage(unsigned short listenPort, unsigned char flags, std::string username, net::Client2 *client);
   void sendPingMessage(unsigned int plLength, unsigned int seqNumber, net::Client2 *client);
