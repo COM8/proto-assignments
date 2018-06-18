@@ -292,7 +292,7 @@ shared_ptr<File> Filesystem::genFile(string FID)
 
 //toimpl saveFilessytem()
 void FilesystemClient::saveFilesystem() {
-	fstream tmp(this->path + ".csync.files", fstream::out | fstream::in | fstream::binary | fstream::trunc);
+	fstream tmp(this->path + "/.csync.files", fstream::out | fstream::in | fstream::binary | fstream::trunc);
 	if (tmp) {
 		for(auto f: this->files) {
 			char *nameLen = intToArray(f.first.length());
@@ -305,13 +305,14 @@ void FilesystemClient::saveFilesystem() {
 			for(auto d : f.second->crcMap) {
 				char* crcNumber = intToArray(d.first);
 				tmp.write(crcNumber, 4);
-
+				tmp.write(d.second.get()->data(), 4);
 				delete[] crcNumber;
 			}
 			delete[] nameLen;
 			delete[] size;
 			delete[] crcsize;
 		}
+		tmp.close();
 	} else {
 		Logger::error("can't open Filesystem file");
 	}
