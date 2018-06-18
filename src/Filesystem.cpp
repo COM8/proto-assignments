@@ -181,22 +181,24 @@ int FilesystemClient::genMap(string path, unordered_map <string, shared_ptr<File
 			else
 			{
 				string temp = p.path().string();
-				if (!this->files[temp] == 0)
-				{
-					char *hash = new char[32];
-					calcSHA256(temp, hash);
-					if (strcmp(this->files[temp]->hash->data(), hash) != 0)
+				if(temp.compare(".csync.files")) {
+					if (!this->files[temp] == 0)
 					{
-						compareFiles(temp, this->files[temp]);
+						char *hash = new char[32];
+						calcSHA256(temp, hash);
+						if (strcmp(this->files[temp]->hash->data(), hash) != 0)
+						{
+							compareFiles(temp, this->files[temp]);
+						}
+						delete hash;
 					}
-					delete hash;
-				}
-				else
-				{
-					shared_ptr<File> f = genFile(temp);
-					f->sendCompleteFile();
-					this->files[temp] = f;
-					(*files)[temp] = f;
+					else
+					{
+						shared_ptr<File> f = genFile(temp);
+						f->sendCompleteFile();
+						this->files[temp] = f;
+						(*files)[temp] = f;
+					}
 				}
 			}
 		}
@@ -290,7 +292,29 @@ shared_ptr<File> Filesystem::genFile(string FID)
 
 //toimpl saveFilessytem()
 void FilesystemClient::saveFilesystem() {
+	fstream tmp(this->path + ".csync.files", fstream::out | fstream::in | fstream::binary | fstream::trunc);
+	if (tmp) {
+		for(auto f: this->files) {
+			char *nameLen = intToArray(f.first.length());
+			tmp.write(nameLen, 4);
+			tmp.write(f.first.c_str(), f.first.length());
+			char *size = intToArray(f.second->size);
+			tmp.write(size, 4);
+			tmp.write(f.second->hash.get()->data(), 32);
+			char *crcsize = intToArray(f.second->crcMap.size());
+			for(auto d : f.second->crcMap) {
+				char* crcNumber = intToArray(d.first);
+				tmp.write(crcNumber, 4);
 
+				delete[] crcNumber;
+			}
+			delete[] nameLen;
+			delete[] size;
+			delete[] crcsize;
+		}
+	} else {
+		Logger::error("can't open Filesystem file");
+	}
 }
 
 //toimpl implement openFilesystem
@@ -414,6 +438,7 @@ void FilesystemServer::saveFolderFile()
 	tmp.close();
 }
 
+//todo fix memleak
 void FilesystemServer::saveFileFile()
 {
 	fstream tmp((this->path + ".csync.files"), fstream::out | fstream::in | fstream::binary | fstream::trunc);
