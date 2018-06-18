@@ -42,6 +42,8 @@ struct ServerFile {
 class Filesystem {
 protected:
     static std::shared_ptr<File> genFile(std::string FID);
+    char* intToArray(unsigned int i);
+    unsigned int charToInt(char* buffer);
 public:
     const unsigned static int partLength = MAX_CONTENT_LENGTH;
     static long unsigned int filesize(const std::string FID);
@@ -66,6 +68,8 @@ private:
     bool isInFolders(std::string path);
     void compareFiles(std::string FID, std::shared_ptr<File> f);
     void genCRC32(std::string FID, std::shared_ptr<File> f);
+    void saveFilesystem();
+    void openFilesystem();
     
 
 public:
@@ -101,8 +105,6 @@ private:
     void fileClean(std::string file);
     void readFolderFile();
     void readFileFile();
-    char* intToArray(unsigned int i);
-    unsigned int charToInt(char* buffer);
     void saveFolderFile();
     void saveFileFile();
 public:
