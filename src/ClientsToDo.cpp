@@ -6,43 +6,43 @@ using namespace net;
 ClientsToDo::ClientsToDo()
 {
     this->clientsToDoMap = ClientsToDoMap();
-    this->clientsToDoMapMutex = new mutex();
+    //this->clientsToDoMapMutex = new mutex();
 }
 
 ClientsToDo::~ClientsToDo()
 {
-    delete clientsToDoMapMutex;
+    //delete clientsToDoMapMutex;
 }
 
 void ClientsToDo::addClient(unsigned int clientId)
 {
-    unique_lock<mutex> mlock(*clientsToDoMapMutex);
+    //unique_lock<mutex> mlock(*clientsToDoMapMutex);
     ClientsToDoMap::iterator iter = clientsToDoMap.find(clientId);
 
     if (iter == clientsToDoMap.end())
     {
         clientsToDoMap[clientId] = ClientToDo();
     }
-    mlock.unlock();
+    //mlock.unlock();
 }
 
 ClientToDo *ClientsToDo::getClientToDos(unsigned int clientId)
 {
-    unique_lock<mutex> mlock(*clientsToDoMapMutex);
+    //unique_lock<mutex> mlock(*clientsToDoMapMutex);
     ClientsToDoMap::iterator iter = clientsToDoMap.find(clientId);
     if (iter == clientsToDoMap.end())
     {
-        mlock.unlock();
+        //mlock.unlock();
         return NULL;
     }
     ClientToDo *toDo = &(iter->second);
-    mlock.unlock();
+    //mlock.unlock();
     return toDo;
 }
 
 void ClientsToDo::addToDoForAllExcept(TodoEntry toDo, unsigned int ignoredClientId)
 {
-    unique_lock<mutex> mlock(*clientsToDoMapMutex);
+    //unique_lock<mutex> mlock(*clientsToDoMapMutex);
     for (ClientsToDoMap::iterator iter = clientsToDoMap.begin(); iter != clientsToDoMap.end(); iter++)
     {
         if (iter->first != ignoredClientId)
@@ -50,5 +50,5 @@ void ClientsToDo::addToDoForAllExcept(TodoEntry toDo, unsigned int ignoredClient
             iter->second.addToDo(toDo);
         }
     }
-    mlock.unlock();
+    //mlock.unlock();
 }

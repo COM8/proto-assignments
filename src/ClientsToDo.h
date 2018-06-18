@@ -18,5 +18,5 @@ public:
 
 private:
   ClientsToDoMap clientsToDoMap;
-  std::mutex *clientsToDoMapMutex;
+  //std::mutex *clientsToDoMapMutex;
 };
