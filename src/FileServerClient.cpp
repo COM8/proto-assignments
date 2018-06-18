@@ -291,7 +291,15 @@ void FileServerClient::onAckMessage(net::ReadMessage *msg)
     }
 
     unsigned int seqNumber = AckMessage::getSeqNumberFromMessage(msg->buffer);
-    Logger::debug("Acked: " + to_string(seqNumber));
+    if (!sendMessageQueue->onSequenceNumberAck(seqNumber))
+    {
+        Logger::error("Unable to ACK sequence number: " + to_string(seqNumber) + ". Sequence number was not found!");
+        return;
+    }
+    else
+    {
+        Logger::debug("Acked sequence number: " + to_string(seqNumber));
+    }
 
     if (getState() == fsc_awaitServerAuthAck)
     {
