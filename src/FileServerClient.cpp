@@ -426,7 +426,7 @@ void FileServerClient::onFileTransferMessage(net::ReadMessage *msg)
         uint64_t contLength = FileTransferMessage::getContentLengthFromMessage(msg->buffer);
         unsigned char *content = FileTransferMessage::getContentFromMessage(msg->buffer, contLength);
         int result = user->fS->writeFilePart(curFID, (char *)content, partNumber, contLength, clientId);
-        Logger::debug("Wrote file part: " + to_string(contLength) + ", length: " + to_string(contLength) + " for file: \"" + curFID + "\" with result: " + to_string(result));
+        Logger::debug("Wrote file part: " + to_string(partNumber) + ", length: " + to_string(contLength) + " for file: \"" + curFID + "\" with result: " + to_string(result));
         if ((flags & 0b1000) == 0b1000)
         {
             Logger::info("Last file part received for: " + curFID);
