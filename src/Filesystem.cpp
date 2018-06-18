@@ -55,6 +55,21 @@ void Filesystem::calcSHA256(const string FID, char* buffer)
 	}
 }
 
+char *Filesystem::intToArray(unsigned int i)
+{
+	char *ret = new char[4];
+	for (int e = 0; e < 4; e++)
+	{
+		ret[3 - e] = (i >> (e * 8));
+	}
+	return ret;
+}
+
+unsigned int Filesystem::charToInt(char *buffer)
+{
+	return static_cast<int>(buffer[0]) << 24 | buffer[1] << 16 | buffer[2] << 8 | buffer[3];
+}
+
 void Filesystem::calcCRC32(char* in, char* out) {
 	CRC32 c3;
 	strcpy(out, c3(in).c_str());
@@ -97,7 +112,6 @@ void FilesystemClient::compareFiles(string FID, shared_ptr<File> f) {
 	delete n;
 }
 
-//todo add crc32 here, may not update md5
 int FilesystemClient::writeFilePart(std::string FID, char* buffer, unsigned int partNr, unsigned int length) {
 	if(this->files[FID]) {
 		this->files[FID] = File::genPointer(FID);
@@ -274,6 +288,17 @@ shared_ptr<File> Filesystem::genFile(string FID)
 	return f;
 }
 
+//toimpl saveFilessytem()
+void FilesystemClient::saveFilesystem() {
+
+}
+
+//toimpl implement openFilesystem
+void FilesystemClient::openFilesystem() {
+
+}
+
+//totest test save and open mechanism
 void FilesystemClient::close()
 {
 	for (auto const &ent1 : this->files)
@@ -281,6 +306,7 @@ void FilesystemClient::close()
 		shared_ptr<File> t = ent1.second;
 		t->fd.close();
 	}
+	saveFilesystem();
 }
 
 string FilesystemClient::filesToString()
@@ -403,20 +429,6 @@ void FilesystemServer::saveFileFile()
 	tmp.close();
 }
 
-char *FilesystemServer::intToArray(unsigned int i)
-{
-	char *ret = new char[4];
-	for (int e = 0; e < 4; e++)
-	{
-		ret[3 - e] = (i >> (e * 8));
-	}
-	return ret;
-}
-
-unsigned int FilesystemServer::charToInt(char *buffer)
-{
-	return static_cast<int>(buffer[0]) << 24 | buffer[1] << 16 | buffer[2] << 8 | buffer[3];
-}
 
 void FilesystemServer::createPath()
 {
