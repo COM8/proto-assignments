@@ -15,8 +15,8 @@ FileTransferMessage::FileTransferMessage(unsigned int clientId, unsigned int seq
 
 void FileTransferMessage::createBuffer(struct Message *msg)
 {
-	msg->buffer = new unsigned char[21 + contentLength]{};
-	msg->bufferLength = 21 + contentLength;
+	msg->buffer = new unsigned char[25 + contentLength]{};
+	msg->bufferLength = 25 + contentLength;
 
 	// Add type:
 	msg->buffer[0] |= type;
