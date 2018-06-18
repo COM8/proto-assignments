@@ -6,7 +6,9 @@ FileServerUser::FileServerUser(string username, string password) : clients(), US
 {
     this->clientsMutex = new mutex();
     this->clientsToDo = ClientsToDo();
-    this->fS = new FilesystemServer("sync/" + username + "/", &clientsToDo);
+    string path = "sync/" + USERNAME + "/";
+    this->fS = new FilesystemServer();
+    this->fS->init(path, &clientsToDo);
 }
 
 FileServerUser::~FileServerUser()

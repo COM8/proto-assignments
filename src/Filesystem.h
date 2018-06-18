@@ -7,7 +7,7 @@
 #include <list>
 #include <fstream>
 #include <cstring>
-#include <WorkingSet.h>
+#include "WorkingSet.h"
 #include "lib/hash-library/md5.h"
 #include "lib/hash-library/crc32.h"
 #include "Logger.h"
@@ -108,7 +108,8 @@ private:
     void saveFolderFile();
     void saveFileFile();
 public:
-    FilesystemServer(std::string path, ClientsToDo* clientsToDo);
+    FilesystemServer();
+    void init(std::string path, ClientsToDo* clientsToDo);
     void genFile(std::string FID, char* hash);
     void genFolder(std::string path);
     void delFolder(std::string path);
