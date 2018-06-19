@@ -191,6 +191,7 @@ int FilesystemClient::genMap(string path, unordered_map <string, shared_ptr<File
 						{
 							if(this->files[temp]->size > filesize(temp)) {
 								this->files[temp]->sendCompleteFile();
+								deleteFile->push_back(temp);
 							}else {
 								compareFiles(temp, this->files[temp]);
 							}
