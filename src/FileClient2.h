@@ -4,6 +4,7 @@
 #include <mutex>
 #include <list>
 #include <unistd.h>
+#include <time.h>
 #include "Filesystem.h"
 #include "net/Client2.h"
 #include "net/Server2.h"
@@ -44,7 +45,9 @@ class FileClient2 : public AbstractClient
     unsigned short uploadPort;
     std::string serverAddress;
     std::thread helloThread;
+    std::thread workingSetThread;
     bool shouldHelloRun;
+    bool gettingWorkingSet;
     std::string clientPassword;
     std::string username;
     net::Client2 *client;
@@ -54,12 +57,17 @@ class FileClient2 : public AbstractClient
     unsigned int msgTimeoutCount;
     WorkingSet *curWorkingSet;
     bool transferFinished;
+    bool joinedWorkingSetThread;
+    time_t lastGetWorkingSet;
 
     void setState(FileClient2State state);
     void startSendingFS();
     unsigned int getRandomClientId();
     void startHelloThread();
     void stopHelloThread();
+    void startGetWorkingSet();
+    void joinGetWorkingSet();
+    void getWorkingSet();
     void helloTask(unsigned short listenPort, bool reconnecting, net::Client2 *client);
     void onMessageReceived(net::ReadMessage *msg);
     void sendNextFilePart();

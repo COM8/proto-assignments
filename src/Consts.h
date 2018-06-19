@@ -15,6 +15,7 @@
 // UDP-Client:
 #define CLIENT_MESSAGE_DROP_CHANCE 0 // Between 0 and 100
 #define ENABLE_UDP_CLIENT_DEBUG_OUTPUT false
+#define MAX_WORKING_SET_AGE_IN_SEC 10
 
 // Filesystem:
 #define MAX_CONTENT_LENGTH 1000

@@ -110,7 +110,7 @@ Flags [4 Bit]:
 ### File-Creation
 Marks the start of a file transfer. Tells the server to create the given file with the given path.
 ```
-0      4           36                68          72              328        360          424
+0      4           36                68          72         328        360          424
 +------+-----------+-----------------+-----------+----------+----------+------------+-----+
 | Type | Client ID | Sequence Number | File Type | File MD5 | Checksum | FID Length | FID |
 +------+-----------+-----------------+-----------+----------+----------+------------+-----+

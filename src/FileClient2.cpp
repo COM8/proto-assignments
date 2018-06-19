@@ -24,14 +24,17 @@ FileClient2::FileClient2(string serverAddress, unsigned short serverPort, string
     this->msgTimeoutCount = 0;
     this->uploadPort = 0;
     this->transferFinished = false;
-    this->curWorkingSet = fS->getWorkingSet();
+    this->curWorkingSet = NULL;
     this->clientId = getRandomClientId();
+    this->gettingWorkingSet = false;
+    this->joinedWorkingSetThread = true;
 }
 
 FileClient2::~FileClient2()
 {
     disconnect();
     stopHelloThread();
+    joinGetWorkingSet();
 
     delete stateMutex;
     delete client;
@@ -214,8 +217,8 @@ void FileClient2::sendNextFilePart()
 
         if (curWorkingSet->isEmpty())
         {
-            delete curWorkingSet;
-            curWorkingSet = fS->getWorkingSet();
+            startGetWorkingSet();
+            joinGetWorkingSet();
             if (curWorkingSet->isEmpty())
             {
                 sendTransferEndedMessage(0b0001, uploadClient);
@@ -269,6 +272,8 @@ void FileClient2::connect()
     FileClient2State state = getState();
     if (state == disconnected)
     {
+        startGetWorkingSet();
+        joinGetWorkingSet();
         listenPort = 2000 + rand() % 63000; // Pick random lisen port
         client = new Client2(serverAddress, serverPort, UNLIMITED_PPS, enc);
         client->init();
@@ -301,6 +306,44 @@ void FileClient2::startHelloThread()
 {
     shouldHelloRun = true;
     helloThread = thread(&FileClient2::helloTask, this, listenPort, reconnect, client);
+}
+
+void FileClient2::startGetWorkingSet()
+{
+    if (!gettingWorkingSet)
+    {
+        gettingWorkingSet = true;
+        workingSetThread = thread(&FileClient2::getWorkingSet, this);
+    }
+    else
+    {
+        Logger::warn("Faild to start get workingset thread. Join first!");
+    }
+}
+
+void FileClient2::joinGetWorkingSet()
+{
+    if (workingSetThread.joinable() && workingSetThread.get_id() != this_thread::get_id())
+    {
+        workingSetThread.join();
+    }
+    joinedWorkingSetThread = true;
+}
+
+void FileClient2::getWorkingSet()
+{
+    if (curWorkingSet)
+    {
+        delete curWorkingSet;
+        curWorkingSet = NULL;
+    }
+    lastGetWorkingSet = time(NULL);
+    Logger::info("Started indexing files.");
+    curWorkingSet = fS->getWorkingSet();
+    int div = (int)difftime(time(NULL), lastGetWorkingSet);
+    Logger::info("Finished indexing files in " + to_string(div) + " seconds.");
+    gettingWorkingSet = false;
+    joinedWorkingSetThread = false;
 }
 
 void FileClient2::stopHelloThread()
@@ -347,6 +390,11 @@ void FileClient2::onAuthResultMessage(net::ReadMessage *msg)
     {
         sendAckMessage(seqNumber, uploadClient);
         Logger::debug("Acked sequence number in AuthResultMessage: " + to_string(seqNumber));
+    }
+
+    if (getState() != clientAuth)
+    {
+        return;
     }
 
     unsigned char flags = AuthResultMessage::getFlagsFromMessage(msg->buffer);
@@ -516,6 +564,17 @@ void FileClient2::onTimerTick(int identifier)
     switch (state)
     {
     case connected:
+        if (!gettingWorkingSet)
+        {
+            if (!joinedWorkingSetThread)
+            {
+                joinGetWorkingSet();
+            }
+            if (difftime(time(NULL), lastGetWorkingSet) > MAX_WORKING_SET_AGE_IN_SEC)
+            {
+                startGetWorkingSet();
+            }
+        }
         setState(ping);
         break;
 
