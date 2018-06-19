@@ -344,12 +344,14 @@ void FilesystemClient::openFilesystem() {
 			tmp.read(intVar, 4);
 			int crcsize = charToInt(intVar);
 			char* crcValue = new char[4];
+			currPosition += 44;
 			for(int i = 0; i < crcsize; i++) {
 				tmp.read(intVar, 4);
 				int crcN = charToInt(intVar);
 				tmp.read(crcValue, 4);
 				t->crcMap[crcN] = make_shared<array<char, 4>>();
 				strcpy(t->crcMap[crcN].get()->data(), crcValue);
+				currPosition += 8;
 			}
 			this->files[string(FID)] = t;
 			delete[] crcValue;
