@@ -6,6 +6,7 @@
 #include <fstream>
 #include <mutex>
 #include <memory>
+#include <cstring>
 #include "Logger.h"
 #include "Consts.h"
 #include "net/FileCreationMessage.h"
@@ -156,12 +157,16 @@ struct File
     std::unique_ptr<NextPart> np= std::make_unique<NextPart>(NextPart());
     File(std::string name, unsigned int size){
         this->name = name;
-        this->hash = hash;
     }
     File(){}
     File(std::string FID) {
         this->name = FID;
 
+    }
+    File(std::string FID, unsigned int size, char* hash) {
+        this->name = FID;
+        this->size = size;
+        std::strcpy(this->hash.get()->data(), hash);
     }
     void sendCompleteFile() {
         this->np->addHoleFile(this->size%MAX_CONTENT_LENGTH == 0 ? this->size/MAX_CONTENT_LENGTH: (this->size/MAX_CONTENT_LENGTH));
@@ -171,6 +176,9 @@ struct File
     }
     static std::shared_ptr<struct File> genPointer(std::string name) {
         return std::make_shared<struct File>(File(name));
+    }
+    static std::shared_ptr<struct File> genPointer(std::string name, unsigned int size, char* hash){
+        return std::make_shared<struct File>(File(name, size, hash));
     }
 };
 
