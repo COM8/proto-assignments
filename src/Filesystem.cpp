@@ -189,7 +189,11 @@ int FilesystemClient::genMap(string path, unordered_map <string, shared_ptr<File
 						calcSHA256(temp, hash);
 						if (strcmp(this->files[temp]->hash->data(), hash) != 0)
 						{
-							compareFiles(temp, this->files[temp]);
+							if(this->files[temp]->size > filesize(temp)) {
+								this->files[temp]->sendCompleteFile();
+							}else {
+								compareFiles(temp, this->files[temp]);
+							}
 						}
 						delete hash;
 					}
