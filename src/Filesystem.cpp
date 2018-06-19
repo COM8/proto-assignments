@@ -6,7 +6,8 @@ using namespace std;
 
 FilesystemClient::FilesystemClient(string p)
 {
-	path = p;
+	this->path = p;
+	openFilesystem();
 }
 
 bool Filesystem::exists(string path)
@@ -188,7 +189,12 @@ int FilesystemClient::genMap(string path, unordered_map <string, shared_ptr<File
 						calcSHA256(temp, hash);
 						if (strcmp(this->files[temp]->hash->data(), hash) != 0)
 						{
-							compareFiles(temp, this->files[temp]);
+							if(this->files[temp]->size > filesize(temp)) {
+								this->files[temp]->sendCompleteFile();
+								deleteFile->push_back(temp);
+							}else {
+								compareFiles(temp, this->files[temp]);
+							}
 						}
 						delete hash;
 					}
@@ -290,7 +296,7 @@ shared_ptr<File> Filesystem::genFile(string FID)
 	return f;
 }
 
-//toimpl saveFilessytem()
+//totest wasn't checked for functionality
 void FilesystemClient::saveFilesystem() {
 	fstream tmp(this->path + "/.csync.files", fstream::out | fstream::in | fstream::binary | fstream::trunc);
 	if (tmp) {
@@ -320,7 +326,41 @@ void FilesystemClient::saveFilesystem() {
 
 //toimpl implement openFilesystem
 void FilesystemClient::openFilesystem() {
-
+	int size = filesize(this->path + ".csync.files");
+	fstream tmp(this->path + "/.csync.files", fstream::in | fstream::binary);
+	if(tmp) {
+		int currPosition = 0;
+		char *intVar = new char[4];
+		while(currPosition < size) {
+			tmp.read(intVar, 4);
+			int nameLength = charToInt(intVar);
+			char *FID = new char[nameLength];
+			tmp.read(FID, nameLength);
+			tmp.read(intVar,4);
+			int size = charToInt(intVar);
+			char *Hash = new char[32];
+			tmp.read(Hash, 32);
+			shared_ptr<File> t = File::genPointer(string(FID), size, Hash);
+			tmp.read(intVar, 4);
+			int crcsize = charToInt(intVar);
+			char* crcValue = new char[4];
+			for(int i = 0; i < crcsize; i++) {
+				tmp.read(intVar, 4);
+				int crcN = charToInt(intVar);
+				tmp.read(crcValue, 4);
+				t->crcMap[crcN] = make_shared<array<char, 4>>();
+				strcpy(t->crcMap[crcN].get()->data(), crcValue);
+			}
+			this->files[string(FID)] = t;
+			delete[] crcValue;
+			delete[] Hash;
+			delete[] FID;
+		}
+		delete[] intVar;
+		tmp.close();
+	} else {
+		Logger::warn("there is no .csync.files, can't restore previouse state");
+	}
 }
 
 //totest test save and open mechanism

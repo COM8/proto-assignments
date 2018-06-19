@@ -370,3 +370,4 @@ In order to do file sync we check periodically if there were files changed (It's
 
 ## Limitations
 - Currently the protocol is vulnerable to man in the middle attacks because Diffie-Hellman does not check for authenticated server certificates.
+- Currently if a file shirnks, it will be deleted and send again
