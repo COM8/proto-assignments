@@ -507,7 +507,7 @@ void FilesystemServer::saveFileFile()
 
 void FilesystemServer::createPath()
 {
-	system(("mkdir -p " + this->path).c_str());
+	system(("mkdir -p '" + this->path + "'").c_str());
 }
 
 void FilesystemServer::genFolder(string path)
@@ -516,7 +516,7 @@ void FilesystemServer::genFolder(string path)
 	if (this->folders[temp] == 0)
 		this->folders[temp] = true;
 	if (!exists(temp))
-		system(("mkdir -p " + temp).c_str());
+		system(("mkdir -p '" + temp+ "'").c_str());
 }
 
 void FilesystemServer::delFolder(string path)
