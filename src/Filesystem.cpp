@@ -6,7 +6,7 @@ using namespace std;
 
 FilesystemClient::FilesystemClient(string p)
 {
-	this->path = p;
+	this->path = (p.c_str()[p.size()-1] == '/' ? p: (p+'/'));
 	openFilesystem();
 }
 
@@ -171,6 +171,7 @@ int FilesystemClient::genMap(string path, unordered_map <string, shared_ptr<File
 		{
 			if (fs::is_directory(p))
 			{
+				cout << p.path().string() << endl;
 				if (!isInFolders(p.path().string()))
 				{
 					shared_ptr<Folder> f = Folder::genPointer(p.path().string());
@@ -298,7 +299,7 @@ shared_ptr<File> Filesystem::genFile(string FID)
 
 //totest wasn't checked for functionality
 void FilesystemClient::saveFilesystem() {
-	fstream tmp(this->path + "/.csync.files", fstream::out | fstream::in | fstream::binary | fstream::trunc);
+	fstream tmp(this->path + ".csync.files", fstream::out | fstream::in | fstream::binary | fstream::trunc);
 	if (tmp) {
 		for(auto f: this->files) {
 			char *nameLen = intToArray(f.first.length());
@@ -324,10 +325,10 @@ void FilesystemClient::saveFilesystem() {
 	}
 }
 
-//toimpl implement openFilesystem
+//totest implement openFilesystem
 void FilesystemClient::openFilesystem() {
 	int size = filesize(this->path + ".csync.files");
-	fstream tmp(this->path + "/.csync.files", fstream::in | fstream::binary);
+	fstream tmp(this->path + ".csync.files", fstream::in | fstream::binary);
 	if(tmp) {
 		int currPosition = 0;
 		char *intVar = new char[4];
@@ -402,7 +403,7 @@ FilesystemServer::FilesystemServer()
 }
 
 void FilesystemServer::init(string path, ClientsToDo* clientsToDo) {
-	this->path = path;
+	this->path = path.c_str()[path.size()-1] == '/' ? path: path + '/';
 	this->clientsToDo = clientsToDo;
 	if (!exists(path))
 	{
