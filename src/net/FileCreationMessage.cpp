@@ -3,7 +3,7 @@
 using namespace net;
 using namespace std;
 
-FileCreationMessage::FileCreationMessage(unsigned int clientId, unsigned int seqNumber, unsigned char fileType, unsigned char *fileHash, uint64_t fIDLength, unsigned char *fID) : AbstractMessage(FILE_CREATION_MESSAGE_ID << 4)
+FileCreationMessage::FileCreationMessage(unsigned int clientId, unsigned int seqNumber, FileType fileType, unsigned char *fileHash, uint64_t fIDLength, unsigned char *fID) : AbstractMessage(FILE_CREATION_MESSAGE_ID << 4)
 {
 	this->clientId = clientId;
 	this->seqNumber = seqNumber;
@@ -56,9 +56,9 @@ unsigned int FileCreationMessage::getClientIdFromMessage(unsigned char *buffer)
 	return getUnsignedIntFromMessage(buffer, 4);
 }
 
-unsigned char FileCreationMessage::getFileTypeFromMessage(unsigned char *buffer)
+FileType FileCreationMessage::getFileTypeFromMessage(unsigned char *buffer)
 {
-	return buffer[8] & 0xF; // 68 bit offset
+	return static_cast<FileType>(buffer[8] & 0xF); // 68 bit offset
 }
 
 unsigned char *FileCreationMessage::getFileHashFromMessage(unsigned char *buffer)

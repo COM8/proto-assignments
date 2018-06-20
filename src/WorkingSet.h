@@ -20,12 +20,12 @@ struct NextPart{
         this->addPart(partNr);
     }
 
-    bool isempty() {
+    bool isEmpty() {
         return this->content.empty();
     }
 
     unsigned int getNextPart() {
-        if(!this->isempty()){
+        if(!this->isEmpty()){
             return this->content.begin()->first;
         }
         return -1;
@@ -36,7 +36,7 @@ struct NextPart{
         this->content.push_back(std::pair<unsigned int, unsigned int> (0, length));
     }
     void addPart(unsigned int partNr) {
-        if(!this->isempty()){
+        if(!this->isEmpty()){
             for(std::list<std::pair<unsigned int, unsigned int>>::iterator i = content.begin(); i != content.end(); ++i){
                 if(i->first <= partNr && partNr<= i->second) {
                     return;
@@ -101,7 +101,7 @@ struct NextPart{
     }
 
     int acknowledgePart(unsigned int partNr) {
-        if(this->isempty()) {
+        if(this->isEmpty()) {
             return -1;
         }
         std::list<std::pair<unsigned int, unsigned int>>::iterator i = this->content.begin();

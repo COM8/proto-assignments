@@ -23,7 +23,7 @@ void ClientToDo::addToDo(TodoEntry toDo)
     }
     else
     {
-        while (!toDo.np.isempty())
+        while (!toDo.np.isEmpty())
         {
             iter->second.np.addPart(toDo.np.getNextPart());
         }

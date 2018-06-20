@@ -10,6 +10,7 @@ struct TodoEntry
   net::FileType type;
   NextPart np;
   std::string fid;
+  unsigned char *hash;
 };
 
 typedef std::unordered_map<std::string, TodoEntry> ClientToDoMap;

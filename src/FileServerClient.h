@@ -3,6 +3,7 @@
 #include <mutex>
 #include <cstdint>
 #include <time.h>
+#include <string>
 #include "net/Client2.h"
 #include "net/Server2.h"
 #include "Filesystem.h"

@@ -74,7 +74,7 @@ void FileServerClient::onTimerTick(int identifier)
                     msg.sendCount++;
                     msg.sendTime = time(NULL);
                     sendMessageQueue->push(msg);
-                    Logger::info("Resending message.");
+                    Logger::warn("Resending message with type: " + to_string(msg.msg->getType()));
                 }
             }
             delete msgs;
@@ -199,19 +199,36 @@ void FileServerClient::sendNextClientToDo()
 
     switch (toDoHelper.curToDo->type)
     {
-    case ft_folder:
     case ft_del_folder:
-    case ft_del_file:
-        //sendFileCreationMessage(toDoHelper.curToDo->fid, )
         setState(fsc_awaitingAck);
+        sendFolderDeletionMessage(toDoHelper.curToDo->fid, udpClient);
+        break;
+
+    case ft_del_file:
+        setState(fsc_awaitingAck);
+        sendFileDeletionMessage(toDoHelper.curToDo->fid, udpClient);
+        break;
+
+    case ft_folder:
+        setState(fsc_awaitingAck);
+        sendFileCreationMessage(toDoHelper.curToDo->fid, NULL, ft_folder, udpClient);
         break;
 
     case ft_file:
+        setState(fsc_awaitingAck);
         if (toDoHelper.sendCreationMsg)
         {
-            toDoHelper.sendCreationMsg = true;
+            unsigned int np = toDoHelper.curToDo->np.getNextPart();
+            if (toDoHelper.curToDo->np.isEmpty())
+            {
+                toDoHelper.clientToDo->removeToDo(toDoHelper.curToDo->fid);
+            }
         }
-        setState(fsc_awaitingAck);
+        else
+        {
+            toDoHelper.sendCreationMsg = true;
+            sendFileCreationMessage(toDoHelper.curToDo->fid, toDoHelper.curToDo->hash, ft_file, udpClient);
+        }
         break;
 
     case ft_none:

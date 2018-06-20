@@ -165,7 +165,7 @@ void Server2::contRead()
             recvlen = recvfrom(sockFD, buf, BUF_SIZE, 0, (struct sockaddr *)&remAddr, &addrLen);
         } while (getState() == us_started && recvlen <= 0);
 
-        if (recvlen > 0)
+        if (recvlen > 0 && recvlen < BUF_SIZE)
         {
             if (ENABLE_UDP_SERVER_DEBUG_OUTPUT)
             {

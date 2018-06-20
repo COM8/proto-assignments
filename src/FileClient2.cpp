@@ -601,7 +601,7 @@ void FileClient2::onTimerTick(int identifier)
                 msg.sendCount++;
                 msg.sendTime = time(NULL);
                 sendMessageQueue->push(msg);
-                Logger::info("Resending message.");
+                Logger::warn("Resending message with type: " + to_string(msg.msg->getType()));
             }
         }
         delete msgs;

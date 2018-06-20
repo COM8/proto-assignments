@@ -53,46 +53,33 @@ void AbstractClient::sendTransferEndedMessage(unsigned char flags, Client2 *clie
 
 void AbstractClient::sendFolderCreationMessage(shared_ptr<Folder> f, Client2 *client)
 {
-    const char *c = f->path.c_str();
-    uint64_t l = f->path.length();
-    int i = getNextSeqNumber();
-    FileCreationMessage *msg = new FileCreationMessage(clientId, i, 1, NULL, l, (unsigned char *)c);
-
-    client->send(msg);
-    sendMessageQueue->pushSendMessage(i, msg);
+    sendFileCreationMessage(f->path, NULL, ft_folder, client);
     Logger::info("Send folder creation for: \"" + f->path + "\"");
 }
 
 void AbstractClient::sendFolderDeletionMessage(string folderPath, Client2 *client)
 {
-    const char *c = folderPath.c_str();
-    uint64_t l = folderPath.length();
-    int i = getNextSeqNumber();
-    FileCreationMessage *msg = new FileCreationMessage(clientId, i, 2, NULL, l, (unsigned char *)c);
-
-    client->send(msg);
-    sendMessageQueue->pushSendMessage(i, msg);
+    sendFileCreationMessage(folderPath, NULL, ft_del_folder, client);
     Logger::info("Send folder deletion for: \"" + folderPath + "\"");
 }
 
 void AbstractClient::sendFileDeletionMessage(string filePath, Client2 *client)
 {
-    const char *c = filePath.c_str();
-    uint64_t l = filePath.length();
-    int i = getNextSeqNumber();
-    FileCreationMessage *msg = new FileCreationMessage(clientId, i, 8, NULL, l, (unsigned char *)c);
-
-    client->send(msg);
-    sendMessageQueue->pushSendMessage(i, msg);
+    sendFileCreationMessage(filePath, NULL, ft_del_file, client);
     Logger::info("Send file deletion for: \"" + filePath + "\"");
 }
 
 void AbstractClient::sendFileCreationMessage(string fid, unsigned char *hash, Client2 *client)
 {
+    sendFileCreationMessage(fid, hash, ft_file, client);
+}
+
+void AbstractClient::sendFileCreationMessage(string fid, unsigned char *hash, FileType fileType, Client2 *client)
+{
     const char *c = fid.c_str();
     uint64_t l = fid.length();
     unsigned int i = getNextSeqNumber();
-    FileCreationMessage *msg = new FileCreationMessage(clientId, i, 4, hash, l, (unsigned char *)c);
+    FileCreationMessage *msg = new FileCreationMessage(clientId, i, fileType, hash, l, (unsigned char *)c);
 
     client->send(msg);
     sendMessageQueue->pushSendMessage(i, msg);
