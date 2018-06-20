@@ -4,19 +4,15 @@ namespace fs = std::experimental::filesystem;
 
 using namespace std;
 
-FilesystemClient::FilesystemClient(string p)
-{
+FilesystemClient::FilesystemClient(string p) {
 	this->path = (p.c_str()[p.size()-1] == '/' ? p: (p+'/'));
 	openFilesystem();
 }
-
-bool Filesystem::exists(string path)
-{
+bool Filesystem::exists(string path) {
 	return fs::exists(path);
 }
 
-int FilesystemClient::genMap()
-{
+int FilesystemClient::genMap() {
 	return genMap(this->path);
 }
 
@@ -24,14 +20,12 @@ void Filesystem::calcSHA256(const string FID, shared_ptr<array<char,32>> buffer)
 	calcSHA256(FID, buffer.get()->data());
 	}
 
-void Filesystem::calcSHA256(const string FID, char* buffer)
-{
+void Filesystem::calcSHA256(const string FID, char* buffer) {
 	Logger::debug("Caluclating md5 of "+ FID);
 	MD5 m = MD5();
 	int length = (int) Filesystem::filesize(FID);
 	ifstream file(FID, ifstream::binary);
-	if (file)
-	{
+	if (file) {
 		file.seekg(0, file.beg);
 		char *b = new char[MAX_HASH_PART_SIZE_BYTE];
 		int curPart = 0;
@@ -45,29 +39,23 @@ void Filesystem::calcSHA256(const string FID, char* buffer)
 		file.close();
 		delete[] b;
 		strcpy(buffer, m.getHash().c_str());
-	}
-	else
-	{
+	}else {
 		cerr << "error opening " << FID << "for hashing using empty hash" << endl;
-		for (int i = 0; i < 32; i++)
-		{
+		for (int i = 0; i < 32; i++) {
 			buffer[i] = '\0';
 		}
 	}
 }
 
-char *Filesystem::intToArray(unsigned int i)
-{
+char *Filesystem::intToArray(unsigned int i) {
 	char *ret = new char[4];
-	for (int e = 0; e < 4; e++)
-	{
+	for (int e = 0; e < 4; e++) {
 		ret[3 - e] = (i >> (e * 8));
 	}
 	return ret;
 }
 
-unsigned int Filesystem::charToInt(char *buffer)
-{
+unsigned int Filesystem::charToInt(char *buffer) {
 	return static_cast<int>(buffer[0]) << 24 | buffer[1] << 16 | buffer[2] << 8 | buffer[3];
 }
 
@@ -77,8 +65,7 @@ void Filesystem::calcCRC32(char* in, char* out) {
 	return;
 }
 
-long unsigned int Filesystem::filesize(const string FID)
-{
+long unsigned int Filesystem::filesize(const string FID) {
 	ifstream file(FID, ifstream::ate | ifstream::binary);
 	long unsigned int ret = file.tellg();
 	file.close();
@@ -108,7 +95,7 @@ void FilesystemClient::compareFiles(string FID, shared_ptr<File> f) {
 			f->crcMap[i] = t;
 		}
 		i++;
-		}
+	}
 	delete[] buffer;
 	delete n;
 }
@@ -116,7 +103,7 @@ void FilesystemClient::compareFiles(string FID, shared_ptr<File> f) {
 int FilesystemClient::writeFilePart(std::string FID, char* buffer, unsigned int partNr, unsigned int length) {
 	if(this->files[FID]) {
 		this->files[FID] = File::genPointer(FID);
-		}
+	}
 	fstream tmp((this->path + FID), fstream::out |fstream::in | fstream::binary);
 	if(tmp) {
 		tmp.seekg(partNr * partLength, tmp.beg);
@@ -125,37 +112,30 @@ int FilesystemClient::writeFilePart(std::string FID, char* buffer, unsigned int 
 		this->files[FID]->size = filesize(FID);
 		calcSHA256(FID, this->files[FID]->hash);
 		return partNr;
-	}
-	else{
+	}else {
 		return -1;
 	}
 }
 
-WorkingSet *FilesystemClient::getWorkingSet()
-{
+WorkingSet *FilesystemClient::getWorkingSet() {
 	unordered_map<string, shared_ptr<File>> files;
 	list<string> deleteFolder;
 	list<string> deleteFile;
 	list<shared_ptr<Folder>> folders;
 	genMap(this->path, &files, &folders, &deleteFile, &deleteFolder);
-	if (!files.empty() || !folders.empty())
-	{
+	if (!files.empty() || !folders.empty()) {
 		shared_ptr<Folder> f = Folder::genPointer(path);
 		this->folders.push_back(f);
 		folders.push_back(f);
 	}
-
 	for(_List_iterator<shared_ptr<Folder> > i = this->folders.begin(); i != this->folders.end(); ++i) {
 		if(!Filesystem::exists(i->get()->path)) {
 			deleteFolder.push_back(i->get()->path);
 			this->folders.erase(i++);
 		}
 	}
-
-	for (const auto f : this->files)
-	{
-		if (!Filesystem::exists(f.first))
-		{
+	for (const auto f : this->files) {
+		if (!Filesystem::exists(f.first)) {
 			deleteFile.push_back(f.first);
 			this->files.erase(f.first);
 		}
@@ -163,29 +143,20 @@ WorkingSet *FilesystemClient::getWorkingSet()
 	return new WorkingSet(files, folders, deleteFile, deleteFolder);
 }
 
-int FilesystemClient::genMap(string path, unordered_map <string, shared_ptr<File>> *files, list<shared_ptr<Folder>> *folders, list<string> *deleteFile, list<string> *deleteFolder)
-{
-	if (Filesystem::exists(path))
-	{
-		for (auto &p : fs::recursive_directory_iterator(path))
-		{
-			if (fs::is_directory(p))
-			{
+int FilesystemClient::genMap(string path, unordered_map <string, shared_ptr<File>> *files, list<shared_ptr<Folder>> *folders, list<string> *deleteFile, list<string> *deleteFolder) {
+	if (Filesystem::exists(path)) {
+		for (auto &p : fs::recursive_directory_iterator(path)) {
+			if (fs::is_directory(p)) {
 				shared_ptr<Folder> f = Folder::genPointer(p.path().string());
 				folders->push_back(f);
 				this->folders.push_back(f);
-				//genMap(p.path().string(), files, folders, deleteFile, deleteFolder);
-			}
-			else
-			{
+			} else {
 				string temp = p.path().string();
 				if(temp.compare(".csync.files")) {
-					if (!this->files[temp] == 0)
-					{
+					if (!this->files[temp] == 0) {
 						char *hash = new char[32];
 						calcSHA256(temp, hash);
-						if (strcmp(this->files[temp]->hash->data(), hash) != 0)
-						{
+						if (strcmp(this->files[temp]->hash->data(), hash) != 0) {
 							if(this->files[temp]->size > filesize(temp)) {
 								this->files[temp]->sendCompleteFile();
 								deleteFile->push_back(temp);
@@ -194,9 +165,7 @@ int FilesystemClient::genMap(string path, unordered_map <string, shared_ptr<File
 							}
 						}
 						delete hash;
-					}
-					else
-					{
+					}else {
 						shared_ptr<File> f = genFile(temp);
 						f->sendCompleteFile();
 						this->files[temp] = f;
@@ -210,33 +179,24 @@ int FilesystemClient::genMap(string path, unordered_map <string, shared_ptr<File
 	return 0;
 }
 
-bool FilesystemClient::isInFolders(string path)
-{
-	for (const auto f : this->folders)
-	{
-		if (path.compare(f->path))
-		{
+bool FilesystemClient::isInFolders(string path) {
+	for (const auto f : this->folders) {
+		if (path.compare(f->path)) {
 			return true;
 		}
 	}
 	return false;
 }
 
-int FilesystemClient::readFile(string FID, char *buffer, unsigned int partNr, bool *isLastPart)
-{
-	if (!(this->files[FID] == 0))
-	{
-		if (!this->files[FID]->isOpen)
-		{
+int FilesystemClient::readFile(string FID, char *buffer, unsigned int partNr, bool *isLastPart) {
+	if (!(this->files[FID] == 0)) {
+		if (!this->files[FID]->isOpen) {
 			this->files[FID]->fd = ifstream(FID, ifstream::ate | ifstream::binary);
-			if (!this->files[FID]->fd)
-			{
+			if (!this->files[FID]->fd) {
 				this->files.erase(FID);
 				cerr << "Error FID: " << FID << " is missing removing it" << endl;
 				return -2;
-			}
-			else
-			{
+			}else {
 				this->files[FID]->isOpen = true;
 			}
 		}
@@ -244,37 +204,25 @@ int FilesystemClient::readFile(string FID, char *buffer, unsigned int partNr, bo
 		int retLength = (this->files[FID]->size > (partLength * (partNr + 1))) ? partLength : this->files[FID]->size - partLength * partNr;
 		retLength = retLength < 0 ? 0 : retLength;
 		this->files[FID]->fd.read(buffer, retLength);
-		if (partNr == ((this->files[FID]->size / partLength) + (this->files[FID]->size % partLength == 0 ? -1 : 0)))
-		{
+		if (partNr == ((this->files[FID]->size / partLength) + (this->files[FID]->size % partLength == 0 ? -1 : 0))) {
 			this->files[FID]->fd.close();
 			this->files[FID]->isOpen = false;
 			*isLastPart = true;
-		}
-		else
-		{
+		}else {
 			*isLastPart = false;
 		}
 		return retLength;
-	}
-	else
-	{
+	}else {
 		return -2;
 	}
 }
 
-int FilesystemClient::genMap(string path)
-{
-	if (Filesystem::exists(path))
-	{
-		for (auto const &p : fs::recursive_directory_iterator(path))
-		{
-			if (fs::is_directory(p))
-			{
+int FilesystemClient::genMap(string path) {
+	if (Filesystem::exists(path)) {
+		for (auto const &p : fs::recursive_directory_iterator(path)) {
+			if (fs::is_directory(p)) {
 				this->folders.push_back(Folder::genPointer(p.path().string()));
-				//genMap(p.path().string());
-			}
-			else
-			{
+			}else {
 				string temp = p.path().string();
 				this->files[temp] = genFile(temp);
 			}
@@ -285,8 +233,7 @@ int FilesystemClient::genMap(string path)
 }
 
 
-shared_ptr<File> Filesystem::genFile(string FID)
-{
+shared_ptr<File> Filesystem::genFile(string FID) {
 	shared_ptr<File> f= File::genPointer(FID);
 	f->size = filesize(FID);
 	calcSHA256(FID, f->hash);
@@ -315,7 +262,7 @@ void FilesystemClient::saveFilesystem() {
 			delete[] crcsize;
 		}
 		tmp.close();
-	} else {
+	}else {
 		Logger::error("can't open Filesystem file");
 	}
 }
@@ -358,13 +305,12 @@ void FilesystemClient::openFilesystem() {
 		}
 		delete[] intVar;
 		tmp.close();
-	} else {
+	}else {
 		Logger::warn("there is no .csync.files, can't restore previouse state");
 	}
 }
 
-void FilesystemClient::close()
-{
+void FilesystemClient::close() {
 	for (auto const &ent1 : this->files)
 	{
 		shared_ptr<File> t = ent1.second;
@@ -373,64 +319,50 @@ void FilesystemClient::close()
 	saveFilesystem();
 }
 
-string FilesystemClient::filesToString()
-{
+string FilesystemClient::filesToString() {
 	string temp = "";
-	for (auto const &ent1 : this->files)
-	{
+	for (auto const &ent1 : this->files) {	
 		shared_ptr<File> t = ent1.second;
 		temp = temp + ent1.first + ": " + to_string(t->size) + " Bytes" + " Hash: " + string(t->hash.get()->data())+ "\n";
 	}
 	return temp;
 }
 
-string FilesystemClient::foldersToString()
-{
+string FilesystemClient::foldersToString() {
 	string temp = "";
-	for (auto const &ent1 : this->folders)
-	{
+	for (auto const &ent1 : this->folders) {
 		temp = temp + ent1->path + "\n";
 	}
 	return temp;
 }
 
-FilesystemServer::FilesystemServer()
-{
+FilesystemServer::FilesystemServer() {
 }
 
 void FilesystemServer::init(string path, ClientsToDo* clientsToDo) {
 	this->path = path.c_str()[path.size()-1] == '/' ? path: path + '/';
 	this->clientsToDo = clientsToDo;
-	if (!exists(path))
-	{
+	if (!exists(path)) {
 		createPath();
 	}
-	if (!exists(path + ".csync.folders"))
-	{
+	if (!exists(path + ".csync.folders")) {
 		genFile(".csync.folders", new char[32]);
-	}
-	else
-	{
+	}else {
 		readFolderFile();
 	}
-	if (!exists(path + ".csync.files"))
-	{
+	if (!exists(path + ".csync.files")) {
 		genFile(".csync.files", new char[32]);
-	}
-	else
-	{
+	}else {
 		readFileFile();
 	}
 	clearDirecotry();
 }
 
-void FilesystemServer::readFileFile()
-{
+void FilesystemServer::readFileFile() {
 	int size = filesize(this->path + ".csync.files");
 	fstream tmp((this->path + ".csync.files"), fstream::in | fstream::binary);
 	int currPosition = 0;
-	while (currPosition < size)
-	{
+	while (currPosition < size) {
 		char *length = new char[4];
 		tmp.read(length, 4);
 		int l = charToInt(length);
@@ -447,13 +379,11 @@ void FilesystemServer::readFileFile()
 	tmp.close();
 }
 
-void FilesystemServer::readFolderFile()
-{
+void FilesystemServer::readFolderFile() {
 	fstream tmp((this->path + ".csync.folders"), fstream::out | fstream::in | fstream::binary);
 	int size = tmp.tellg();
 	int currPosition = 0;
-	while (currPosition < size)
-	{
+	while (currPosition < size) {
 		char *length = new char[4];
 		tmp.read(length, 4);
 		int l = charToInt(length);
@@ -467,11 +397,9 @@ void FilesystemServer::readFolderFile()
 	tmp.close();
 }
 
-void FilesystemServer::saveFolderFile()
-{
+void FilesystemServer::saveFolderFile() {
 	fstream tmp((this->path + ".csync.folders"), fstream::out | fstream::in | fstream::binary | fstream::trunc);
-	for (auto const &ent1 : this->folders)
-	{
+	for (auto const &ent1 : this->folders) {
 		tmp.write(intToArray(ent1.first.length()), 4);
 		tmp.write(ent1.first.c_str(), ent1.first.length());
 	}
@@ -479,11 +407,9 @@ void FilesystemServer::saveFolderFile()
 }
 
 //totest fixed memleak
-void FilesystemServer::saveFileFile()
-{
+void FilesystemServer::saveFileFile() {
 	fstream tmp((this->path + ".csync.files"), fstream::out | fstream::in | fstream::binary | fstream::trunc);
-	for (auto const &ent1 : this->files)
-	{
+	for (auto const &ent1 : this->files) {
 		if(!(ent1.first.compare(this->path+".csync.files") || ent1.first.compare(this->path+".csync.folders"))) {
 			char *fidLen = intToArray(ent1.first.length());
 			tmp.write(fidLen, 4);
@@ -493,31 +419,28 @@ void FilesystemServer::saveFileFile()
 			tmp.write(lPart, 4);
 			delete[] lPart;
 			tmp.write(ent1.second.get()->hash->data(), 32);
-		}
-		else {
+		}else {
 		}
 	}
 	tmp.close();
 }
 
 
-void FilesystemServer::createPath()
-{
+void FilesystemServer::createPath() {
 	system(("mkdir -p '" + this->path + "'").c_str());
 }
 
-void FilesystemServer::genFolder(string path, unsigned int clientID)
-{
-	if (this->folders[path] == 0)
-		this->folders[path] = true;
+void FilesystemServer::genFolder(string path, unsigned int clientID) {
+	if (this->folders[path] == 0){
+			this->folders[path] = true;
+		}
 		system(("mkdir -p '" + this->path + path + "'").c_str());
 		TodoEntry t = TodoEntry();
 		t.createFolder(path);
 		this->clientsToDo->addToDoForAllExcept(t, clientID);
 }
 
-void FilesystemServer::delFolder(string path, unsigned int clientID)
-{
+void FilesystemServer::delFolder(string path, unsigned int clientID) {
 	string temp = this->path + path;
 	this->folders.erase(temp);
 	folderClean(temp);
@@ -526,13 +449,11 @@ void FilesystemServer::delFolder(string path, unsigned int clientID)
 	this->clientsToDo->addToDoForAllExcept(t, clientID);
 }
 
-void FilesystemServer::folderClean(string folder)
-{
+void FilesystemServer::folderClean(string folder) {
 	system(("rm " + this->path + path + " -r -f").c_str());
 }
 
-void FilesystemServer::delFile(string FID, unsigned int clientID)
-{
+void FilesystemServer::delFile(string FID, unsigned int clientID) {
 	string temp = this->path + FID;
 	this->files.erase(temp);
 	fileClean(temp);
@@ -541,15 +462,13 @@ void FilesystemServer::delFile(string FID, unsigned int clientID)
 	this->clientsToDo->addToDoForAllExcept(t, clientID);
 }
 
-void FilesystemServer::fileClean(string file)
-{
+void FilesystemServer::fileClean(string file) {
 	system(("rm '" + file + "' -f").c_str());
 }
 
-void FilesystemServer::genFile(string FID, char *hash)
-{
-	if (this->files[FID] == 0)
-	{
+//totry switch back to old method
+void FilesystemServer::genFile(string FID, char *hash) {
+	if (this->files[FID] == 0) {
 		this->files[FID] = ServerFile::genPointer(hash, 0);
 	}
 	system (("touch '" + (this->path + FID) + "'").c_str());
@@ -557,59 +476,43 @@ void FilesystemServer::genFile(string FID, char *hash)
 	//tmp.close();
 }
 
-void FilesystemServer::clearDirecotry()
-{
-	if (Filesystem::exists(path))
-	{
-		for (auto const &p : fs::directory_iterator(path))
-		{
-			if (fs::is_directory(p))
-			{
-				if (this->folders[p.path().string()] == 0)
-				{
+void FilesystemServer::clearDirecotry() {
+	if (Filesystem::exists(path)) {
+		for (auto const &p : fs::directory_iterator(path)) {
+			if (fs::is_directory(p)) {
+				if (this->folders[p.path().string()] == 0) {
 					folderClean(p.path().string());
 				}
-			}
-			else
-			{
-				if (this->files[p.path().string()] == 0)
-				{
+			}else {
+				if (this->files[p.path().string()] == 0) {
 					fileClean(p.path().string());
 				}
 			}
 		}
-	}
-	else
-	{
+	}else {
 		createPath();
 	}
 }
 
-int FilesystemServer::writeFilePart(string FID, char *buffer, unsigned int partNr, unsigned int length, unsigned int clientID)
-{
-	if (!exists(this->path + FID))
-	{
+int FilesystemServer::writeFilePart(string FID, char *buffer, unsigned int partNr, unsigned int length, unsigned int clientID) {
+	if (!exists(this->path + FID)) {
 		cerr << "File: " << FID << " is unknown by the System, but it will be created with some hash" << endl;
 		genFile(FID, new char[32]);
 	}
 	fstream tmp((this->path + FID), fstream::out | fstream::in | fstream::binary);
-	if (tmp)
-	{
+	if (tmp) {
 		tmp.seekp(partNr * partLength, tmp.beg);
 		tmp.write(buffer, length > partLength ? partLength : length);
 		tmp.close();
 		unsigned int last_part = this->files[FID].get()->last_part;
-		if (last_part + 1 == partNr)
-		{
+		if (last_part + 1 == partNr) {
 			this->files[FID].get()->last_part = last_part + 1;
 		}
 		TodoEntry t = TodoEntry();
 		t.transFile(FID, partNr, (unsigned char*) this->files[FID]->hash.get()->data());
 		this->clientsToDo->addToDoForAllExcept(t, clientID);
 		return 0;
-	}
-	else
-	{
+	}else {
 		return -1;
 	}
 }
@@ -625,7 +528,6 @@ int FilesystemServer::readFile(string FID, char* buffer, unsigned int partNr) {
 		}
 	}else {
 		if(exists(this->path + FID)) {
-
 		}else {
 			Logger::error(FID+ " is unknown by the Server");
 			return -2;
@@ -645,20 +547,15 @@ int FilesystemServer::readFile(string FID, char* buffer, unsigned int partNr) {
 	}
 }
 
-unsigned int FilesystemServer::getLastPart(string FID)
-{
-	if (this->files[FID] == 0)
-	{
+unsigned int FilesystemServer::getLastPart(string FID) {
+	if (this->files[FID] == 0) {
 		return 0;
-	}
-	else
-	{
+	}else {
 		return this->files[FID].get()->last_part;
 	}
 }
 
-void FilesystemServer::close()
-{
+void FilesystemServer::close() {
 	saveFolderFile();
 	saveFileFile();
 }
