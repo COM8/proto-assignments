@@ -353,6 +353,9 @@ void FilesystemClient::openFilesystem() {
 				t->crcMap[crcN] = make_shared<array<char, 4>>();
 				strcpy(t->crcMap[crcN].get()->data(), crcValue);
 				currPosition += 8;
+				if(currPosition >= size) {
+					break;
+				}
 			}
 			this->files[string(FID)] = t;
 			delete[] crcValue;
