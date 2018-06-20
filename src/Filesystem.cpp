@@ -293,7 +293,6 @@ shared_ptr<File> Filesystem::genFile(string FID)
 	return f;
 }
 
-//totest wasn't checked for functionality
 void FilesystemClient::saveFilesystem() {
 	fstream tmp(this->path + ".csync.files", fstream::out | fstream::in | fstream::binary | fstream::trunc);
 	if (tmp) {
@@ -321,7 +320,6 @@ void FilesystemClient::saveFilesystem() {
 	}
 }
 
-//totest implement openFilesystem
 void FilesystemClient::openFilesystem() {
 	int size = filesize(this->path + ".csync.files");
 	fstream tmp(this->path + ".csync.files", fstream::in | fstream::binary);
@@ -365,7 +363,6 @@ void FilesystemClient::openFilesystem() {
 	}
 }
 
-//totest test save and open mechanism
 void FilesystemClient::close()
 {
 	for (auto const &ent1 : this->files)
@@ -481,17 +478,20 @@ void FilesystemServer::saveFolderFile()
 	tmp.close();
 }
 
-//todo fix memleak
+//totest fixed memleak
 void FilesystemServer::saveFileFile()
 {
 	fstream tmp((this->path + ".csync.files"), fstream::out | fstream::in | fstream::binary | fstream::trunc);
 	for (auto const &ent1 : this->files)
 	{
 		if(!(ent1.first.compare(this->path+".csync.files") || ent1.first.compare(this->path+".csync.folders"))) {
-			tmp.write(intToArray(ent1.first.length()), 4);
+			char *fidLen = intToArray(ent1.first.length());
+			tmp.write(fidLen, 4);
+			delete[] fidLen;
 			tmp.write(ent1.first.c_str(), ent1.first.length());
-			unsigned int last_part = ent1.second->last_part;
-			tmp.write(intToArray(last_part), 4);
+			char *lPart = intToArray(ent1.second->last_part);
+			tmp.write(lPart, 4);
+			delete[] lPart;
 			tmp.write(ent1.second.get()->hash->data(), 32);
 		}
 		else {
