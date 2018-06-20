@@ -540,17 +540,18 @@ void FilesystemServer::delFile(string FID)
 
 void FilesystemServer::fileClean(string file)
 {
-	system(("rm " + file + " -f").c_str());
+	system(("rm '" + file + "' -f").c_str());
 }
 
 void FilesystemServer::genFile(string FID, char *hash)
 {
-	if (this->files[(this->path + FID)] == 0)
+	if (this->files[FID] == 0)
 	{
-		this->files[(this->path + FID)] = ServerFile::genPointer(hash, 0);
+		this->files[FID] = ServerFile::genPointer(hash, 0);
 	}
-	fstream tmp((this->path + FID), fstream::out);
-	tmp.close();
+	system (("touch '" + (this->path + FID) + "'").c_str());
+	//fstream tmp((this->path + FID), fstream::out);
+	//tmp.close();
 }
 
 void FilesystemServer::clearDirecotry()
