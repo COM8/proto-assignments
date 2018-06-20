@@ -111,9 +111,9 @@ public:
     FilesystemServer();
     void init(std::string path, ClientsToDo* clientsToDo);
     void genFile(std::string FID, char* hash);
-    void genFolder(std::string path);
-    void delFolder(std::string path);
-    void delFile(std::string FID);
+    void genFolder(std::string path, unsigned int clientID);
+    void delFolder(std::string path, unsigned int clientID);
+    void delFile(std::string FID, unsigned int clientID);
     unsigned int getLastPart(std::string FID);
     int writeFilePart(std::string FID, char* buffer, unsigned int partNr, unsigned int length, unsigned int clientID);
     void clearDirecotry();

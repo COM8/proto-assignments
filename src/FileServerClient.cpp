@@ -395,12 +395,12 @@ void FileServerClient::onFileCreationMessage(net::ReadMessage *msg)
     switch (fileType)
     {
     case 1:
-        user->fS->genFolder(fidString);
+        user->fS->genFolder(fidString, clientId);
         Logger::debug("Folder \"" + fidString + "\" generated.");
         break;
 
     case 2:
-        user->fS->delFolder(fidString);
+        user->fS->delFolder(fidString, clientId);
         break;
 
     case 4:
@@ -412,7 +412,7 @@ void FileServerClient::onFileCreationMessage(net::ReadMessage *msg)
         break;
 
     case 8:
-        user->fS->delFile(fidString);
+        user->fS->delFile(fidString, clientId);
         break;
 
     default:

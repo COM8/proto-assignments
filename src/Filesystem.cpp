@@ -506,18 +506,24 @@ void FilesystemServer::createPath()
 	system(("mkdir -p '" + this->path + "'").c_str());
 }
 
-void FilesystemServer::genFolder(string path)
+void FilesystemServer::genFolder(string path, unsigned int clientID)
 {
 	if (this->folders[path] == 0)
 		this->folders[path] = true;
 		system(("mkdir -p '" + this->path + path + "'").c_str());
+		TodoEntry t = TodoEntry();
+		t.createFolder(path);
+		this->clientsToDo->addToDoForAllExcept(t, clientID);
 }
 
-void FilesystemServer::delFolder(string path)
+void FilesystemServer::delFolder(string path, unsigned int clientID)
 {
 	string temp = this->path + path;
 	this->folders.erase(temp);
 	folderClean(temp);
+	TodoEntry t = TodoEntry();
+	t.delFolder(path);
+	this->clientsToDo->addToDoForAllExcept(t, clientID);
 }
 
 void FilesystemServer::folderClean(string folder)
@@ -525,11 +531,14 @@ void FilesystemServer::folderClean(string folder)
 	system(("rm " + this->path + path + " -r -f").c_str());
 }
 
-void FilesystemServer::delFile(string FID)
+void FilesystemServer::delFile(string FID, unsigned int clientID)
 {
 	string temp = this->path + FID;
 	this->files.erase(temp);
 	fileClean(temp);
+	TodoEntry t = TodoEntry();
+	t.delFile(FID);
+	this->clientsToDo->addToDoForAllExcept(t, clientID);
 }
 
 void FilesystemServer::fileClean(string file)
