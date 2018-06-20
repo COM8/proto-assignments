@@ -5,7 +5,7 @@ namespace fs = std::experimental::filesystem;
 using namespace std;
 
 FilesystemClient::FilesystemClient(string p) {
-	this->path = (p.c_str()[p.size()-1] == '/' ? p: (p+'/'));
+	this->path = (p.c_str()[p.size()-1] == '/' ? p : (p + '/'));
 	openFilesystem();
 }
 bool Filesystem::exists(string path) {
@@ -29,7 +29,7 @@ void Filesystem::calcSHA256(const string FID, char* buffer) {
 		file.seekg(0, file.beg);
 		char *b = new char[MAX_HASH_PART_SIZE_BYTE];
 		int curPart = 0;
-		while(length >= (curPart+1)*MAX_HASH_PART_SIZE_BYTE) {
+		while (length >= (curPart+1)*MAX_HASH_PART_SIZE_BYTE) {
 			file.seekg(curPart++*MAX_HASH_PART_SIZE_BYTE, file.beg);
 			file.read(b, MAX_HASH_PART_SIZE_BYTE);
 			m.add(b,MAX_HASH_PART_SIZE_BYTE);
@@ -77,10 +77,10 @@ void FilesystemClient::compareFiles(string FID, shared_ptr<File> f) {
 	char *buffer = new char[partLength];
 	char *tmpcrc = new char[4];
 	bool *n = new bool;
-	while(readFile(FID, buffer, i,n)!=0){
+	while (readFile(FID, buffer, i,n) != 0){
 		calcCRC32(buffer, tmpcrc);
-		if(!f->crcMap[i]) {
-			if(strcmp(tmpcrc, f->crcMap[i].get()->data())!= 0) {
+		if (!f->crcMap[i]) {
+			if (strcmp(tmpcrc, f->crcMap[i].get()->data())!= 0) {
 				Logger::debug("Found File Delta: " + FID + ": " + to_string(i));
 				f->np->addPart(i);
 				shared_ptr<array<char,4>> t = make_shared<array<char,4>>();
@@ -101,11 +101,11 @@ void FilesystemClient::compareFiles(string FID, shared_ptr<File> f) {
 }
 
 int FilesystemClient::writeFilePart(std::string FID, char* buffer, unsigned int partNr, unsigned int length) {
-	if(this->files[FID]) {
+	if (this->files[FID]) {
 		this->files[FID] = File::genPointer(FID);
 	}
 	fstream tmp((this->path + FID), fstream::out |fstream::in | fstream::binary);
-	if(tmp) {
+	if (tmp) {
 		tmp.seekg(partNr * partLength, tmp.beg);
 		tmp.write(buffer, length > partLength ? partLength : length);
 		tmp.close();
@@ -128,8 +128,8 @@ WorkingSet *FilesystemClient::getWorkingSet() {
 		this->folders.push_back(f);
 		folders.push_back(f);
 	}
-	for(_List_iterator<shared_ptr<Folder> > i = this->folders.begin(); i != this->folders.end(); ++i) {
-		if(!Filesystem::exists(i->get()->path)) {
+	for (_List_iterator<shared_ptr<Folder> > i = this->folders.begin(); i != this->folders.end(); ++i) {
+		if (!Filesystem::exists(i->get()->path)) {
 			deleteFolder.push_back(i->get()->path);
 			this->folders.erase(i++);
 		}
@@ -152,12 +152,12 @@ int FilesystemClient::genMap(string path, unordered_map <string, shared_ptr<File
 				this->folders.push_back(f);
 			} else {
 				string temp = p.path().string();
-				if(temp.compare(".csync.files")) {
+				if (temp.compare(".csync.files")) {
 					if (!this->files[temp] == 0) {
 						char *hash = new char[32];
 						calcSHA256(temp, hash);
 						if (strcmp(this->files[temp]->hash->data(), hash) != 0) {
-							if(this->files[temp]->size > filesize(temp)) {
+							if (this->files[temp]->size > filesize(temp)) {
 								this->files[temp]->sendCompleteFile();
 								deleteFile->push_back(temp);
 							}else {
@@ -243,7 +243,7 @@ shared_ptr<File> Filesystem::genFile(string FID) {
 void FilesystemClient::saveFilesystem() {
 	fstream tmp(this->path + ".csync.files", fstream::out | fstream::in | fstream::binary | fstream::trunc);
 	if (tmp) {
-		for(auto f: this->files) {
+		for (auto f: this->files) {
 			char *nameLen = intToArray(f.first.length());
 			tmp.write(nameLen, 4);
 			tmp.write(f.first.c_str(), f.first.length());
@@ -251,7 +251,7 @@ void FilesystemClient::saveFilesystem() {
 			tmp.write(size, 4);
 			tmp.write(f.second->hash.get()->data(), 32);
 			char *crcsize = intToArray(f.second->crcMap.size());
-			for(auto d : f.second->crcMap) {
+			for (auto d : f.second->crcMap) {
 				char* crcNumber = intToArray(d.first);
 				tmp.write(crcNumber, 4);
 				tmp.write(d.second.get()->data(), 4);
@@ -270,7 +270,7 @@ void FilesystemClient::saveFilesystem() {
 void FilesystemClient::openFilesystem() {
 	int size = filesize(this->path + ".csync.files");
 	fstream tmp(this->path + ".csync.files", fstream::in | fstream::binary);
-	if(tmp) {
+	if (tmp) {
 		int currPosition = 0;
 		char *intVar = new char[4];
 		while(currPosition < size) {
@@ -287,14 +287,14 @@ void FilesystemClient::openFilesystem() {
 			int crcsize = charToInt(intVar);
 			char* crcValue = new char[4];
 			currPosition += 44;
-			for(int i = 0; i < crcsize; i++) {
+			for (int i = 0; i < crcsize; i++) {
 				tmp.read(intVar, 4);
 				int crcN = charToInt(intVar);
 				tmp.read(crcValue, 4);
 				t->crcMap[crcN] = make_shared<array<char, 4>>();
 				strcpy(t->crcMap[crcN].get()->data(), crcValue);
 				currPosition += 8;
-				if(currPosition >= size) {
+				if (currPosition >= size) {
 					break;
 				}
 			}
@@ -311,8 +311,7 @@ void FilesystemClient::openFilesystem() {
 }
 
 void FilesystemClient::close() {
-	for (auto const &ent1 : this->files)
-	{
+	for (auto const &ent1 : this->files) {
 		shared_ptr<File> t = ent1.second;
 		t->fd.close();
 	}
@@ -410,7 +409,7 @@ void FilesystemServer::saveFolderFile() {
 void FilesystemServer::saveFileFile() {
 	fstream tmp((this->path + ".csync.files"), fstream::out | fstream::in | fstream::binary | fstream::trunc);
 	for (auto const &ent1 : this->files) {
-		if(!(ent1.first.compare(this->path+".csync.files") || ent1.first.compare(this->path+".csync.folders"))) {
+		if (!(ent1.first.compare(this->path+".csync.files") || ent1.first.compare(this->path+".csync.folders"))) {
 			char *fidLen = intToArray(ent1.first.length());
 			tmp.write(fidLen, 4);
 			delete[] fidLen;
@@ -518,8 +517,8 @@ int FilesystemServer::writeFilePart(string FID, char *buffer, unsigned int partN
 }
 
 int FilesystemServer::readFile(string FID, char* buffer, unsigned int partNr) {
-	if(this->files[FID]) {
-		if(exists(this->path + FID)) {
+	if (this->files[FID]) {
+		if (exists(this->path + FID)) {
 			Logger::warn("adding unkonwn File to the Filesystem");
 			this->files[FID] = ServerFile::genPointer(0);
 		}else {
@@ -527,14 +526,14 @@ int FilesystemServer::readFile(string FID, char* buffer, unsigned int partNr) {
 			return -2;
 		}
 	}else {
-		if(exists(this->path + FID)) {
+		if (exists(this->path + FID)) {
 		}else {
 			Logger::error(FID+ " is unknown by the Server");
 			return -2;
 		}
 	}
 	ifstream tmp = ifstream(this->path + FID, ifstream::ate | ifstream::binary);
-	if(!tmp) {
+	if (!tmp) {
 		Logger::error("Error opening " + FID);
 		return -1;
 	}else {
