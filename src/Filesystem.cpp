@@ -171,7 +171,6 @@ int FilesystemClient::genMap(string path, unordered_map <string, shared_ptr<File
 		{
 			if (fs::is_directory(p))
 			{
-				cout << p.path().string() << endl;
 				if (!isInFolders(p.path().string()))
 				{
 					shared_ptr<Folder> f = Folder::genPointer(p.path().string());
@@ -512,11 +511,10 @@ void FilesystemServer::createPath()
 
 void FilesystemServer::genFolder(string path)
 {
-	string temp = this->path + path;
-	if (this->folders[temp] == 0)
-		this->folders[temp] = true;
-	if (!exists(temp))
-		system(("mkdir -p '" + temp+ "'").c_str());
+	if (this->folders[path] == 0)
+		this->folders[path] = true;
+	if (!exists(this->path + path))
+		cout << system(("mkdir -p '" + this->path + path + "'").c_str()) << endl;
 }
 
 void FilesystemServer::delFolder(string path)
@@ -595,10 +593,10 @@ int FilesystemServer::writeFilePart(string FID, char *buffer, unsigned int partN
 		tmp.seekp(partNr * partLength, tmp.beg);
 		tmp.write(buffer, length > partLength ? partLength : length);
 		tmp.close();
-		unsigned int last_part = this->files[this->path + FID].get()->last_part;
+		unsigned int last_part = this->files[FID].get()->last_part;
 		if (last_part + 1 == partNr)
 		{
-			this->files[this->path + FID].get()->last_part = last_part + 1;
+			this->files[FID].get()->last_part = last_part + 1;
 		}
 		return 0;
 	}
@@ -641,13 +639,13 @@ int FilesystemServer::readFile(string FID, char* buffer, unsigned int partNr) {
 
 unsigned int FilesystemServer::getLastPart(string FID)
 {
-	if (this->files[this->path + FID] == 0)
+	if (this->files[FID] == 0)
 	{
 		return 0;
 	}
 	else
 	{
-		return this->files[this->path + FID].get()->last_part;
+		return this->files[FID].get()->last_part;
 	}
 }
 
