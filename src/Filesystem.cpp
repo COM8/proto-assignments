@@ -510,8 +510,7 @@ void FilesystemServer::genFolder(string path)
 {
 	if (this->folders[path] == 0)
 		this->folders[path] = true;
-		cout << ("mkdir -p '" + this->path + path + "'").c_str() << endl;
-		cout << system(("mkdir -p '" + this->path + path + "'").c_str()) << endl;
+		system(("mkdir -p '" + this->path + path + "'").c_str());
 }
 
 void FilesystemServer::delFolder(string path)
