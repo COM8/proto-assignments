@@ -171,12 +171,9 @@ int FilesystemClient::genMap(string path, unordered_map <string, shared_ptr<File
 		{
 			if (fs::is_directory(p))
 			{
-				if (!isInFolders(p.path().string()))
-				{
-					shared_ptr<Folder> f = Folder::genPointer(p.path().string());
-					folders->push_back(f);
-					this->folders.push_back(f);
-				}
+				shared_ptr<Folder> f = Folder::genPointer(p.path().string());
+				folders->push_back(f);
+				this->folders.push_back(f);
 				//genMap(p.path().string(), files, folders, deleteFile, deleteFolder);
 			}
 			else
@@ -513,7 +510,7 @@ void FilesystemServer::genFolder(string path)
 {
 	if (this->folders[path] == 0)
 		this->folders[path] = true;
-	if (!exists(this->path + path))
+		cout << ("mkdir -p '" + this->path + path + "'").c_str() << endl;
 		cout << system(("mkdir -p '" + this->path + path + "'").c_str()) << endl;
 }
 
