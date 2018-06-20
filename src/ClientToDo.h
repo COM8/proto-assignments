@@ -11,6 +11,24 @@ struct TodoEntry
   NextPart np;
   std::string fid;
   unsigned char *hash;
+  void transFile(std::string fid, unsigned int n, unsigned char *hash) {
+    this->fid = fid;
+    this->type = net::FileType::ft_file;
+    this->np = NextPart(n);
+    this->hash = hash;
+  }
+  void createFolder(std::string fid) {
+    this->fid = fid;
+    this->type = net::FileType::ft_folder;
+  }
+  void delFolder(std::string fid) {
+    this->fid = fid;
+    this->type = net::FileType::ft_del_folder;
+  }
+  void delFile(std::string fid) {
+    this->fid = fid;
+    this->type = net::FileType::ft_del_file;
+  }
 };
 
 typedef std::unordered_map<std::string, TodoEntry> ClientToDoMap;

@@ -576,7 +576,7 @@ void FilesystemServer::clearDirecotry()
 	}
 }
 
-int FilesystemServer::writeFilePart(string FID, char *buffer, unsigned int partNr, unsigned int length, unsigned int userID)
+int FilesystemServer::writeFilePart(string FID, char *buffer, unsigned int partNr, unsigned int length, unsigned int clientID)
 {
 	if (!exists(this->path + FID))
 	{
@@ -594,6 +594,9 @@ int FilesystemServer::writeFilePart(string FID, char *buffer, unsigned int partN
 		{
 			this->files[FID].get()->last_part = last_part + 1;
 		}
+		TodoEntry t = TodoEntry();
+		t.transFile(FID, partNr, (unsigned char*) this->files[FID]->hash.get()->data());
+		this->clientsToDo->addToDoForAllExcept(t, clientID);
 		return 0;
 	}
 	else
