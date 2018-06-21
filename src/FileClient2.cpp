@@ -23,7 +23,6 @@ FileClient2::FileClient2(string serverAddress, unsigned short serverPort, string
     this->reconnect = false;
     this->msgTimeoutCount = 0;
     this->uploadPort = 0;
-    this->transferFinished = false;
     this->curWorkingSet = NULL;
     this->clientId = getRandomClientId();
     this->gettingWorkingSet = false;
@@ -111,17 +110,11 @@ void FileClient2::setState(FileClient2State state)
         break;
 
     case connected:
-        if (!transferFinished)
-        {
-            if (reconnect)
-            {
-            }
-            else
-            {
-                startSendingFS();
-            }
-        }
         tTimer->start();
+        if (!gettingWorkingSet && joinedWorkingSetThread && !curWorkingSet->isEmpty())
+        {
+            startSendingFS();
+        }
         break;
 
     case ping:
@@ -222,7 +215,6 @@ void FileClient2::sendNextFilePart()
             if (curWorkingSet->isEmpty())
             {
                 sendTransferEndedMessage(0b0001, uploadClient);
-                transferFinished = true;
                 Logger::info("Transfer finished!");
                 setState(connected);
                 return;

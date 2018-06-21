@@ -56,7 +56,6 @@ class FileClient2 : public AbstractClient
     bool reconnect;
     unsigned int msgTimeoutCount;
     WorkingSet *curWorkingSet;
-    bool transferFinished;
     bool joinedWorkingSetThread;
     time_t lastGetWorkingSet;
 
