@@ -73,31 +73,33 @@ long unsigned int Filesystem::filesize(const string FID) {
 }
 
 void FilesystemClient::compareFiles(string FID, shared_ptr<File> f) {
-	unsigned int i = 0;
-	char *buffer = new char[partLength];
-	char *tmpcrc = new char[4];
-	bool *n = new bool;
-	while (readFile(FID, buffer, i,n) != 0){
-		calcCRC32(buffer, tmpcrc);
-		if (!f->crcMap[i]) {
-			if (strcmp(tmpcrc, f->crcMap[i].get()->data())!= 0) {
-				Logger::debug("Found File Delta: " + FID + ": " + to_string(i));
+	if (exists(FID)) {
+		unsigned int i = 0;
+		char *buffer = new char[partLength];
+		char *tmpcrc = new char[4];
+		bool *n = new bool;
+		while (readFile(FID, buffer, i,n) != 0){
+			calcCRC32(buffer, tmpcrc);
+			if (!f->crcMap[i]) {
+				if (strcmp(tmpcrc, f->crcMap[i].get()->data())!= 0) {
+					Logger::debug("Found File Delta: " + FID + ": " + to_string(i));
+					f->np->addPart(i);
+					shared_ptr<array<char,4>> t = make_shared<array<char,4>>();
+					strcpy(t.get()->data(), tmpcrc);
+					f->crcMap[i] = t;
+				}
+			}else {
 				f->np->addPart(i);
+				Logger::debug("Added file part: "+ FID+ ": " + to_string(i));
 				shared_ptr<array<char,4>> t = make_shared<array<char,4>>();
 				strcpy(t.get()->data(), tmpcrc);
 				f->crcMap[i] = t;
 			}
-		}else {
-			f->np->addPart(i);
-			Logger::debug("Added file part: "+ FID+ ": " + to_string(i));
-			shared_ptr<array<char,4>> t = make_shared<array<char,4>>();
-			strcpy(t.get()->data(), tmpcrc);
-			f->crcMap[i] = t;
+			i++;
 		}
-		i++;
+		delete[] buffer;
+		delete n;
 	}
-	delete[] buffer;
-	delete n;
 }
 
 int FilesystemClient::writeFilePart(std::string FID, char* buffer, unsigned int partNr, unsigned int length) {
@@ -137,8 +139,10 @@ WorkingSet *FilesystemClient::getWorkingSet() {
 	for (const auto f : this->files) {
 		if (!Filesystem::exists(f.first)) {
 			deleteFile.push_back(f.first);
-			this->files.erase(f.first);
 		}
+	}
+	for(const auto f : deleteFile) {
+		this->files.erase(f);
 	}
 	return new WorkingSet(files, folders, deleteFile, deleteFolder);
 }
