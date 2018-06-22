@@ -439,7 +439,6 @@ void FileClient2::onFileStatusMessage(net::ReadMessage *msg)
     }
 
     unsigned int lastFIDPartNumber = FileStatusMessage::getLastFIDPartNumberFromMessage(msg->buffer);
-
     if (lastFIDPartNumber <= 0)
     {
         string fid = curWorkingSet->getCurFID();
