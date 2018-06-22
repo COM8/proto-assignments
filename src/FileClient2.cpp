@@ -27,6 +27,7 @@ FileClient2::FileClient2(string serverAddress, unsigned short serverPort, string
     this->clientId = getRandomClientId();
     this->gettingWorkingSet = false;
     this->joinedWorkingSetThread = true;
+    this->curFID = "";
 }
 
 FileClient2::~FileClient2()
@@ -438,7 +439,6 @@ void FileClient2::onFileStatusMessage(net::ReadMessage *msg)
     }
 
     unsigned int lastFIDPartNumber = FileStatusMessage::getLastFIDPartNumberFromMessage(msg->buffer);
-
     if (lastFIDPartNumber <= 0)
     {
         string fid = curWorkingSet->getCurFID();
@@ -677,6 +677,103 @@ void FileClient2::onPingMessage(net::ReadMessage *msg)
     unsigned int seqNum = PingMessage::getSeqNumberFromMessage(msg->buffer);
     sendAckMessage(seqNum, uploadClient);
     Logger::debug("PONG " + to_string(clientId));
+}
+
+void FileClient2::onFileCreationMessage(ReadMessage *msg)
+{
+    // Check if the checksum of the received message is valid else drop it:
+    if (!AbstractMessage::isChecksumValid(msg, FileCreationMessage::CHECKSUM_OFFSET_BITS))
+    {
+        return;
+    }
+
+    // Check if client ID is valid:
+    unsigned int clientId = FileCreationMessage::getClientIdFromMessage(msg->buffer);
+    if (clientId != clientId)
+    {
+        Logger::warn("Invalid client id received for FileCreationMessage! Ignoring message.");
+        return;
+    }
+
+    // Send ack:
+    unsigned int seqNumber = FileCreationMessage::getSeqNumberFromMessage(msg->buffer);
+    sendAckMessage(seqNumber, uploadClient);
+
+    // Create file/folder:
+    unsigned char fileType = FileCreationMessage::getFileTypeFromMessage(msg->buffer);
+    uint64_t fidLengt = FileCreationMessage::getFIDLengthFromMessage(msg->buffer);
+    unsigned char *fid = FileCreationMessage::getFIDFromMessage(msg->buffer, fidLengt);
+    unsigned char *hash = FileCreationMessage::getFileHashFromMessage(msg->buffer);
+    string fidString = string((char *)fid, fidLengt);
+    switch (fileType)
+    {
+    case ft_folder:
+        fS->genFolder(fidString);
+        Logger::debug("Folder \"" + fidString + "\" generated.");
+        break;
+
+    case ft_del_folder:
+        fS->delFolder(fidString);
+        break;
+
+    case ft_file:
+        hash = FileCreationMessage::getFileHashFromMessage(msg->buffer);
+        curFID = fidString;
+        fS->genFile(curFID, (char *)hash);
+        Logger::debug("File \"" + fidString + "\" generated.");
+        break;
+
+    case ft_del_file:
+        fS->delFile(fidString);
+        break;
+
+    default:
+        Logger::error("Unknown fileType received: " + to_string((int)fileType));
+        break;
+    }
+    delete[] fid;
+    delete[] hash;
+}
+
+void FileClient2::onFileTransferMessage(ReadMessage *msg)
+{
+    // Check if the checksum of the received message is valid else drop it:
+    if (!AbstractMessage::isChecksumValid(msg, FileTransferMessage::CHECKSUM_OFFSET_BITS))
+    {
+        return;
+    }
+
+    // Check if client ID is valid:
+    unsigned int clientId = FileTransferMessage::getClientIdFromMessage(msg->buffer);
+    if (clientId != clientId)
+    {
+        Logger::warn("Invalid client id received!");
+        return;
+    }
+
+    // Send ack:
+    unsigned int seqNumber = FileTransferMessage::getSeqNumberFromMessage(msg->buffer);
+    sendAckMessage(seqNumber, uploadClient);
+
+    // Write file:
+    char flags = FileTransferMessage::getFlagsFromMessage(msg->buffer);
+    if ((flags & 0b10) == 0b10)
+    {
+        unsigned int partNumber = FileTransferMessage::getFIDPartNumberFromMessage(msg->buffer);
+        uint64_t contLength = FileTransferMessage::getContentLengthFromMessage(msg->buffer);
+        unsigned char *content = FileTransferMessage::getContentFromMessage(msg->buffer, contLength);
+        int result = fS->writeFilePart(curFID, (char *)content, partNumber, contLength);
+        Logger::debug("Wrote file part: " + to_string(partNumber) + ", length: " + to_string(contLength) + " for file: \"" + curFID + "\" with result: " + to_string(result));
+        if ((flags & 0b1000) == 0b1000)
+        {
+            Logger::info("Last file part received for: " + curFID);
+        }
+        delete[] content;
+    }
+    else
+    {
+        Logger::error("Invalid FileTransferMessage flags received: " + to_string((int)flags));
+    }
 }
 
 void FileClient2::printToDo()

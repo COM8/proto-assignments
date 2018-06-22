@@ -218,7 +218,22 @@ void FileServerClient::sendNextClientToDo()
         setState(fsc_awaitingAck);
         if (toDoHelper.sendCreationMsg)
         {
-            unsigned int np = toDoHelper.curToDo->np.getNextPart();
+            if (toDoHelper.curToDo->np.isEmpty())
+            {
+                toDoHelper.clientToDo->removeToDo(toDoHelper.curToDo->fid);
+            }
+
+            unsigned int partNr = toDoHelper.curToDo->np.getNextPart();
+            char *buffer;
+            int readCount = user->fS->readFile(toDoHelper.curToDo->fid, buffer, partNr);
+            if (readCount <= 0)
+            {
+                Logger::warn("Failed to read from file with: " + readCount);
+            }
+            else
+            {
+                sendFileTransferMessage(0b0110, partNr, readCount, (unsigned char *)buffer, toDoHelper.curToDo->fid, udpClient);
+            }
             if (toDoHelper.curToDo->np.isEmpty())
             {
                 toDoHelper.clientToDo->removeToDo(toDoHelper.curToDo->fid);
@@ -366,7 +381,7 @@ void FileServerClient::onAuthRequestMessage(net::ReadMessage *msg)
     }
 }
 
-void FileServerClient::onFileCreationMessage(net::ReadMessage *msg)
+void FileServerClient::onFileCreationMessage(ReadMessage *msg)
 {
     // Check if the checksum of the received message is valid else drop it:
     if (!AbstractMessage::isChecksumValid(msg, FileCreationMessage::CHECKSUM_OFFSET_BITS))
@@ -394,16 +409,16 @@ void FileServerClient::onFileCreationMessage(net::ReadMessage *msg)
     string fidString = string((char *)fid, fidLengt);
     switch (fileType)
     {
-    case 1:
+    case ft_folder:
         user->fS->genFolder(fidString, clientId);
         Logger::debug("Folder \"" + fidString + "\" generated.");
         break;
 
-    case 2:
+    case ft_del_folder:
         user->fS->delFolder(fidString, clientId);
         break;
 
-    case 4:
+    case ft_file:
         hash = FileCreationMessage::getFileHashFromMessage(msg->buffer);
         curFID = fidString;
         curFIDLength = fidLengt;
@@ -411,7 +426,7 @@ void FileServerClient::onFileCreationMessage(net::ReadMessage *msg)
         Logger::debug("File \"" + fidString + "\" generated.");
         break;
 
-    case 8:
+    case ft_del_file:
         user->fS->delFile(fidString, clientId);
         break;
 
@@ -423,7 +438,7 @@ void FileServerClient::onFileCreationMessage(net::ReadMessage *msg)
     delete[] hash;
 }
 
-void FileServerClient::onFileTransferMessage(net::ReadMessage *msg)
+void FileServerClient::onFileTransferMessage(ReadMessage *msg)
 {
     // Check if the checksum of the received message is valid else drop it:
     if (!AbstractMessage::isChecksumValid(msg, FileTransferMessage::CHECKSUM_OFFSET_BITS))

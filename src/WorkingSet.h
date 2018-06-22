@@ -340,13 +340,13 @@ class WorkingSet
         return temp;
     }
 
-    unsigned int getCurNextPart() {
+    int getCurNextPart() {
         curFileMutex.lock();
         if(!this->curFile){
             curFileMutex.unlock();
             return -1;
         }
-        unsigned int ret;
+        int ret;
         ret = this->curFile->second->np->getNextPart();
         curFileMutex.unlock();
         return ret;
