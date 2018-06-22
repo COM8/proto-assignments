@@ -227,6 +227,12 @@ void FilesystemClient::genFile(string FID, char *hash) {
 void FilesystemClient::delFolder(string path) {
 	uintmax_t n= fs::remove_all(path);
 	Logger::info("Deleting " + path + " ==> " + to_string(n) + " items are delted");
+	for (_List_iterator<shared_ptr<Folder> > i = this->folders.begin(); i != this->folders.end(); ++i) {
+		if (i->get()->path.compare(path)) {
+			this->folders.erase(i);
+			break;
+		}
+	}
 }
 
 //totest
