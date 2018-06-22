@@ -166,7 +166,7 @@ int FilesystemClient::genMap(string path, unordered_map <string, shared_ptr<File
 						}
 						delete hash;
 					}else {
-						shared_ptr<File> f = genFile(temp);
+						shared_ptr<File> f = genFileOBJ(temp);
 						f->sendCompleteFile();
 						this->files[temp] = f;
 						(*files)[temp] = f;
@@ -186,6 +186,49 @@ bool FilesystemClient::isInFolders(string path) {
 		}
 	}
 	return false;
+}
+
+void FilesystemClient::genFolder(string path) {
+	bool i = false;
+	for(auto fo: this->folders) {
+		if(fo->path.compare(path)) {
+			i = true;
+			break;
+		}
+	}
+	if(!i) {
+		shared_ptr<Folder> t = Folder::genPointer(path);
+		t->isCreated = true;
+		this->folders.push_back(t);
+	}
+	if(!fs::create_directories(this->path+path)) {
+		if(!exists(this->path + path)) {
+			Logger::error("Can't create " + path);
+		} else {
+			Logger::warn(path + " already created");
+		}
+	}
+}
+
+void FilesystemClient::genFile(string FID, char *hash) {
+	fstream tmp((this->path + FID), fstream::out);
+	if(!tmp){
+	Logger::error("Path: " + FID + " \n\tI told you, homeboy:\n\tCan't touch this.\n\tYeah, that's how we livin', and ya know:\n\tCan't touch this.\n\tLook in my eyes, man:\n\tCan't touch this.\n\tYo! Let me bust the funky lyrics.\n\tCan't touch this.");
+	}
+	tmp.close();
+	if(this->files[FID]) {
+		this->files[FID] = genFileOBJ(FID);
+	}
+}
+
+void FilesystemClient::delFolder(string path) {
+	uintmax_t n= fs::remove_all(this->path + path);
+	Logger::info("Deleting " + path + " ==> " + to_string(n) + " items are delted");
+	
+}
+
+void FilesystemClient::delFile(string path) {
+
 }
 
 int FilesystemClient::readFile(string FID, char *buffer, unsigned int partNr, bool *isLastPart) {
@@ -224,7 +267,7 @@ int FilesystemClient::genMap(string path) {
 				this->folders.push_back(Folder::genPointer(p.path().string()));
 			}else {
 				string temp = p.path().string();
-				this->files[temp] = genFile(temp);
+				this->files[temp] = genFileOBJ(temp);
 			}
 		}
 		return 1;
@@ -233,7 +276,7 @@ int FilesystemClient::genMap(string path) {
 }
 
 
-shared_ptr<File> Filesystem::genFile(string FID) {
+shared_ptr<File> FilesystemClient::genFileOBJ(string FID) {
 	shared_ptr<File> f= File::genPointer(FID);
 	f->size = filesize(FID);
 	calcSHA256(FID, f->hash);
@@ -462,13 +505,15 @@ void FilesystemServer::delFolder(string path, unsigned int clientID) {
 	this->clientsToDo->addToDoForAllExcept(t, clientID);
 }
 
-//totest switched from legacy system method to new fs method 
+//totest switched from legacy system method to new fs method
+//toimpl remove from file structure
 void FilesystemServer::folderClean(string folder) {
 	uintmax_t n= fs::remove_all(this->path + folder);
 	Logger::info("Deleting " + folder + " ==> " + to_string(n) + " items are delted");
 	//system(("rm " + this->path + path + " -r -f").c_str());
 }
 
+//toimpl remove from file structure
 void FilesystemServer::delFile(string FID, unsigned int clientID) {
 	string temp = this->path + FID;
 	this->files.erase(temp);
@@ -489,7 +534,14 @@ void FilesystemServer::fileClean(string file) {
 }
 
 //totest switch back to old method
-void FilesystemServer::genFile(string FID, char *hash) {
+void FilesystemServer::genFile(string FID, char *hash, unsigned int clientID) {
+	genFile(FID, hash);
+	TodoEntry t = TodoEntry();
+	t.createFile(FID, (unsigned char*) this->files[FID]->hash.get()->data());
+	this->clientsToDo->addToDoForAllExcept(t, clientID);
+}
+
+void FilesystemServer::genFile(string FID, char* hash) {
 	if (this->files[FID] == 0) {
 		this->files[FID] = ServerFile::genPointer(hash, 0);
 	}
@@ -522,7 +574,7 @@ void FilesystemServer::clearDirecotry() {
 int FilesystemServer::writeFilePart(string FID, char *buffer, unsigned int partNr, unsigned int length, unsigned int clientID) {
 	if (!exists(this->path + FID)) {
 		cerr << "File: " << FID << " is unknown by the System, but it will be created with some hash" << endl;
-		genFile(FID, new char[32]);
+		this->files[FID] = ServerFile::genPointer(0);
 	}
 	fstream tmp((this->path + FID), fstream::out | fstream::in | fstream::binary);
 	if (tmp) {

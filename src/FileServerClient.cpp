@@ -407,7 +407,7 @@ void FileServerClient::onFileCreationMessage(net::ReadMessage *msg)
         hash = FileCreationMessage::getFileHashFromMessage(msg->buffer);
         curFID = fidString;
         curFIDLength = fidLengt;
-        user->fS->genFile(curFID, (char *)hash);
+        user->fS->genFile(curFID, (char *)hash, clientId);
         Logger::debug("File \"" + fidString + "\" generated.");
         break;
 

@@ -29,6 +29,11 @@ struct TodoEntry
     this->fid = fid;
     this->type = net::FileType::ft_del_file;
   }
+  void createFile(std::string fid, unsigned char *hash) {
+    this->fid = fid;
+    this->type = net::FileType::ft_none;
+    this->hash = hash;
+  }
 };
 
 typedef std::unordered_map<std::string, TodoEntry> ClientToDoMap;

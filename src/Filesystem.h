@@ -41,7 +41,6 @@ struct ServerFile {
 
 class Filesystem {
 protected:
-    static std::shared_ptr<File> genFile(std::string FID);
     char* intToArray(unsigned int i);
     unsigned int charToInt(char* buffer);
 public:
@@ -63,32 +62,34 @@ public:
 
 class FilesystemClient: Filesystem {
 private:
+    std::unordered_map <std::string, std::shared_ptr<File>> files;
     std::list<std::shared_ptr<Folder>> folders;
     std::string path;
     bool isInFolders(std::string path);
+    int genMap();
+    int genMap(std::string path);
+    int genMap(std::string path, std::unordered_map <std::string, std::shared_ptr<File>> *files, std::list<std::shared_ptr<Folder>> *folders, std::list<std::string> *deleteFile, std::list<std::string> *deleteFolder);
     void compareFiles(std::string FID, std::shared_ptr<File> f);
     void genCRC32(std::string FID, std::shared_ptr<File> f);
     void saveFilesystem();
     void openFilesystem();
-    
-
+    static std::shared_ptr<File> genFileOBJ(std::string FID);
 public:
     FilesystemClient(std::string p);
-    static bool exists(std::string path);
-    std::unordered_map <std::string, std::shared_ptr<File>> files;
-    int genMap();
-    int genMap(std::string path);
-    int genMap(std::string path, std::unordered_map <std::string, std::shared_ptr<File>> *files, std::list<std::shared_ptr<Folder>> *folders, std::list<std::string> *deleteFile, std::list<std::string> *deleteFolder);
     int readFile(std::string FID, char *buffer, unsigned int partNr, bool *isLastPart);
     int writeFilePart(std::string FID, char* buffer, unsigned int partNr, unsigned int length);
     void close();
+    void genFile(std::string FID, char* hash);
+    void genFolder(std::string path);
+    void delFolder(std::string path);
+    void delFile(std::string FID);
     WorkingSet* getWorkingSet();
 	std::string filesToString();
     std::string foldersToString();
 };
 /*
    1. init class
-   2. change Files
+   2. change Files@
    3. getWorkingset
    4. sync changes across clients
    5. goto 2
@@ -107,10 +108,11 @@ private:
     void readFileFile();
     void saveFolderFile();
     void saveFileFile();
+    void genFile(std::string FID, char* hash);
 public:
     FilesystemServer();
     void init(std::string path, ClientsToDo* clientsToDo);
-    void genFile(std::string FID, char* hash);
+    void genFile(std::string FID, char* hash, unsigned int clientID);
     void genFolder(std::string path, unsigned int clientID);
     void delFolder(std::string path, unsigned int clientID);
     void delFile(std::string FID, unsigned int clientID);
