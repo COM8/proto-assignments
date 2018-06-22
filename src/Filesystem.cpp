@@ -104,7 +104,7 @@ int FilesystemClient::writeFilePart(std::string FID, char* buffer, unsigned int 
 	if (this->files[FID]) {
 		this->files[FID] = File::genPointer(FID);
 	}
-	fstream tmp((this->path + FID), fstream::out |fstream::in | fstream::binary);
+	fstream tmp((FID), fstream::out |fstream::in | fstream::binary);
 	if (tmp) {
 		tmp.seekg(partNr * partLength, tmp.beg);
 		tmp.write(buffer, length > partLength ? partLength : length);
@@ -188,6 +188,7 @@ bool FilesystemClient::isInFolders(string path) {
 	return false;
 }
 
+//totest
 void FilesystemClient::genFolder(string path) {
 	bool i = false;
 	for(auto fo: this->folders) {
@@ -210,6 +211,7 @@ void FilesystemClient::genFolder(string path) {
 	}
 }
 
+//totest
 void FilesystemClient::genFile(string FID, char *hash) {
 	fstream tmp((this->path + FID), fstream::out);
 	if(!tmp){
@@ -221,14 +223,22 @@ void FilesystemClient::genFile(string FID, char *hash) {
 	}
 }
 
+//totest
 void FilesystemClient::delFolder(string path) {
-	uintmax_t n= fs::remove_all(this->path + path);
+	uintmax_t n= fs::remove_all(path);
 	Logger::info("Deleting " + path + " ==> " + to_string(n) + " items are delted");
-	
 }
 
-void FilesystemClient::delFile(string path) {
-
+//totest
+void FilesystemClient::delFile(string FID) {
+	if(fs::remove(path)) {
+		Logger::info("successfully deleted: "+ FID);
+	} else {
+		Logger::warn("can't delete: " + FID + "this could happen if the file was already deleted");
+	}
+	if(!this->files[FID]) {
+		this->files.erase(FID);
+	}
 }
 
 int FilesystemClient::readFile(string FID, char *buffer, unsigned int partNr, bool *isLastPart) {
