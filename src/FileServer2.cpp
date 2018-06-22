@@ -95,9 +95,11 @@ void FileServer2::onTimerTick(int identifier)
                 i->second->clanupClients();
                 if (i->second->isEmpty())
                 {
-                    Logger::info("Removing user \"" + i->second->USERNAME + "\" because he does not contain any clients.");
-                    delete i->second;
-                    i = users.erase(i);
+                    // ToDo: fix crash #12
+                    // Logger::info("Removing user \"" + i->second->USERNAME + "\" because he does not contain any clients.");
+                    // delete i->second;
+                    // i = users.erase(i);
+                    i++;
                 }
                 else
                 {
