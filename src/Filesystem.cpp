@@ -544,10 +544,11 @@ void FilesystemServer::delFile(string FID, unsigned int clientID) {
 
 //totest switched from legacy system method to filesystem operation
 void FilesystemServer::fileClean(string file) {
-	if(fs::remove(this->path+file)) {
+	//cout << this->path+file << endl;
+	if(fs::remove(file)) {
 		Logger::info("successfully deleted: "+ file);
 	} else {
-		Logger::warn("can't delete: " + file + "this could happen if the file was already deleted");
+		Logger::warn("can't delete: " + file + " this could happen if the file was already deleted");
 	}
 	//system(("rm '" + file + "' -f").c_str());
 }
@@ -581,7 +582,8 @@ void FilesystemServer::clearDirecotry() {
 				}
 			}else {
 				if (this->files[p.path().string()] == 0) {
-					fileClean(p.path().string());
+					if((!p.path().string().compare(".csync.folders"))&&(!p.path().string().compare(".csync.files")))
+						fileClean(p.path().string());
 				}
 			}
 		}
