@@ -100,7 +100,7 @@ private:
     std::unordered_map <std::string, bool> folders;
     std::unordered_map <std::string, std::unique_ptr<ServerFile>> files;
     ClientsToDo* clientsToDo;
-    void createPath();
+    bool createPath();
     void folderClean(std::string path);
     void fileClean(std::string file);
     void readFolderFile();

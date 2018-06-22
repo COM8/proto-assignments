@@ -342,7 +342,12 @@ void FilesystemServer::init(string path, ClientsToDo* clientsToDo) {
 	this->path = path.c_str()[path.size()-1] == '/' ? path: path + '/';
 	this->clientsToDo = clientsToDo;
 	if (!exists(path)) {
-		createPath();
+		if(createPath()) {
+			Logger::info("created sync path");
+		}else {
+			Logger::error("can't create sync path terminating");
+			exit(-1);
+		}
 	}
 	if (!exists(path + ".csync.folders")) {
 		genFile(".csync.folders", new char[32]);
@@ -425,18 +430,27 @@ void FilesystemServer::saveFileFile() {
 }
 
 
-void FilesystemServer::createPath() {
-	system(("mkdir -p '" + this->path + "'").c_str());
+bool FilesystemServer::createPath() {
+	return fs::create_directories(this->path);
 }
 
+//totest switched to filesystemlibrary for folder creation
 void FilesystemServer::genFolder(string path, unsigned int clientID) {
 	if (this->folders[path] == 0){
 			this->folders[path] = true;
 		}
-		system(("mkdir -p '" + this->path + path + "'").c_str());
-		TodoEntry t = TodoEntry();
-		t.createFolder(path);
-		this->clientsToDo->addToDoForAllExcept(t, clientID);
+		if(fs::create_directories(this->path+path)) {
+			Logger::error("created " + path);
+			TodoEntry t = TodoEntry();
+			t.createFolder(path);
+			this->clientsToDo->addToDoForAllExcept(t, clientID);
+		}else {
+			if(!exists(this->path + path)) {
+				Logger::error("Can't create " + path);
+			} else {
+				Logger::warn(path + " already created");
+			}
+		}
 }
 
 void FilesystemServer::delFolder(string path, unsigned int clientID) {
@@ -465,14 +479,17 @@ void FilesystemServer::fileClean(string file) {
 	system(("rm '" + file + "' -f").c_str());
 }
 
-//totry switch back to old method
+//totest switch back to old method
 void FilesystemServer::genFile(string FID, char *hash) {
 	if (this->files[FID] == 0) {
 		this->files[FID] = ServerFile::genPointer(hash, 0);
 	}
-	system (("touch '" + (this->path + FID) + "'").c_str());
-	//fstream tmp((this->path + FID), fstream::out);
-	//tmp.close();
+	//system (("touch '" + (this->path + FID) + "'").c_str());
+	fstream tmp((this->path + FID), fstream::out);
+	if(!tmp){
+	Logger::error("Path: " + FID + " \n\tI told you, homeboy:\n\tCan't touch this.\n\tYeah, that's how we livin', and ya know:\n\tCan't touch this.\n\tLook in my eyes, man:\n\tCan't touch this.\n\tYo! Let me bust the funky lyrics.\n\tCan't touch this.");
+	}
+	tmp.close();
 }
 
 void FilesystemServer::clearDirecotry() {
