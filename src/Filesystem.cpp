@@ -462,8 +462,11 @@ void FilesystemServer::delFolder(string path, unsigned int clientID) {
 	this->clientsToDo->addToDoForAllExcept(t, clientID);
 }
 
+//totest switched from legacy system method to new fs method 
 void FilesystemServer::folderClean(string folder) {
-	system(("rm " + this->path + path + " -r -f").c_str());
+	uintmax_t n= fs::remove_all(this->path + folder);
+	Logger::info("Deleting " + folder + " ==> " + to_string(n) + " items are delted");
+	//system(("rm " + this->path + path + " -r -f").c_str());
 }
 
 void FilesystemServer::delFile(string FID, unsigned int clientID) {
@@ -475,8 +478,14 @@ void FilesystemServer::delFile(string FID, unsigned int clientID) {
 	this->clientsToDo->addToDoForAllExcept(t, clientID);
 }
 
+//totest switched from legacy system method to filesystem operation
 void FilesystemServer::fileClean(string file) {
-	system(("rm '" + file + "' -f").c_str());
+	if(fs::remove(this->path+file)) {
+		Logger::info("successfully deleted: "+ file);
+	} else {
+		Logger::warn("can't delete: " + file + "this could happen if the file was already deleted");
+	}
+	//system(("rm '" + file + "' -f").c_str());
 }
 
 //totest switch back to old method
