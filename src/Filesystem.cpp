@@ -80,7 +80,8 @@ void FilesystemClient::compareFiles(string FID, shared_ptr<File> f) {
 		bool *n = new bool;
 		while (readFile(FID, buffer, i,n) != 0){
 			calcCRC32(buffer, tmpcrc);
-			if (!f->crcMap[i]) {
+			if (!(f->crcMap[i] == 0)) {
+				cout << 3 << endl;
 				if (strcmp(tmpcrc, f->crcMap[i].get()->data())!= 0) {
 					Logger::debug("Found File Delta: " + FID + ": " + to_string(i));
 					f->np->addPart(i);
@@ -90,7 +91,7 @@ void FilesystemClient::compareFiles(string FID, shared_ptr<File> f) {
 				}
 			}else {
 				f->np->addPart(i);
-				Logger::debug("Added file part: "+ FID+ ": " + to_string(i));
+				// Logger::debug("Added file part: "+ FID + ": " + to_string(i));
 				shared_ptr<array<char,4>> t = make_shared<array<char,4>>();
 				strcpy(t.get()->data(), tmpcrc);
 				f->crcMap[i] = t;
@@ -263,6 +264,7 @@ int FilesystemClient::readFile(string FID, char *buffer, unsigned int partNr, bo
 				this->files[FID]->isOpen = true;
 			}
 		}
+		this->files[FID]->size = this->files[FID]->fd.tellg();
 		this->files[FID]->fd.seekg(partLength * partNr, this->files[FID]->fd.beg);
 		int retLength = (this->files[FID]->size > (partLength * (partNr + 1))) ? partLength : this->files[FID]->size - partLength * partNr;
 		this->files[FID]->fd.read(buffer, retLength);
@@ -544,7 +546,6 @@ void FilesystemServer::delFile(string FID, unsigned int clientID) {
 
 //totest switched from legacy system method to filesystem operation
 void FilesystemServer::fileClean(string file) {
-	//cout << this->path+file << endl;
 	if(fs::remove(file)) {
 		Logger::info("successfully deleted: "+ file);
 	} else {
