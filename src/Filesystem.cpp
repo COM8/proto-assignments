@@ -261,14 +261,8 @@ int FilesystemClient::readFile(string FID, char *buffer, unsigned int partNr, bo
 		}
 		this->files[FID]->fd.seekg(partLength * partNr, this->files[FID]->fd.beg);
 		int retLength = (this->files[FID]->size > (partLength * (partNr + 1))) ? partLength : this->files[FID]->size - partLength * partNr;
-		if(retLength <=0) {
-			this->files[FID]->fd.close();
-			this->files[FID]->isOpen = false;
-			*isLastPart = true;
-			return 0;
-		}
 		this->files[FID]->fd.read(buffer, retLength);
-		if (partNr == ((this->files[FID]->size / partLength) + (this->files[FID]->size % partLength == 0 ? -1 : 0))) {
+		if (partNr == ((this->files[FID]->size / partLength) + (this->files[FID]->size % partLength == 0 ? -1 : 0)) || retLength == 0) {
 			this->files[FID]->fd.close();
 			this->files[FID]->isOpen = false;
 			*isLastPart = true;
