@@ -48,7 +48,7 @@ public:
     static long unsigned int filesize(const std::string FID);
     static void calcSHA256(const std::string FID, std::shared_ptr<std::array<char,32>> buffer);
     static void calcSHA256(const std::string FID, char* buffer);
-    static void calcCRC32(char* in, char* out);
+    static void calcCRC32(char* buffer, size_t bufferLength, char crc32Bytes[CRC32::HashBytes]);
     static bool exists(std::string path);
     };
 

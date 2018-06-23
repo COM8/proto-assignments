@@ -59,9 +59,10 @@ unsigned int Filesystem::charToInt(char *buffer) {
 	return static_cast<int>(buffer[0]) << 24 | buffer[1] << 16 | buffer[2] << 8 | buffer[3];
 }
 
-void Filesystem::calcCRC32(char* in, char* out) {
-	CRC32 c3;
-	strcpy(out, c3(in).c_str());
+void Filesystem::calcCRC32(char* buffer, size_t bufferLength, char crc32Bytes[CRC32::HashBytes]) {
+	CRC32 crc = CRC32();
+	crc.add(buffer, bufferLength);
+	crc.getHash((unsigned char *)crc32Bytes);
 	return;
 }
 
@@ -95,8 +96,9 @@ void FilesystemClient::compareFiles(const string FID, shared_ptr<File> f) {
 		char *buffer = new char[partLength];
 		char *tmpcrc = new char[4];
 		bool *n = new bool;
-		while (readFile(FID, buffer, i,n) != 0){
-			calcCRC32(buffer, tmpcrc);
+		int bufferLength = -1;
+		while ((bufferLength = readFile(FID, buffer, i,n)) != 0){
+			calcCRC32(buffer, bufferLength, tmpcrc);
 			if ((f->crcMap.find(i) != f->crcMap.end()))	 {
 				cout << f->crcMap[i] << endl;
 				if (strcmp(tmpcrc, f->crcMap[i].get()->data())!= 0) {
@@ -111,7 +113,7 @@ void FilesystemClient::compareFiles(const string FID, shared_ptr<File> f) {
 				// Logger::debug("Added file part: "+ FID + ": " + to_string(i));
 				shared_ptr<array<char,4>> t = make_shared<array<char,4>>();
 				strcpy(t.get()->data(), tmpcrc);
-				f->crcMap.insert(make_pair(i, t));
+				f->crcMap[i] = t;
 			}
 			i++;
 		}
