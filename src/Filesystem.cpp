@@ -97,8 +97,8 @@ void FilesystemClient::compareFiles(const string FID, shared_ptr<File> f) {
 		bool *n = new bool;
 		while (readFile(FID, buffer, i,n) != 0){
 			calcCRC32(buffer, tmpcrc);
-			if (!(f->crcMap[i] == 0)) {
-				cout << 3 << endl;
+			if ((f->crcMap.find(i) != f->crcMap.end()))	 {
+				cout << f->crcMap[i] << endl;
 				if (strcmp(tmpcrc, f->crcMap[i].get()->data())!= 0) {
 					Logger::debug("Found File Delta: " + FID + ": " + to_string(i));
 					f->np->addPart(i);
@@ -111,7 +111,7 @@ void FilesystemClient::compareFiles(const string FID, shared_ptr<File> f) {
 				// Logger::debug("Added file part: "+ FID + ": " + to_string(i));
 				shared_ptr<array<char,4>> t = make_shared<array<char,4>>();
 				strcpy(t.get()->data(), tmpcrc);
-				f->crcMap[i] = t;
+				f->crcMap.insert(make_pair(i, t));
 			}
 			i++;
 		}
