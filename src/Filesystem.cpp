@@ -72,7 +72,7 @@ long unsigned int Filesystem::filesize(const string FID) {
 	return ret;
 }
 
-void FilesystemClient::compareFiles(string FID, shared_ptr<File> f) {
+void FilesystemClient::compareFiles(const string FID, shared_ptr<File> f) {
 	if (exists(FID)) {
 		unsigned int i = 0;
 		char *buffer = new char[partLength];
@@ -103,7 +103,7 @@ void FilesystemClient::compareFiles(string FID, shared_ptr<File> f) {
 	}
 }
 
-int FilesystemClient::writeFilePart(std::string FID, char* buffer, unsigned int partNr, unsigned int length) {
+int FilesystemClient::writeFilePart(const string FID, char* buffer, unsigned int partNr, unsigned int length) {
 	if (this->files[FID]) {
 		this->files[FID] = File::genPointer(FID);
 	}
@@ -148,7 +148,7 @@ WorkingSet *FilesystemClient::getWorkingSet() {
 	return new WorkingSet(files, folders, deleteFile, deleteFolder);
 }
 
-int FilesystemClient::genMap(string path, unordered_map <string, shared_ptr<File>> *files, list<shared_ptr<Folder>> *folders, list<string> *deleteFile, list<string> *deleteFolder) {
+int FilesystemClient::genMap(const string path, unordered_map <string, shared_ptr<File>> *files, list<shared_ptr<Folder>> *folders, list<string> *deleteFile, list<string> *deleteFolder) {
 	if (Filesystem::exists(path)) {
 		for (auto &p : fs::recursive_directory_iterator(path)) {
 			if (fs::is_directory(p)) {
@@ -194,7 +194,7 @@ bool FilesystemClient::isInFolders(string path) {
 }
 
 //totest
-void FilesystemClient::genFolder(string path) {
+void FilesystemClient::genFolder(const string path) {
 	bool i = false;
 	for(auto fo: this->folders) {
 		if(fo->path.compare(path)) {
@@ -217,7 +217,7 @@ void FilesystemClient::genFolder(string path) {
 }
 
 //totest
-void FilesystemClient::genFile(string FID, char *hash) {
+void FilesystemClient::genFile(const string FID, char *hash) {
 	fstream tmp((this->path + FID), fstream::out);
 	if(!tmp){
 	Logger::error("Path: " + FID + " \n\tI told you, homeboy:\n\tCan't touch this.\n\tYeah, that's how we livin', and ya know:\n\tCan't touch this.\n\tLook in my eyes, man:\n\tCan't touch this.\n\tYo! Let me bust the funky lyrics.\n\tCan't touch this.");
@@ -229,7 +229,7 @@ void FilesystemClient::genFile(string FID, char *hash) {
 }
 
 //totest
-void FilesystemClient::delFolder(string path) {
+void FilesystemClient::delFolder(const string path) {
 	uintmax_t n= fs::remove_all(path);
 	Logger::info("Deleting " + path + " ==> " + to_string(n) + " items are delted");
 	for (_List_iterator<shared_ptr<Folder> > i = this->folders.begin(); i != this->folders.end(); ++i) {
@@ -241,7 +241,7 @@ void FilesystemClient::delFolder(string path) {
 }
 
 //totest
-void FilesystemClient::delFile(string FID) {
+void FilesystemClient::delFile(const string FID) {
 	if(fs::remove(path)) {
 		Logger::info("successfully deleted: "+ FID);
 	} else {
@@ -252,7 +252,7 @@ void FilesystemClient::delFile(string FID) {
 	}
 }
 
-int FilesystemClient::readFile(string FID, char *buffer, unsigned int partNr, bool *isLastPart) {
+int FilesystemClient::readFile(const string FID, char *buffer, unsigned int partNr, bool *isLastPart) {
 	if (!(this->files[FID] == 0)) {
 		if (!this->files[FID]->isOpen) {
 			this->files[FID]->fd = ifstream(FID, ifstream::ate | ifstream::binary);
@@ -297,7 +297,7 @@ int FilesystemClient::genMap(string path) {
 }
 
 
-shared_ptr<File> FilesystemClient::genFileOBJ(string FID) {
+shared_ptr<File> FilesystemClient::genFileOBJ(const string FID) {
 	shared_ptr<File> f= File::genPointer(FID);
 	f->size = filesize(FID);
 	calcSHA256(FID, f->hash);
