@@ -73,7 +73,7 @@ private:
     void genCRC32(std::string FID, std::shared_ptr<File> f);
     void saveFilesystem();
     void openFilesystem();
-    static std::shared_ptr<File> genFileOBJ(const std::string FID);
+    std::shared_ptr<File> genFileOBJ(const std::string FID);
 public:
     FilesystemClient(std::string p);
     int readFile(const std::string FID, char *buffer, unsigned int partNr, bool *isLastPart);
@@ -86,6 +86,8 @@ public:
     WorkingSet* getWorkingSet();
 	std::string filesToString();
     std::string foldersToString();
+    long unsigned int filesize(const std::string FID);
+
 };
 
 /*

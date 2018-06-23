@@ -72,6 +72,23 @@ long unsigned int Filesystem::filesize(const string FID) {
 	return ret;
 }
 
+long unsigned int FilesystemClient::filesize(const string FID) {
+	if(this->files[FID]) {
+		if(!this->files[FID]->fd.is_open()) {
+			this->files[FID]->fd.open(FID, ifstream::ate | ifstream::binary);
+		} 
+			long unsigned int ret = this->files[FID]->fd.tellg();
+			this->files[FID]->fd.close();
+			return ret;
+	} else {
+		ifstream file(FID, ifstream::ate | ifstream::binary);
+		long unsigned int ret = file.tellg();
+		file.close();
+		return ret;
+	}
+}
+
+
 void FilesystemClient::compareFiles(const string FID, shared_ptr<File> f) {
 	if (exists(FID)) {
 		unsigned int i = 0;
@@ -254,8 +271,8 @@ void FilesystemClient::delFile(const string FID) {
 
 int FilesystemClient::readFile(const string FID, char *buffer, unsigned int partNr, bool *isLastPart) {
 	if (!(this->files[FID] == 0)) {
-		if (!this->files[FID]->isOpen) {
-			this->files[FID]->fd = ifstream(FID, ifstream::ate | ifstream::binary);
+		if (!this->files[FID]->fd.is_open()) {
+			this->files[FID]->fd.open(FID, ifstream::ate | ifstream::binary);
 			if (!this->files[FID]->fd) {
 				this->files.erase(FID);
 				cerr << "Error FID: " << FID << " is missing removing it" << endl;
