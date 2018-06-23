@@ -100,7 +100,6 @@ void FilesystemClient::compareFiles(const string FID, shared_ptr<File> f) {
 		while ((bufferLength = readFile(FID, buffer, i,n)) > 0){
 			calcCRC32(buffer, bufferLength, tmpcrc);
 			if ((f->crcMap.find(i) != f->crcMap.end()))	 {
-				cout << f->crcMap[i] << endl;
 				if (strcmp(tmpcrc, f->crcMap[i].get()->data())!= 0) {
 					Logger::debug("Found File Delta: " + FID + ": " + to_string(i));
 					f->np->addPart(i);
