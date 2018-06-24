@@ -295,7 +295,7 @@ int FilesystemClient::readFile(const string FID, char *buffer, unsigned int part
 			this->files[FID]->fd.open(FID, ifstream::ate | ifstream::in | ifstream::binary);
 			if (!this->files[FID]->fd) {
 				this->files.erase(FID);
-				cerr << "Error FID: " << FID << " is missing removing it" << endl;
+				Logger::error("Error FID: " + FID + " is missing removing it");
 				return -2;
 			}else {
 			}
@@ -304,13 +304,26 @@ int FilesystemClient::readFile(const string FID, char *buffer, unsigned int part
 		int retLength = (this->files[FID]->size > (partLength * (partNr + 1))) ? partLength : this->files[FID]->size - partLength * partNr;
 		retLength = retLength < 0 ? 0 : retLength;
 		this->files[FID]->fd.read(buffer, retLength);
-		if (((partNr + 1) * partLength) -1 > this->files[FID]->size) {
+		if (((partNr + 1) * partLength) > this->files[FID]->size) {
 			this->files[FID]->fd.close();
 			return retLength;
 		}
 		return retLength;
 	}else {
-		return -2;
+		Logger::error("Requested file not known, try to get part anyway");
+		ifstream t (FID, ifstream::ate | ifstream::in | ifstream::binary);
+		if(!t) {
+			Logger::error("File doesn't open");
+			return -2;
+		}else {
+			unsigned int size = filesize(FID);
+			t.seekg(partLength * partNr, t.beg);
+			int retLength = (size > (partLength * (partNr + 1))) ? partLength : size - partLength * partNr;
+			retLength = retLength < 0 ? 0 : retLength;
+			t.read(buffer, retLength);
+			t.close();
+			return retLength;
+		}
 	}
 }
 
