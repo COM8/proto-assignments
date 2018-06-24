@@ -360,7 +360,7 @@ void FileClient2::getWorkingSet()
     Logger::info("Started indexing files.");
     curWorkingSet = fS->getWorkingSet();
     int div = (int)difftime(time(NULL), lastGetWorkingSet);
-    Logger::info("Finished indexing files in " + to_string(div) + " seconds.");
+    Logger::info("Finished indexing files in <" + to_string(div) + " seconds.");
     gettingWorkingSet = false;
     joinedWorkingSetThread = false;
 }

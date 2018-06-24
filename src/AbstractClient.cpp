@@ -53,6 +53,7 @@ void AbstractClient::sendTransferEndedMessage(unsigned char flags, Client2 *clie
 
 void AbstractClient::sendFolderCreationMessage(shared_ptr<Folder> f, Client2 *client)
 {
+    f->isCreated = true;
     sendFileCreationMessage(f->path, NULL, ft_folder, client);
     Logger::info("Send folder creation for: \"" + f->path + "\"");
 }
