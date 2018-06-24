@@ -260,8 +260,6 @@ bool FileClient2::sendFilePartMessage(string fid, shared_ptr<File> f, Client2 *c
     f->np->acknowledgePart(nextPartNumber);
     bool wasLasPart = f->np->isEmpty();
 
-    f->np->printNexPart();
-
     // File part:
     char flags = 2;
 
