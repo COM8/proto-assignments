@@ -282,12 +282,14 @@ int FilesystemClient::readFile(const string FID, char *buffer, unsigned int part
 			}else {
 			}
 		}
-		this->files[FID]->size = this->files[FID]->fd.tellg();
+		//this->files[FID]->fd.seekg(0, this->files[FID]->fd.beg),
+		this->files[FID]->size = filesize(FID);
+		cout << this->files[FID]->size << endl;
 		this->files[FID]->fd.seekg(partLength * partNr, this->files[FID]->fd.beg);
 		int retLength = (this->files[FID]->size > (partLength * (partNr + 1))) ? partLength : this->files[FID]->size - partLength * partNr;
 		retLength = retLength < 0 ? 0 : retLength;
 		this->files[FID]->fd.read(buffer, retLength);
-		if (partNr == ((this->files[FID]->size / partLength) + (this->files[FID]->size % partLength == 0 ? -1 : 0)) || retLength == 0) {
+		if (((partNr + 1) * partLength) -1 > this->files[FID]->size) {
 			this->files[FID]->fd.close();
 			return retLength;
 		}
