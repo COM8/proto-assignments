@@ -42,28 +42,29 @@ class AbstractMessage
 	static void printByteArray(unsigned char *c, int length);
 	static void printByte(unsigned char c);
 
+	static unsigned int getUnsignedIntFromMessage(unsigned char *buffer, int bitOffset);
+	static unsigned int getUnsignedShortFromMessage(unsigned char *buffer, int bitOffset);
+	static uint64_t getUnsignedInt64FromMessage(unsigned char *buffer, int bitOffset);
+
+	static void setBufferValue(unsigned char *buffer, unsigned char *value, int valueLength, int bitOffset);
+	static void setByteWithOffset(unsigned char *buffer, unsigned char value, int bitOffset);
+	static void setBufferUnsignedInt(unsigned char *, unsigned int i, int bitOffset);
+	static void setBufferUnsignedShort(unsigned char *, unsigned short i, int bitOffset);
+	static void setBufferUint64_t(unsigned char *, uint64_t i, int bitOffset);
+
   protected:
 	unsigned char type;
 
 	// Source: https://en.wikipedia.org/wiki/Cyclic_redundancy_check
 	static unsigned int caclCRC32(unsigned char *buffer, int bufferLength);
 
-	static unsigned int getUnsignedIntFromMessage(unsigned char *buffer, int bitOffset);
-	static unsigned int getUnsignedShortFromMessage(unsigned char *buffer, int bitOffset);
-	static uint64_t getUnsignedInt64FromMessage(unsigned char *buffer, int bitOffset);
-
 	static unsigned char *getBytesWithOffset(unsigned char *buffer, int bitOffset, int bitLength);
 	static unsigned char *getBytesWithOffset(unsigned char *buffer, int bitOffset, uint64_t bitLength);
 	static unsigned char getByteWithOffset(unsigned char *buffer, int bitOffset);
 	void setBufferValue(struct Message *msg, unsigned char *value, int valueLength, int bitOffset);
-	static void setBufferValue(unsigned char *buffer, unsigned char *value, int valueLength, int bitOffset);
 	void setByteWithOffset(struct Message *msg, unsigned char value, int bitOffset);
-	static void setByteWithOffset(unsigned char *buffer, unsigned char value, int bitOffset);
 	void setBufferUnsignedInt(struct Message *msg, unsigned int i, int bitOffset);
-	static void setBufferUnsignedInt(unsigned char *, unsigned int i, int bitOffset);
 	void setBufferUnsignedShort(struct Message *msg, unsigned short i, int bitOffset);
-	static void setBufferUnsignedShort(unsigned char *, unsigned short i, int bitOffset);
 	void setBufferUint64_t(struct Message *msg, uint64_t i, int bitOffset);
-	static void setBufferUint64_t(unsigned char *, uint64_t i, int bitOffset);
 };
 }
