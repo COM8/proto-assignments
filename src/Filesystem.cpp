@@ -346,8 +346,7 @@ void FilesystemClient::saveFilesystem() {
 				delete[] crcNumber;
 			}
 			delete[] nameLen;
-			//delete[] s;
-			//delete[] crcsize;
+
 		}
 		tmp.close();
 	}else {
@@ -376,7 +375,6 @@ void FilesystemClient::openFilesystem() {
 			unsigned char crcVar[4];
 			tmp.read((char*) crcVar, 4);
 			unsigned int crcsize = net::AbstractMessage::getUnsignedIntFromMessage(crcVar, 0);
-			cout << crcsize << endl;
 			char* crcValue = new char[4];
 			currPosition += 44;
 			for (unsigned int i = 0; i < crcsize; i++) {
