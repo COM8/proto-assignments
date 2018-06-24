@@ -175,7 +175,7 @@ int FilesystemClient::genMap(const string path, unordered_map <string, shared_pt
 				this->folders.push_back(f);
 			} else {
 				string temp = p.path().string();
-				if (temp.compare(".csync.files")) {
+				if (temp.compare(this->path + ".csync.files")) {
 					if (!this->files[temp] == 0) {
 						char *hash = new char[32];
 						calcSHA256(temp, hash);
