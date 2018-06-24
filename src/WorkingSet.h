@@ -150,7 +150,6 @@ struct File
 {
     std::string name;
     std::shared_ptr<std::array<char,32>> hash = std::make_shared<std::array<char,32>>(); 
-    bool isOpen = false;
     unsigned int size;
     std::ifstream fd;
     std::unordered_map<unsigned int, std::shared_ptr<std::array<char, 4>>> crcMap;

@@ -281,7 +281,6 @@ int FilesystemClient::readFile(const string FID, char *buffer, unsigned int part
 				cerr << "Error FID: " << FID << " is missing removing it" << endl;
 				return -2;
 			}else {
-				this->files[FID]->isOpen = true;
 			}
 		}
 		this->files[FID]->size = this->files[FID]->fd.tellg();
@@ -291,8 +290,8 @@ int FilesystemClient::readFile(const string FID, char *buffer, unsigned int part
 		this->files[FID]->fd.read(buffer, retLength);
 		if (partNr == ((this->files[FID]->size / partLength) + (this->files[FID]->size % partLength == 0 ? -1 : 0)) || retLength == 0) {
 			this->files[FID]->fd.close();
-			this->files[FID]->isOpen = false;
 			*isLastPart = true;
+			return retLength;
 		}else {
 			*isLastPart = false;
 		}
