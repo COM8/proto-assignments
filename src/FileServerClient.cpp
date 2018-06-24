@@ -226,7 +226,11 @@ void FileServerClient::sendNextClientToDo()
             unsigned int partNr = toDoHelper.curToDo->np.getNextPart();
             char *buffer;
             int readCount = user->fS->readFile(toDoHelper.curToDo->fid, buffer, partNr);
-            if (readCount <= 0)
+            if (readCount == -2)
+            {
+                Logger::warn("Failed to read from file with -2");
+            }
+            else if (readCount <= 0)
             {
                 Logger::warn("Failed to read from file with: " + readCount);
             }
