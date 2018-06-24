@@ -96,7 +96,7 @@ void FilesystemClient::compareFiles(const string FID, shared_ptr<File> f) {
 		unsigned int i = 0;
 		char *buffer = new char[partLength];
 		char *tmpcrc = new char[4];
-		int bufferLength = readFile(FID, buffer, i);
+		int bufferLength = -1;
 		while ((bufferLength = readFile(FID, buffer, i)) > 0){
 			calcCRC32(buffer, bufferLength, tmpcrc);
 			if (!(f->crcMap[i] == 0)) {
@@ -112,7 +112,6 @@ void FilesystemClient::compareFiles(const string FID, shared_ptr<File> f) {
 				strcpy(f->crcMap[i].get()->data(), tmpcrc);
 			}
 			i++;
-			readFile(FID, buffer, i);
 		}
 		delete[] buffer;
 		delete[] tmpcrc;
@@ -187,6 +186,7 @@ int FilesystemClient::genMap(const string path, unordered_map <string, shared_pt
 								compareFiles(temp, this->files[temp]);
 								(*files)[temp] = this->files[temp];
 							}
+							strcpy(this->files[temp]->hash->data(), hash);
 						}
 						delete hash;
 					}else {
