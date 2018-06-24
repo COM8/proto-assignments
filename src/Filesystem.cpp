@@ -186,12 +186,12 @@ int FilesystemClient::genMap(const string path, unordered_map <string, shared_pt
 								deleteFile->push_back(temp);
 							}else {
 								compareFiles(temp, this->files[temp]);
+								(*files)[temp] = this->files[temp];
 							}
 						}
 						delete hash;
 					}else {
 						shared_ptr<File> f = genFileOBJ(temp);
-						//f->sendCompleteFile();
 						this->files[temp] = f;
 						compareFiles(temp, this->files[temp]);
 						(*files)[temp] = f;
