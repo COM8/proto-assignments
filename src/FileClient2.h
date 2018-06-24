@@ -71,7 +71,7 @@ private:
   void helloTask(unsigned short listenPort, bool reconnecting, net::Client2 *client);
   void onMessageReceived(net::ReadMessage *msg);
   void sendNextFilePart();
-  bool sendFilePartMessage(std::string fid, std::shared_ptr<File> f, unsigned int nextPartNr, net::Client2 *client);
+  bool sendFilePartMessage(std::string fid, std::shared_ptr<File> f, net::Client2 *client);
   void onServerHelloMessage(net::ReadMessage *msg);
   void onFileStatusMessage(net::ReadMessage *msg);
   void onAckMessage(net::ReadMessage *msg);

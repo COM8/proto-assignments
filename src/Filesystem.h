@@ -76,7 +76,7 @@ private:
     std::shared_ptr<File> genFileOBJ(const std::string FID);
 public:
     FilesystemClient(std::string p);
-    int readFile(const std::string FID, char *buffer, unsigned int partNr, bool *isLastPart);
+    int readFile(const std::string FID, char *buffer, unsigned int partNr);
     int writeFilePart(const std::string FID, char* buffer, unsigned int partNr, unsigned int length);
     void close();
     void genFile(const std::string FID, char* hash);

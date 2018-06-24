@@ -96,9 +96,8 @@ void FilesystemClient::compareFiles(const string FID, shared_ptr<File> f) {
 		unsigned int i = 0;
 		char *buffer = new char[partLength];
 		char *tmpcrc = new char[4];
-		bool *n = new bool;
-		int bufferLength = readFile(FID, buffer, i ,n);
-		while ((bufferLength = readFile(FID, buffer, i ,n)) > 0){
+		int bufferLength = readFile(FID, buffer, i);
+		while ((bufferLength = readFile(FID, buffer, i)) > 0){
 			calcCRC32(buffer, bufferLength, tmpcrc);
 			if (!(f->crcMap[i] == 0)) {
 				if (strcmp(tmpcrc, f->crcMap[i].get()->data())!= 0) {
@@ -113,11 +112,10 @@ void FilesystemClient::compareFiles(const string FID, shared_ptr<File> f) {
 				strcpy(f->crcMap[i].get()->data(), tmpcrc);
 			}
 			i++;
-			readFile(FID, buffer, i ,n);
+			readFile(FID, buffer, i);
 		}
 		delete[] buffer;
 		delete[] tmpcrc;
-		delete n;
 	}
 }
 
@@ -273,7 +271,7 @@ void FilesystemClient::delFile(const string FID) {
 	}
 }
 
-int FilesystemClient::readFile(const string FID, char *buffer, unsigned int partNr, bool *isLastPart) {
+int FilesystemClient::readFile(const string FID, char *buffer, unsigned int partNr) {
 	if (!(this->files[FID] == 0)) {
 		if (!this->files[FID]->fd.is_open()) {
 			this->files[FID]->fd.open(FID, ifstream::ate | ifstream::binary);
@@ -291,10 +289,7 @@ int FilesystemClient::readFile(const string FID, char *buffer, unsigned int part
 		this->files[FID]->fd.read(buffer, retLength);
 		if (partNr == ((this->files[FID]->size / partLength) + (this->files[FID]->size % partLength == 0 ? -1 : 0)) || retLength == 0) {
 			this->files[FID]->fd.close();
-			*isLastPart = true;
 			return retLength;
-		}else {
-			*isLastPart = false;
 		}
 		return retLength;
 	}else {

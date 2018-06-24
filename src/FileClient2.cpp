@@ -156,19 +156,26 @@ void FileClient2::sendNextFilePart()
     {
         string fid = curWorkingSet->getCurFID();
         shared_ptr<File> curFile = curWorkingSet->getCurFileFile();
-        setState(awaitingAck);
-        bool lastPartSend = sendFilePartMessage(fid, curFile, curFilePartNr, uploadClient);
+        bool wasLastPart = false;
+        // Handle empty files:
+        if (curFile->np->isEmpty())
+        {
+            wasLastPart = true;
+        }
+        else
+        {
+            setState(awaitingAck);
+            wasLastPart = sendFilePartMessage(fid, curFile, uploadClient);
+        }
         curWorkingSet->unlockCurFile();
-
-        curWorkingSet->getCurFileFile()->np->acknowledgePart(curFilePartNr);
-        curWorkingSet->unlockCurFile();
-        if (lastPartSend)
+        if (wasLastPart)
         {
             files->erase(curWorkingSet->getCurFID());
         }
     }
+    
     // Delete file:
-    else if (!delFiles->empty())
+    if (!delFiles->empty())
     {
         string filePath = delFiles->front();
         delFiles->pop_front();
@@ -231,33 +238,37 @@ void FileClient2::sendNextFilePart()
     curWorkingSet->unlockDelFolders();
 }
 
-bool FileClient2::sendFilePartMessage(string fid, shared_ptr<File> f, unsigned int nextPartNr, Client2 *client)
+bool FileClient2::sendFilePartMessage(string fid, shared_ptr<File> f, Client2 *client)
 {
     char chunk[Filesystem::partLength];
-    bool isLastPart = false;
-    int readCount = fS->readFile(fid, chunk, nextPartNr, &isLastPart);
+    unsigned int nextPartNumber = f->np->getNextPart();
+    int readCount = fS->readFile(fid, chunk, nextPartNumber);
+    f->np->acknowledgePart(nextPartNumber);
+    bool wasLasPart = f->np->isEmpty();
+
+    f->np->printNexPart();
 
     // File part:
     char flags = 2;
 
     // First file part:
-    if (nextPartNr == 0)
+    if (nextPartNumber == 0)
     {
         flags |= 1;
     }
     // Last file part:
-    else if (isLastPart)
+    else if (wasLasPart)
     {
         flags |= 8;
     }
 
-    sendFileTransferMessage(flags, nextPartNr, readCount, (unsigned char *)chunk, fid, uploadClient);
+    sendFileTransferMessage(flags, nextPartNumber, readCount, (unsigned char *)chunk, fid, uploadClient);
 
-    if (isLastPart)
+    if (wasLasPart)
     {
         Logger::info("Finished sending: " + fid);
     }
-    return isLastPart;
+    return wasLasPart;
 }
 
 void FileClient2::connect()

@@ -24,7 +24,7 @@ struct NextPart{
         return this->content.empty();
     }
 
-    unsigned int getNextPart() {
+    int getNextPart() {
         if(!this->isEmpty()){
             return this->content.begin()->first;
         }
