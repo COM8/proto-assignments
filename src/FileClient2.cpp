@@ -144,6 +144,20 @@ void FileClient2::setState(FileClient2State state)
 
 void FileClient2::sendNextFilePart()
 {
+    // Handle empty files:
+    if (curWorkingSet->curFileExists())
+    {
+        if (curWorkingSet->getCurFileFile()->np->isEmpty())
+        {
+            curWorkingSet->unlockCurFile();
+            curWorkingSet->deleteCurFile();
+        }
+        else
+        {
+            curWorkingSet->unlockCurFile();
+        }
+    }
+
     std::list<std::shared_ptr<Folder>> *folders = curWorkingSet->getFolders();
     std::unordered_map<std::string, std::shared_ptr<File>> *files = curWorkingSet->getFiles();
     std::list<std::string> *delFolders = curWorkingSet->getDelFolders();
@@ -152,16 +166,6 @@ void FileClient2::sendNextFilePart()
     // Continue file transfer:
     string fid = curWorkingSet->getCurFID();
     shared_ptr<File> curFile = curWorkingSet->getCurFileFile();
-    bool unlockedCurrFile = false;
-
-    // Handle empty files:
-    if (curFile && curFile->np->isEmpty())
-    {
-        curWorkingSet->unlockCurFile();
-        files->erase(curWorkingSet->getCurFID());
-        unlockedCurrFile = true;
-    }
-
     if (curFile && !curFile->np->isEmpty())
     {
         bool wasLastPart = false;
@@ -175,19 +179,18 @@ void FileClient2::sendNextFilePart()
             setState(awaitingAck);
             wasLastPart = sendFilePartMessage(fid, curFile, uploadClient);
         }
+
         curWorkingSet->unlockCurFile();
         if (wasLastPart)
         {
+
             files->erase(curWorkingSet->getCurFID());
         }
     }
     // Delete file:
     else
     {
-        if (!unlockedCurrFile)
-        {
-            curWorkingSet->unlockCurFile();
-        }
+        curWorkingSet->unlockCurFile();
         if (!delFiles->empty())
         {
             string filePath = delFiles->front();
@@ -472,8 +475,8 @@ void FileClient2::onFileStatusMessage(net::ReadMessage *msg)
     }
     else
     {
-        curWorkingSet->getCurFileFile()->np->acknowledgePart(lastFIDPartNumber);
-        curWorkingSet->unlockCurFile();
+        //curWorkingSet->getCurFileFile()->np->acknowledgePart(lastFIDPartNumber);
+        //curWorkingSet->unlockCurFile();
         setState(sendingFS);
     }
 }

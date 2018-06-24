@@ -321,12 +321,21 @@ class WorkingSet
         curFileMutex.unlock();
     }
 
-    bool curFileExists() {
-        bool t = true;
-        if(!this->curFile) {
-            t = false;
+    void deleteCurFile() {
+        if(curFileExists()) {
+            files.erase(curFile->first);
+            curFile = NULL;
         }
-        return t;
+    }
+
+    bool curFileExists() {
+        bool b = false;
+        curFileMutex.lock();
+        if(curFile) {
+            b = true;
+        }
+        curFileMutex.unlock();
+        return b;
     }
 
     std::string getCurFID() {
