@@ -68,26 +68,12 @@ void Filesystem::calcCRC32(char* buffer, size_t bufferLength, char crc32Bytes[CR
 }
 
 long unsigned int Filesystem::filesize(const string FID) {
-	ifstream file(FID, ifstream::ate | ifstream::binary);
-	long unsigned int ret = file.tellg();
-	file.close();
-	return ret;
-}
-
-long unsigned int FilesystemClient::filesize(const string FID) {
-	if(this->files[FID]) {
-		if(!this->files[FID]->fd.is_open()) {
-			this->files[FID]->fd.open(FID, ifstream::ate | ifstream::binary);
-		} 
-			long unsigned int ret = this->files[FID]->fd.tellg();
-			this->files[FID]->fd.close();
-			return ret;
+	if(exists(FID)) {
+		return fs::file_size(FID);
 	} else {
-		ifstream file(FID, ifstream::ate | ifstream::binary);
-		long unsigned int ret = file.tellg();
-		file.close();
-		return ret;
+		return 0;
 	}
+
 }
 
 
@@ -174,6 +160,7 @@ int FilesystemClient::genMap(const string path, unordered_map <string, shared_pt
 				string temp = p.path().string();
 				if (temp.compare(this->path + ".csync.files")) {
 					if (!this->files[temp] == 0) {
+						this->files[temp]->size = this->files[temp]->fd.tellg();
 						char *hash = new char[32];
 						calcSHA256(temp, hash);
 						if (strcmp(this->files[temp]->hash->data(), hash) != 0) {
@@ -274,7 +261,7 @@ void FilesystemClient::delFile(const string FID) {
 int FilesystemClient::readFile(const string FID, char *buffer, unsigned int partNr) {
 	if (!(this->files[FID] == 0)) {
 		if (!this->files[FID]->fd.is_open()) {
-			this->files[FID]->fd.open(FID, ifstream::ate | ifstream::binary);
+			this->files[FID]->fd.open(FID, ifstream::ate | ifstream::in | ifstream::binary);
 			if (!this->files[FID]->fd) {
 				this->files.erase(FID);
 				cerr << "Error FID: " << FID << " is missing removing it" << endl;
@@ -282,7 +269,6 @@ int FilesystemClient::readFile(const string FID, char *buffer, unsigned int part
 			}else {
 			}
 		}
-		//this->files[FID]->fd.seekg(0, this->files[FID]->fd.beg),
 		this->files[FID]->size = filesize(FID);
 		cout << this->files[FID]->size << endl;
 		this->files[FID]->fd.seekg(partLength * partNr, this->files[FID]->fd.beg);
@@ -352,9 +338,9 @@ void FilesystemClient::saveFilesystem() {
 }
 
 void FilesystemClient::openFilesystem() {
-	unsigned int fsize = filesize(this->path + ".csync.files");
 	fstream tmp(this->path + ".csync.files", fstream::ate | fstream::in | fstream::binary);
 	if (tmp) {
+		unsigned int fsize = filesize(this->path + ".csync.files");
 		tmp.seekg(0, tmp.beg);
 		unsigned int currPosition = 0;
 		char *intVar = new char[4];

@@ -86,7 +86,6 @@ public:
     WorkingSet* getWorkingSet();
 	std::string filesToString();
     std::string foldersToString();
-    long unsigned int filesize(const std::string FID);
 
 };
 
