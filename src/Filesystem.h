@@ -83,6 +83,7 @@ public:
     void genFolder(const std::string path);
     void delFolder(const std::string path);
     void delFile(const std::string FID);
+    long unsigned int filesize(const std::string FID);
     WorkingSet* getWorkingSet();
 	std::string filesToString();
     std::string foldersToString();

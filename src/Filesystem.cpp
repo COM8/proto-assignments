@@ -68,12 +68,31 @@ void Filesystem::calcCRC32(char* buffer, size_t bufferLength, char crc32Bytes[CR
 }
 
 long unsigned int Filesystem::filesize(const string FID) {
+	/*ifstream file(FID, ifstream::ate | ifstream::binary);
+	long unsigned int ret = file.tellg();
+	file.close();
+	return ret;*/
 	if(exists(FID)) {
 		return fs::file_size(FID);
-	} else {
-		return 0;
 	}
+	return 0;
+}
 
+long unsigned int FilesystemClient::filesize(const string FID) {
+	/*if(this->files[FID]) {
+		if(!this->files[FID]->fd.is_open()) {
+			this->files[FID]->fd.open(FID, ifstream::ate | ifstream::binary);
+		} 
+			long unsigned int ret = this->files[FID]->fd.tellg();
+			this->files[FID]->fd.close();
+			return ret;
+	} else {
+		ifstream file(FID, ifstream::ate | ifstream::binary);
+		long unsigned int ret = file.tellg();
+		file.close();
+		return ret;
+	}*/
+	return fs::file_size(FID);
 }
 
 
@@ -83,6 +102,7 @@ void FilesystemClient::compareFiles(const string FID, shared_ptr<File> f) {
 		char *buffer = new char[partLength];
 		char *tmpcrc = new char[4];
 		int bufferLength = -1;
+		this->files[FID]->size = filesize(FID);
 		while ((bufferLength = readFile(FID, buffer, i)) > 0){
 			calcCRC32(buffer, bufferLength, tmpcrc);
 			if (!(f->crcMap[i] == 0)) {
@@ -269,8 +289,6 @@ int FilesystemClient::readFile(const string FID, char *buffer, unsigned int part
 			}else {
 			}
 		}
-		this->files[FID]->size = filesize(FID);
-		cout << this->files[FID]->size << endl;
 		this->files[FID]->fd.seekg(partLength * partNr, this->files[FID]->fd.beg);
 		int retLength = (this->files[FID]->size > (partLength * (partNr + 1))) ? partLength : this->files[FID]->size - partLength * partNr;
 		retLength = retLength < 0 ? 0 : retLength;
