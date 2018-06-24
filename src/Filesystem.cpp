@@ -96,10 +96,10 @@ void FilesystemClient::compareFiles(const string FID, shared_ptr<File> f) {
 		char *buffer = new char[partLength];
 		char *tmpcrc = new char[4];
 		bool *n = new bool;
-		int bufferLength = -1;
-		while ((bufferLength = readFile(FID, buffer, i,n)) > 0){
+		int bufferLength = readFile(FID, buffer, i ,n);
+		while ((bufferLength = readFile(FID, buffer, i ,n)) > 0){
 			calcCRC32(buffer, bufferLength, tmpcrc);
-			if ((f->crcMap.find(i) != f->crcMap.end()))	 {
+			if (!(f->crcMap[i] == 0)) {
 				if (strcmp(tmpcrc, f->crcMap[i].get()->data())!= 0) {
 					Logger::debug("Found File Delta: " + FID + ": " + to_string(i));
 					f->np->addPart(i);
@@ -112,8 +112,10 @@ void FilesystemClient::compareFiles(const string FID, shared_ptr<File> f) {
 				strcpy(f->crcMap[i].get()->data(), tmpcrc);
 			}
 			i++;
+			readFile(FID, buffer, i ,n);
 		}
 		delete[] buffer;
+		delete[] tmpcrc;
 		delete n;
 	}
 }
@@ -178,7 +180,9 @@ int FilesystemClient::genMap(const string path, unordered_map <string, shared_pt
 						calcSHA256(temp, hash);
 						if (strcmp(this->files[temp]->hash->data(), hash) != 0) {
 							if (this->files[temp]->size > filesize(temp)) {
-								this->files[temp]->sendCompleteFile();
+								this->files[temp]->crcMap.clear();
+								compareFiles(temp, this->files[temp]);
+								(*files)[temp] = this->files[temp];
 								deleteFile->push_back(temp);
 							}else {
 								compareFiles(temp, this->files[temp]);
@@ -187,8 +191,9 @@ int FilesystemClient::genMap(const string path, unordered_map <string, shared_pt
 						delete hash;
 					}else {
 						shared_ptr<File> f = genFileOBJ(temp);
-						f->sendCompleteFile();
+						//f->sendCompleteFile();
 						this->files[temp] = f;
+						compareFiles(temp, this->files[temp]);
 						(*files)[temp] = f;
 					}
 				}
@@ -282,6 +287,7 @@ int FilesystemClient::readFile(const string FID, char *buffer, unsigned int part
 		this->files[FID]->size = this->files[FID]->fd.tellg();
 		this->files[FID]->fd.seekg(partLength * partNr, this->files[FID]->fd.beg);
 		int retLength = (this->files[FID]->size > (partLength * (partNr + 1))) ? partLength : this->files[FID]->size - partLength * partNr;
+		retLength = retLength < 0 ? 0 : retLength;
 		this->files[FID]->fd.read(buffer, retLength);
 		if (partNr == ((this->files[FID]->size / partLength) + (this->files[FID]->size % partLength == 0 ? -1 : 0)) || retLength == 0) {
 			this->files[FID]->fd.close();
