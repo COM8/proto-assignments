@@ -173,9 +173,20 @@ int FilesystemClient::genMap(const string path, unordered_map <string, shared_pt
 	if (Filesystem::exists(path)) {
 		for (auto &p : fs::recursive_directory_iterator(path)) {
 			if (fs::is_directory(p)) {
-				shared_ptr<Folder> f = Folder::genPointer(p.path().string());
-				folders->push_back(f);
-				this->folders.push_back(f);
+				bool ig = true;
+				for(const auto fo : this->folders) {
+					if(fo->path.compare(p.path().string())) {
+							if(fo->isCreated) {
+								ig = false;
+							}
+							break;
+						}
+				}
+				if(ig) {
+					shared_ptr<Folder> f = Folder::genPointer(p.path().string());
+					folders->push_back(f);
+					this->folders.push_back(f);
+				}
 			} else {
 				string temp = p.path().string();
 				if (temp.compare(this->path + ".csync.files")) {
