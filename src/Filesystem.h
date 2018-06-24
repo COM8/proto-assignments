@@ -8,12 +8,12 @@
 #include <fstream>
 #include <cstring>
 #include "WorkingSet.h"
+#include "net/AbstractMessage.h"
 #include "lib/hash-library/md5.h"
 #include "lib/hash-library/crc32.h"
 #include "Logger.h"
 #include "Consts.h"
 #include "ClientsToDo.h"
-
 
 struct ServerFile {
     std::shared_ptr<std::array<char,32>> hash = std::make_shared<std::array<char,32>>();

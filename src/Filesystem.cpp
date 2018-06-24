@@ -49,14 +49,15 @@ void Filesystem::calcSHA256(const string FID, char* buffer) {
 
 char *Filesystem::intToArray(unsigned int i) {
 	char *ret = new char[4];
-	for (int e = 0; e < 4; e++) {
-		ret[3 - e] = (i >> (e * 8));
-	}
+	ret[3] = (i >> 0) & 0xFF;
+	ret[2] = (i >> 8) & 0xFF;
+	ret[1] = (i >> 16) & 0xFF;
+	ret[0] = (i >> 24) & 0xFF;
 	return ret;
 }
 
 unsigned int Filesystem::charToInt(char *buffer) {
-	return static_cast<int>(buffer[0]) << 24 | buffer[1] << 16 | buffer[2] << 8 | buffer[3];
+	return static_cast<unsigned int>(buffer[0]) << 24 | buffer[1] << 16 | buffer[2] << 8 | buffer[3];
 }
 
 void Filesystem::calcCRC32(char* buffer, size_t bufferLength, char crc32Bytes[CRC32::HashBytes]) {
@@ -325,16 +326,19 @@ shared_ptr<File> FilesystemClient::genFileOBJ(const string FID) {
 }
 
 void FilesystemClient::saveFilesystem() {
-	fstream tmp(this->path + ".csync.files", fstream::out | fstream::in | fstream::binary | fstream::trunc);
+	fstream tmp(this->path + ".csync.files", fstream::out | fstream::binary | fstream::trunc);
 	if (tmp) {
 		for (auto f: this->files) {
 			char *nameLen = intToArray(f.first.length());
 			tmp.write(nameLen, 4);
 			tmp.write(f.first.c_str(), f.first.length());
-			char *size = intToArray(f.second->size);
-			tmp.write(size, 4);
+			unsigned char s[4];
+			net::AbstractMessage::setBufferUnsignedInt(s, f.second->size, 0);
+			tmp.write((char*) s, 4);
 			tmp.write(f.second->hash.get()->data(), 32);
-			char *crcsize = intToArray(f.second->crcMap.size());
+			unsigned char crcsize[4];
+			net::AbstractMessage::setBufferUnsignedInt(crcsize, f.second->crcMap.size(), 0);
+			tmp.write((char*)crcsize, 4);
 			for (auto d : f.second->crcMap) {
 				char* crcNumber = intToArray(d.first);
 				tmp.write(crcNumber, 4);
@@ -342,8 +346,8 @@ void FilesystemClient::saveFilesystem() {
 				delete[] crcNumber;
 			}
 			delete[] nameLen;
-			delete[] size;
-			delete[] crcsize;
+			//delete[] s;
+			//delete[] crcsize;
 		}
 		tmp.close();
 	}else {
@@ -352,33 +356,38 @@ void FilesystemClient::saveFilesystem() {
 }
 
 void FilesystemClient::openFilesystem() {
-	int size = filesize(this->path + ".csync.files");
-	fstream tmp(this->path + ".csync.files", fstream::in | fstream::binary);
+	unsigned int fsize = filesize(this->path + ".csync.files");
+	fstream tmp(this->path + ".csync.files", fstream::ate | fstream::in | fstream::binary);
 	if (tmp) {
-		int currPosition = 0;
+		tmp.seekg(0, tmp.beg);
+		unsigned int currPosition = 0;
 		char *intVar = new char[4];
-		while(currPosition < size) {
+		while(currPosition < fsize) {
 			tmp.read(intVar, 4);
 			unsigned int nameLength = charToInt(intVar);
 			char *FID = new char[nameLength];
 			tmp.read(FID, nameLength);
-			tmp.read(intVar,4);
-			int size = charToInt(intVar);
+			unsigned char sizeVar[4];
+			tmp.read((char*) sizeVar,4);
+			unsigned int size = net::AbstractMessage::getUnsignedIntFromMessage(sizeVar, 0);
 			char *Hash = new char[32];
 			tmp.read(Hash, 32);
 			shared_ptr<File> t = File::genPointer(string(FID), size, Hash);
-			tmp.read(intVar, 4);
-			unsigned int crcsize = charToInt(intVar);
+			unsigned char crcVar[4];
+			tmp.read((char*) crcVar, 4);
+			unsigned int crcsize = net::AbstractMessage::getUnsignedIntFromMessage(crcVar, 0);
+			cout << crcsize << endl;
 			char* crcValue = new char[4];
 			currPosition += 44;
-			for (unsigned int i = 0; i <= crcsize; i++) {
-				tmp.read(intVar, 4);
-				int crcN = charToInt(intVar);
+			for (unsigned int i = 0; i < crcsize; i++) {
+				unsigned char crcCount[4];
+				tmp.read((char*) crcCount, 4);
+				unsigned int crcN = net::AbstractMessage::getUnsignedIntFromMessage(crcCount, 0);
 				tmp.read(crcValue, 4);
 				t->crcMap[crcN] = make_shared<array<char, 4>>();
 				strcpy(t->crcMap[crcN].get()->data(), crcValue);
 				currPosition += 8;
-				if (currPosition >= size) {
+				if (currPosition >= fsize) {
 					break;
 				}
 			}
