@@ -359,7 +359,7 @@ void FilesystemClient::openFilesystem() {
 		char *intVar = new char[4];
 		while(currPosition < size) {
 			tmp.read(intVar, 4);
-			int nameLength = charToInt(intVar);
+			unsigned int nameLength = charToInt(intVar);
 			char *FID = new char[nameLength];
 			tmp.read(FID, nameLength);
 			tmp.read(intVar,4);
@@ -368,10 +368,10 @@ void FilesystemClient::openFilesystem() {
 			tmp.read(Hash, 32);
 			shared_ptr<File> t = File::genPointer(string(FID), size, Hash);
 			tmp.read(intVar, 4);
-			int crcsize = charToInt(intVar);
+			unsigned int crcsize = charToInt(intVar);
 			char* crcValue = new char[4];
 			currPosition += 44;
-			for (int i = 0; i < crcsize; i++) {
+			for (unsigned int i = 0; i <= crcsize; i++) {
 				tmp.read(intVar, 4);
 				int crcN = charToInt(intVar);
 				tmp.read(crcValue, 4);
