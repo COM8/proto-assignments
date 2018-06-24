@@ -72,6 +72,7 @@ void AbstractClient::sendFileDeletionMessage(string filePath, Client2 *client)
 void AbstractClient::sendFileCreationMessage(string fid, unsigned char *hash, Client2 *client)
 {
     sendFileCreationMessage(fid, hash, ft_file, client);
+    Logger::info("Send file creation: \"" + fid + "\"");
 }
 
 void AbstractClient::sendFileCreationMessage(string fid, unsigned char *hash, FileType fileType, Client2 *client)
@@ -83,7 +84,6 @@ void AbstractClient::sendFileCreationMessage(string fid, unsigned char *hash, Fi
 
     client->send(msg);
     sendMessageQueue->pushSendMessage(i, msg);
-    Logger::info("Send file creation: " + fid);
 }
 
 void AbstractClient::sendFileStatusMessage(string fid, struct std::shared_ptr<File> f, Client2 *client)

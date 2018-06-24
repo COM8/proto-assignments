@@ -31,7 +31,7 @@ struct TodoEntry
   }
   void createFile(std::string fid, unsigned char *hash) {
     this->fid = fid;
-    this->type = net::FileType::ft_none;
+    this->type = net::FileType::ft_file;
     this->hash = hash;
   }
 };

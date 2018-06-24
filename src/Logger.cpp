@@ -2,7 +2,7 @@
 
 using namespace std;
 
-LogLevel Logger::logLevel = l_info;
+LogLevel Logger::logLevel = l_debug;
 
 void Logger::debug(string msg)
 {

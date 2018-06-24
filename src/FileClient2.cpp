@@ -150,12 +150,20 @@ void FileClient2::sendNextFilePart()
     std::list<std::string> *delFiles = curWorkingSet->getDelFiles();
 
     // Continue file transfer:
-    int curFilePartNr = curWorkingSet->getCurNextPart();
-    curWorkingSet->unlockCurFile();
-    if (curFilePartNr >= 0)
+    string fid = curWorkingSet->getCurFID();
+    shared_ptr<File> curFile = curWorkingSet->getCurFileFile();
+    bool unlockedCurrFile = false;
+
+    // Handle empty files:
+    if (curFile && curFile->np->isEmpty())
     {
-        string fid = curWorkingSet->getCurFID();
-        shared_ptr<File> curFile = curWorkingSet->getCurFileFile();
+        curWorkingSet->unlockCurFile();
+        files->erase(curWorkingSet->getCurFID());
+        unlockedCurrFile = true;
+    }
+
+    if (curFile && !curFile->np->isEmpty())
+    {
         bool wasLastPart = false;
         // Handle empty files:
         if (curFile->np->isEmpty())
@@ -173,63 +181,69 @@ void FileClient2::sendNextFilePart()
             files->erase(curWorkingSet->getCurFID());
         }
     }
-    
     // Delete file:
-    if (!delFiles->empty())
-    {
-        string filePath = delFiles->front();
-        delFiles->pop_front();
-        setState(awaitingAck);
-        sendFileDeletionMessage(filePath, uploadClient);
-    }
-    // Delete folder:
-    else if (!delFolders->empty())
-    {
-        string folderPath = delFolders->front();
-        delFolders->pop_front();
-        setState(awaitingAck);
-        sendFileDeletionMessage(folderPath, uploadClient);
-    }
-    // Trasfer folder:
-    else if (!folders->empty())
-    {
-        shared_ptr<Folder> f = folders->front();
-        folders->pop_front();
-        setState(awaitingAck);
-        sendFolderCreationMessage(f, uploadClient);
-    }
-    // Transfer file:
-    else if (!files->empty())
-    {
-        curWorkingSet->setCurFile(files->begin()->first, files->begin()->second);
-
-        string fid = curWorkingSet->getCurFID();
-        shared_ptr<File> curFile = curWorkingSet->getCurFileFile();
-        setState(reqestedFileStatus);
-        sendFileStatusMessage(fid, curFile, uploadClient);
-        curWorkingSet->unlockCurFile();
-    }
     else
     {
-        curWorkingSet->unlockFiles();
-        curWorkingSet->unlockFolders();
-        curWorkingSet->unlockDelFiles();
-        curWorkingSet->unlockDelFolders();
-
-        if (curWorkingSet->isEmpty())
+        if (!unlockedCurrFile)
         {
-            startGetWorkingSet();
-            joinGetWorkingSet();
+            curWorkingSet->unlockCurFile();
+        }
+        if (!delFiles->empty())
+        {
+            string filePath = delFiles->front();
+            delFiles->pop_front();
+            setState(awaitingAck);
+            sendFileDeletionMessage(filePath, uploadClient);
+        }
+        // Delete folder:
+        else if (!delFolders->empty())
+        {
+            string folderPath = delFolders->front();
+            delFolders->pop_front();
+            setState(awaitingAck);
+            sendFileDeletionMessage(folderPath, uploadClient);
+        }
+        // Trasfer folder:
+        else if (!folders->empty())
+        {
+            shared_ptr<Folder> f = folders->front();
+            folders->pop_front();
+            setState(awaitingAck);
+            sendFolderCreationMessage(f, uploadClient);
+        }
+        // Transfer file:
+        else if (!files->empty())
+        {
+            curWorkingSet->setCurFile(files->begin()->first, files->begin()->second);
+
+            string fid = curWorkingSet->getCurFID();
+            shared_ptr<File> curFile = curWorkingSet->getCurFileFile();
+            setState(reqestedFileStatus);
+            sendFileStatusMessage(fid, curFile, uploadClient);
+            curWorkingSet->unlockCurFile();
+        }
+        else
+        {
+            curWorkingSet->unlockFiles();
+            curWorkingSet->unlockFolders();
+            curWorkingSet->unlockDelFiles();
+            curWorkingSet->unlockDelFolders();
+
             if (curWorkingSet->isEmpty())
             {
-                sendTransferEndedMessage(0b0001, uploadClient);
-                Logger::info("Transfer finished!");
-                setState(connected);
-                return;
+                startGetWorkingSet();
+                joinGetWorkingSet();
+                if (curWorkingSet->isEmpty())
+                {
+                    sendTransferEndedMessage(0b0001, uploadClient);
+                    Logger::info("Transfer finished!");
+                    setState(connected);
+                    return;
+                }
             }
+            sendNextFilePart();
+            return;
         }
-        sendNextFilePart();
-        return;
     }
 
     curWorkingSet->unlockFiles();
