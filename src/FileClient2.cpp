@@ -260,6 +260,14 @@ bool FileClient2::sendFilePartMessage(string fid, shared_ptr<File> f, Client2 *c
     char chunk[Filesystem::partLength];
     unsigned int nextPartNumber = f->np->getNextPart();
     int readCount = fS->readFile(fid, chunk, nextPartNumber);
+
+    // File does not exist any more:
+    if (readCount == -2)
+    {
+        Logger::warn("Failed to read from file with -2");
+        return true;
+    }
+
     f->np->acknowledgePart(nextPartNumber);
     bool wasLasPart = f->np->isEmpty();
 
