@@ -1,5 +1,6 @@
 #pragma once
 
+
 #include <map>
 #include <list>
 #include <string>
@@ -22,6 +23,7 @@ public:
    static void calcCRC32(char* buffer, unsigned int bufferLength, char crc32Bytes[CRC32::HashBytes]);
    static bool exists(std::string path);
 };
+
 
 class FilesystemClient:Filesystem {
 private:
@@ -47,6 +49,7 @@ public:
    std::string filesToStirng();
    std::string folderToString();
 };
+
 
 class FilesystemServer:Filesystem {
 private:
