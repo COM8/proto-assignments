@@ -6,8 +6,9 @@
 #include <iostream>
 #include <fstream>
 #include <cstring>
+#include <unordered_map>
 
-#include <Consts.h>
+#include "Consts.h"
 
 struct NextPart{
 	std::list<std::pair<unsigned int, unsigned int>> content;
