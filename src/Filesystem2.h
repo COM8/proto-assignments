@@ -6,7 +6,9 @@
 #include <string>
 #include <memory>
 #include <cstring>
+#include <fstream>
 #include <unordered_map>
+#include <experimental/filesystem>
 
 #include "Consts.h"
 #include "WorkingSet.h"
@@ -18,7 +20,7 @@
 
 class Filesystem {
 public:
-   static unsigned int filesysze(const std::string FID);
+   static unsigned int filesize(const std::string FID);
    static void calcSHA256(const std::string FID, char* buffer);
    static void calcCRC32(char* buffer, unsigned int bufferLength, char crc32Bytes[CRC32::HashBytes]);
    static bool exists(std::string path);

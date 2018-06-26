@@ -23,6 +23,7 @@ FileServerClient::FileServerClient(unsigned int clientId, unsigned short portLoc
     this->lastFIDPartNumber = 0;
     this->state = fsc_disconnected;
     this->toDoHelper = ToDoHelper();
+    untilFirstByte = clock();
 }
 
 FileServerClient::~FileServerClient()
@@ -401,6 +402,7 @@ void FileServerClient::onFileCreationMessage(ReadMessage *msg)
         return;
     }
 
+    startTime = clock();
     // Send ack:
     unsigned int seqNumber = FileCreationMessage::getSeqNumberFromMessage(msg->buffer);
     sendAckMessage(seqNumber, udpClient);
@@ -458,21 +460,28 @@ void FileServerClient::onFileTransferMessage(ReadMessage *msg)
         return;
     }
 
+    if (firstRun) {
+        cout << "Time to first byte: " << float(clock() - untilFirstByte) /CLOCKS_PER_SEC << endl;
+        firstRun = false;
+    }
     // Send ack:
     unsigned int seqNumber = FileTransferMessage::getSeqNumberFromMessage(msg->buffer);
     sendAckMessage(seqNumber, udpClient);
-
     // Write file:
     char flags = FileTransferMessage::getFlagsFromMessage(msg->buffer);
     if ((flags & 0b10) == 0b10)
     {
+        if ((flags & 0b1000) == 0b1000)
+        {
+            cout << curFID << " Time until finished " << float(clock() - startTime) / CLOCKS_PER_SEC << endl;
+        }
         unsigned int partNumber = FileTransferMessage::getFIDPartNumberFromMessage(msg->buffer);
         uint64_t contLength = FileTransferMessage::getContentLengthFromMessage(msg->buffer);
         unsigned char *content = FileTransferMessage::getContentFromMessage(msg->buffer, contLength);
         int result = user->fS->writeFilePart(curFID, (char *)content, partNumber, contLength, clientId);
-        Logger::debug("Wrote file part: " + to_string(partNumber) + ", length: " + to_string(contLength) + " for file: \"" + curFID + "\" with result: " + to_string(result));
         if ((flags & 0b1000) == 0b1000)
         {
+        Logger::debug("Wrote file part: " + to_string(partNumber) + ", length: " + to_string(contLength) + " for file: \"" + curFID + "\" with result: " + to_string(result));
             Logger::info("Last file part received for: " + curFID);
         }
         delete[] content;

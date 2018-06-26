@@ -58,6 +58,8 @@ public:
   const unsigned short PORT_REMOTE;
   const char *IP_REMOTE;
   time_t lastMessageTime;
+  time_t untilFirstByte;
+  bool firstRun = true;
 
   FileServerClient(unsigned int clientId, unsigned short portLocal, unsigned short portRemote, char *ipRemote, unsigned int maxPPS, class FileServerUser *user);
   ~FileServerClient();
@@ -79,6 +81,7 @@ private:
   std::uint64_t curFIDLength;
   unsigned int maxPPS;
   ToDoHelper toDoHelper;
+  clock_t startTime;
 
   void setState(FileServerClientState state);
   void onDisconnectedOrErrorState();

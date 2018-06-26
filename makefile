@@ -69,7 +69,7 @@ release:
 compile:
 	# Create the build directory if it does not allready exist:
 	mkdir -p $(BUILD_DIR)
-	${G++_COMPILER} src/*.cpp src/net/*.cpp src/sec/*.cpp src/lib/hash-library/md5.cpp src/lib/hash-library/crc32.cpp -I src/ -I src/sec/ -I src/net/ -I src/lib/hash-library/ -o $(BUILD_DIR)/csync -lstdc++fs -std=c++17 -pthread
+	${G++_COMPILER} -oo src/*.cpp src/net/*.cpp src/sec/*.cpp src/lib/hash-library/md5.cpp src/lib/hash-library/crc32.cpp -I src/ -I src/sec/ -I src/net/ -I src/lib/hash-library/ -o $(BUILD_DIR)/csync -lstdc++fs -std=c++17 -pthread
 
 
 clean:

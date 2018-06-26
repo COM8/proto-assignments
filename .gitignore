@@ -398,3 +398,4 @@ compile_commands.json
 test.*
 test2/*
 .clang_complete
+benchmark/

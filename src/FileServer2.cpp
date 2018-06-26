@@ -236,7 +236,7 @@ void FileServer2::onClientHelloMessage(ReadMessage *msg)
     {
         return;
     }
-
+    
     unsigned char flags = ClientHelloMessage::getFlagsFromMessage(msg->buffer);
     if ((flags & 0b0001) != 0b0001)
     {

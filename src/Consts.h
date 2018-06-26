@@ -18,7 +18,7 @@
 #define MAX_WORKING_SET_AGE_IN_SEC 10
 
 // Filesystem:
-#define MAX_CONTENT_LENGTH 1000
+#define MAX_CONTENT_LENGTH 1200
 #define MAX_HASH_PART_SIZE_BYTE 16777216
 
 // Message IDs:
