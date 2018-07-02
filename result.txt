@@ -1,0 +1,62 @@
+Using default max packages per second: 0
+Running in Server mode
+using port: 12345
+Server console type "stop" to stop the server.
+SERVER: New client with id: 88736288 on port: 20676
+Time to first byte: 0.000738
+benchmark/5MB Time until finished 0.199591
+benchmark/50MB Time until finished 2.22813
+benchmark/100MB Time until finished 3.91322
+benchmark/200MB Time until finished 7.93516
+benchmark/1GB Time until finished 40.5705
+Using default max packages per second: 0
+Running in Server mode
+using port: 12345
+Server console type "stop" to stop the server.
+SERVER: New client with id: 1534202739 on port: 61290
+New client with id: 1086988625 on port: 56090
+Time to first byte: 0.000576
+Using default max packages per second: 0
+Running in Server mode
+using port: 12345
+Server console type "stop" to stop the server.
+SERVER: New client with id: 1900281967 on port: 46193
+Time to first byte: 0.001724
+benchmark/5MB Time until finished 0.209333
+benchmark/50MB Time until finished 1.9671
+benchmark/100MB Time until finished 3.98035
+benchmark/200MB Time until finished 7.94721
+benchmark/1GB Time until finished 40.5151
+Using default max packages per second: 0
+Running in Server mode
+using port: 12345
+Server console type "stop" to stop the server.
+SERVER: New client with id: 1757628457 on port: 6327
+Time to first byte: 0.000563
+benchmark/5MB Time until finished 0.200379
+benchmark/50MB Time until finished 1.97601
+benchmark/100MB Time until finished 4.01184
+benchmark/200MB Time until finished 7.91592
+benchmark/1GB Time until finished 40.6312
+Using default max packages per second: 0
+Running in Server mode
+using port: 12345
+Server console type "stop" to stop the server.
+SERVER: New client with id: 753323770 on port: 14683
+Time to first byte: 0.000611
+benchmark/5MB Time until finished 0.201163
+benchmark/50MB Time until finished 1.98285
+benchmark/100MB Time until finished 3.9595
+benchmark/200MB Time until finished 7.90843
+New client with id: 1401302186 on port: 20822
+Time to first byte: 0.000412
+ Time until finished 0.135254
+ Time until finished 1.47702
+ Time until finished 4.1429
+ Time until finished 9.47803
+ Time until finished 36.9423
+Using default max packages per second: 0
+Running in Server mode
+using port: 12345
+Server console type "stop" to stop the server.
+SERVER: 

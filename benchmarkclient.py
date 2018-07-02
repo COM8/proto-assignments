@@ -6,6 +6,5 @@ def main():
         print(str(i) + " % done")
         system("./build/csync -h localhost -p 12345 -u user0 -pass password0 -f benchmark/")
 
-
 if __name__ == '__main__':
     main()

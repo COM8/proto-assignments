@@ -363,6 +363,7 @@ void FileClient2::getWorkingSet()
     {
         delete curWorkingSet;
         curWorkingSet = NULL;
+        exit(0);
     }
     lastGetWorkingSet = time(NULL);
     Logger::info("Started indexing files.");
