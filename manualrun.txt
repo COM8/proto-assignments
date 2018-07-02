@@ -1,0 +1,6 @@
+Time to first byte: 0.002481
+benchmark/5MB Time until finished 0.217592
+benchmark/50MB Time until finished 2.01096
+benchmark/100MB Time until finished 4.01738
+benchmark/200MB Time until finished 8.06709
+benchmark/1GB Time until finished 41.5849
