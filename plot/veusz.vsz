@@ -1,9 +1,23 @@
 # Veusz saved document (version 2.2.2)
-# Saved at 2018-07-06T10:17:47.658133
+# Saved at 2018-07-06T10:23:36.700472
 
 AddImportPath(u'/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/plot')
 ImportFileCSV(u'testdat.csv', delimiter=u';', linked=True, numericlocale=u'en_GB')
 ImportFileCSV(u'timetotyte.csv', delimiter=u';', linked=True, numericlocale=u'en_GB', dsprefix=u'timetotyte.csv')
+ImportString(u'`new dataset`(numeric)','''
+0.000000e+00
+1.000000e+00
+2.000000e+00
+3.000000e+00
+4.000000e+00
+5.000000e+00
+6.000000e+00
+7.000000e+00
+8.000000e+00
+9.000000e+00
+1.100000e+01
+1.200000e+01
+''')
 Add('page', name=u'Benchmarks', autoadd=False)
 To(u'Benchmarks')
 Add('graph', name=u'Time Size', autoadd=False)
@@ -65,17 +79,20 @@ Add('graph', name=u'graph1', autoadd=False)
 To(u'graph1')
 Add('axis', name=u'x', autoadd=False)
 To(u'x')
-Set('min', 0.0)
+Set('min', u'Auto')
 Set('max', 12.0)
 To('..')
 Add('axis', name=u'y', autoadd=False)
 To(u'y')
+Set('label', u'Needed tim in seconds')
 Set('direction', u'vertical')
+Set('Label/size', u'14pt')
+Set('TickLabels/size', u'10pt')
 To('..')
 Add('xy', name=u'xy1', autoadd=False)
 To(u'xy1')
 Set('color', u'red')
-Set('xData', u'timetotyte.csvcol1')
+Set('xData', u'new dataset')
 Set('yData', u'timetotyte.csvcol2')
 Set('PlotLine/steps', u'off')
 Set('PlotLine/color', u'foreground')
