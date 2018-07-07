@@ -67,17 +67,21 @@ bool DiffieHellman::isConnectionSecure(){
     return this->isSecure;
 }
 
-void DiffieHellman::encrypt(unsigned char *& toEncrypt, unsigned int toEncryptLength){
-    std::string output = string((char *)toEncrypt,toEncryptLength);
+void DiffieHellman::encrypt(unsigned char *& toEncrypt, unsigned int *&toEncryptLength){
+   
+    std::string output = string((char *)toEncrypt,reinterpret_cast<uintptr_t>(toEncryptLength));
     //output=v_encrypt(output,this->key);
     std::string b64_str = base64_encode(output);
 	output = encrypt_vigenere(b64_str, this->key);
 	// std::cout << vigenere_msg << std::endl;
     toEncrypt=(unsigned char *)output.c_str();
+    toEncryptLength=(unsigned int *)output.length();
+   
 }
 
-void DiffieHellman::decrypt(unsigned char *& toDecrypt, unsigned int toDecryptLength){
-    std::string output = string((char *)toDecrypt, toDecryptLength);
+void DiffieHellman::decrypt(unsigned char *& toDecrypt, unsigned int *&toDecryptLength){
+    
+    std::string output = string((char *)toDecrypt, reinterpret_cast<uintptr_t>(toDecryptLength));
     //output=v_decrypt(output,this->key);
 
     std::string newKey = extend_key(output, key);
@@ -86,6 +90,7 @@ void DiffieHellman::decrypt(unsigned char *& toDecrypt, unsigned int toDecryptLe
 	
     
    toDecrypt=(unsigned char *)output.c_str();
+   toDecryptLength=(unsigned int *)output.length();
 }
 
 unsigned long DiffieHellman::getPrime(){
