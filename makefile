@@ -35,6 +35,12 @@ runMassifServer:
 runMassifClient:
 	valgrind --tool=massif $(DEBUG_DIR)/csync $(ARGS_CLIENT_DEBUG)
 
+runTests:
+	./$(DEBUG_DIR)/csync $(ARGS_CLIENT) -t
+
+runDebugTests:
+	gdb --args ./$(DEBUG_DIR)/csync $(ARGS_SERVER_DEBUG) "-t"
+
 massifClient:
 	make default
 	make runMassifClient
@@ -59,9 +65,17 @@ server:
 	make default
 	make runServer
 
+tests:
+	make default
+	make runTests
+
+debugTests:
+	make default
+	make runDebugTests
+
 debug:
 	mkdir -p $(DEBUG_DIR)
-	${G++_COMPILER} -g src/*.cpp src/sec/*.cpp src/net/*.cpp src/lib/hash-library/md5.cpp src/lib/hash-library/crc32.cpp -I src/ -I src/sec/ -I src/net/ -I src/lib/hash-library/ -o $(DEBUG_DIR)/csync -lstdc++fs -std=c++17 -pthread
+	${G++_COMPILER} -g src/*.cpp src/sec/*.cpp src/net/*.cpp src/test/*.cpp src/lib/hash-library/md5.cpp src/lib/hash-library/crc32.cpp -I src/ -I src/sec/ -I src/test/ -I src/net/ -I src/lib/hash-library/ -o $(DEBUG_DIR)/csync -lstdc++fs -std=c++17 -pthread
 
 release:
 	make compile
@@ -69,7 +83,7 @@ release:
 compile:
 	# Create the build directory if it does not allready exist:
 	mkdir -p $(BUILD_DIR)
-	${G++_COMPILER} src/*.cpp src/net/*.cpp src/sec/*.cpp src/lib/hash-library/md5.cpp src/lib/hash-library/crc32.cpp -I src/ -I src/sec/ -I src/net/ -I src/lib/hash-library/ -o $(BUILD_DIR)/csync -lstdc++fs -std=c++17 -pthread
+	${G++_COMPILER} src/*.cpp src/net/*.cpp src/sec/*.cpp src/test/*.cpp src/lib/hash-library/md5.cpp src/lib/hash-library/crc32.cpp -I src/ -I src/sec/ -I src/net/ -I src/test/ -I src/lib/hash-library/ -o $(BUILD_DIR)/csync -lstdc++fs -std=c++17 -pthread
 
 
 clean:

@@ -1,6 +1,7 @@
 #include "CSync.h"
 
 using namespace std;
+using namespace test;
 
 struct arg *parseParameter(int argc, char *argv[])
 {
@@ -54,6 +55,10 @@ struct arg *parseParameter(int argc, char *argv[])
 			{
 				temp->maxPPS = atoi(argv[i + 1]);
 			}
+		}
+		else if (strcmp(argv[i], "-t") == 0)
+		{
+			temp->runTests = true;
 		}
 	}
 	if (temp->port == DEFAULT_PORT)
@@ -190,7 +195,12 @@ int main(int argc, char *argv[])
 {
 	struct arg *t = parseParameter(argc, argv);
 
-	if (t->type == server)
+	if (t->runTests)
+	{
+		UnitTests tests = UnitTests();
+		tests.runTests();
+	}
+	else if (t->type == server)
 	{
 		cout << "Running in Server mode" << endl
 			 << "using port: " << t->port << endl;

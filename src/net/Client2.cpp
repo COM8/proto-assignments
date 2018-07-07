@@ -125,7 +125,7 @@ bool Client2::send(Message *msg)
         // Encrypt message:
         if (enc && enc->isConnectionSecure())
         {
-            enc->encrypt(msg->buffer, msg->bufferLength);
+            enc->encrypt(msg->buffer, (unsigned int *)(&msg->bufferLength));
         }
 
         // Wait for a slot to send the package:

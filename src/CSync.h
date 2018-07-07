@@ -6,12 +6,13 @@
 #include "Filesystem.h"
 #include "FileClient2.h"
 #include "FileServer2.h"
+#include "test/UnitTests.h"
 
 const unsigned int DEFAULT_PORT = 1234;
 const unsigned int DEFAULT_MAX_PPS = 0;
 enum mode { server, client, none };
 
-const std::string helpString = "Client:\tcsync [-h <hostname|ip-addr>] [-p <port>] [-f <directory-path>] [-u <user>] [-pass<password>]\nServer:\tcsyc [-s] [-p <port>] [-cc <packets>]\n";
+const std::string helpString = "Client:\tcsync [-h <hostname|ip-addr>] [-p <port>] [-f <directory-path>] [-u <user>] [-pass<password>]\nServer:\tcsyc [-s] [-p <port>] [-cc <packets>] [-t]\n";
 
 struct arg {
 	mode type = none;
@@ -21,6 +22,7 @@ struct arg {
 	std::string user = "";
 	std::string password = "";
 	unsigned int maxPPS = DEFAULT_MAX_PPS;
+	bool runTests = false;
 };
 
 struct arg* parseParameter(int argc, char* argv[]);
