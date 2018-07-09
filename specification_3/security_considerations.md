@@ -10,17 +10,17 @@ We fill up the [`Client-Hello-Handshake`](https://github.com/COM8/protocol-assig
 For the key-exchange we use the Diffie-Hellman key-exchange.
 
 ```
-Client				  Server
-  |	ClientStartConnection	    |
-  | ------------------------------> | Client calculates and sends P, G to the server.
-  |				    | 
-  |	onServerReceive             |
-  | <------------------------------ | Server calculates it's shared key, public key and sends it's
-  |				    | public key to client.
-  |				    | Sets secureConnection to true.
-  |	onClientReceive		    |
-  | ------------------------------> | Client calculates it's shared key.
-  |                                 | Sets secure connection to true.
+client							Server
+	|	ClientStartConnection	|
+	|	-------------------->	| Client calculates and sends P, G to the server.
+	|							| 
+	|		onServerReceive		|
+	|	<--------------------	| Server calculates it's shared key, public key and sends it's
+	|							| public key to client.
+	|							| Sets secureConnection to true.
+	|		onClientReceive		|
+	|	-------------------->	| Client calculates it's shared key.
+	|							| Sets secure connection to true.
 ```
 Diffie-Hellman algorithm relies on *discrete logarithm problem.* It is very hard for computers to solve discrete logarithm thus it is a good candidate against brute force attacks. This implementation works like this: 
 - Client and server have to have the common values `P` and `G`. P is a prime number and G is the primitive root of that number. As connections are initiated by client, both P and G is calculated by client. Before sending P and G, client generates a private key and calculates it's public key. `P , G and client's public key` are sent to server by the client at the beginning of the connection.
