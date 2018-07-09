@@ -1,4 +1,4 @@
-## Protocoll
+## Protocol
 ### Important
 * UDP MTU
 * Don't create packages with a size of (bit-size mod 8) != 0. It makes it hard on the receiver side to interpret those!
