@@ -181,7 +181,8 @@ void Server2::contRead()
             // Decrypt message:
             if (enc && enc->isConnectionSecure())
             {
-                enc->decrypt(msg.buffer, msg.bufferLength);
+                Logger::warn("Decrypt");
+                enc->decrypt(msg.buffer, (unsigned int *)(&msg.bufferLength));
             }
 
             // Insert in consumer producer queue:

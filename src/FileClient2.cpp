@@ -563,6 +563,10 @@ void FileClient2::onServerHelloMessage(ReadMessage *msg)
         }
 
         uploadPort = ServerHelloMessage::getPortFromMessage(msg->buffer);
+
+        unsigned long serverPubKey = ServerHelloMessage::getPubKeyFromMessage(msg->buffer);
+        enc->onClientReceive(serverPubKey);
+
         uploadClient = new Client2(serverAddress, uploadPort, UNLIMITED_PPS, enc);
         uploadClient->init();
 
