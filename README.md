@@ -24,4 +24,4 @@ users["user3"] = User{"user3", "password3"};
 users["user4"] = User{"user4", "password4"};
 ```
 
-To Add more users just edit [`src/UserStore.cpp`](https://github.com/COM8/protocol-assignment-1/blob/master/src/UserStore.cpp) and recompile.
+To add more users just edit [`src/UserStore.cpp`](https://github.com/COM8/protocol-assignment-1/blob/master/src/UserStore.cpp) and recompile.
