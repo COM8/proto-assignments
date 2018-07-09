@@ -27,7 +27,7 @@ users["user4"] = User{"user4", "password4"};
 To add more users just edit [`src/UserStore.cpp`](https://github.com/COM8/protocol-assignment-1/blob/master/src/UserStore.cpp) and recompile.
 
 ### More information
-* [Protocol](https://github.com/COM8/protocol-assignment-1/wiki/Protocol)
-* [Benchmarks](https://github.com/COM8/protocol-assignment-1/wiki/Benchmarks)
-* [Delta Sync](https://github.com/COM8/protocol-assignment-1/wiki/Delta-Sync)
-* [Security considerations](https://github.com/COM8/protocol-assignment-1/wiki/Security-considerations)
+* [Protocol](https://github.com/COM8/proto-assignments/wiki/Protocol)
+* [Benchmarks](https://github.com/COM8/proto-assignments/wiki/Benchmarks)
+* [Delta Sync](https://github.com/COM8/proto-assignments/wiki/Delta-Sync)
+* [Security considerations](https://github.com/COM8/proto-assignments/wiki/Security-considerations)
