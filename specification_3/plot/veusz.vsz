@@ -1,5 +1,5 @@
 # Veusz saved document (version 2.2.2)
-# Saved at 2018-07-09T10:03:09.917037
+# Saved at 2018-07-09T11:30:23.518001
 
 AddImportPath(u'/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/plot')
 ImportFileCSV(u'testdat.csv', delimiter=u';', linked=True, numericlocale=u'en_GB')
@@ -94,6 +94,7 @@ To(u'xy1')
 Set('color', u'red')
 Set('xData', u'new dataset')
 Set('yData', u'timetotyte.csvcol2')
+Set('labels', u'')
 Set('PlotLine/steps', u'off')
 Set('PlotLine/color', u'foreground')
 To('..')
