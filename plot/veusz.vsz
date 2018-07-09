@@ -1,5 +1,5 @@
 # Veusz saved document (version 2.2.2)
-# Saved at 2018-07-06T10:23:36.700472
+# Saved at 2018-07-09T10:03:09.917037
 
 AddImportPath(u'/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/plot')
 ImportFileCSV(u'testdat.csv', delimiter=u';', linked=True, numericlocale=u'en_GB')
@@ -116,7 +116,7 @@ Set('direction', u'vertical')
 To('..')
 Add('function', name=u'function1', autoadd=False)
 To(u'function1')
-Set('function', u'2900 + 8 + 40 + (x/1000) * 200 +x')
+Set('function', u'2900 + 8 + 40 + floor(x/1000) * 200 +x')
 Set('key', u'Send bytes')
 Set('Line/color', u'red')
 To('..')
