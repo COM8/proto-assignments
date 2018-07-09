@@ -1,13 +1,13 @@
 # Protocol Design Assignment
 ## How to use
-### Run the server example:
+### Run the server example
 ./build/csync -s -p 12345 -cc 0<br/>
 `-cc <uint>` messages per second (0 = unlimited)<br/>
 `-s` run as server<br/>
 `-p <uint>` server listen port<br/>
 
 
-### Run the client example:
+### Run the client example
 ./build/csync -h 192.168.178.24 -p 12345 -f build -u user0 -pass password0<br/>
 `-h <host>` the server address<br/>
 `-p <uint>` the server listen port<br/>
