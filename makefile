@@ -10,6 +10,9 @@ ARGS_SERVER=-s -p $(PORT) -cc 0
 ARGS_SERVER_DEBUG="-s" "-p" "$(PORT)" "-cc" "0"
 
 default:
+	make rebuild
+
+rebuild:
 	make clean
 	make debug
 
