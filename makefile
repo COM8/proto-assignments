@@ -9,7 +9,7 @@ ARGS_CLIENT_DEBUG="-h" "localhost" "-p" "$(PORT)" "-f" "$(DEBUG_DIR)" "-u" "user
 ARGS_SERVER=-s -p $(PORT) -cc 0
 ARGS_SERVER_DEBUG="-s" "-p" "$(PORT)" "-cc" "0"
 
-default:
+default rebuild:
 	make clean
 	make debug
 
