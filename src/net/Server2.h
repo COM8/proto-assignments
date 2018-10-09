@@ -10,11 +10,11 @@
 #include <string>
 #include <thread>
 #include <unistd.h>
-#include "sec/DiffieHellman.h"
-#include "Logger.h"
-#include "Queue.h"
-#include "Consts.h"
-#include "net/AbstractMessage.h"
+#include "../sec/DiffieHellman.h"
+#include "../Logger.h"
+#include "../Queue.h"
+#include "../Consts.h"
+#include "AbstractMessage.h"
 
 namespace net
 {

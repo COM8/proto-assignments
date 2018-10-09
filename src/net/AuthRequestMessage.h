@@ -1,7 +1,7 @@
 #pragma once
 
 #include <cstdint>
-#include "net/AbstractMessage.h"
+#include "AbstractMessage.h"
 
 namespace net
 {

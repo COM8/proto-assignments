@@ -5,10 +5,9 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <cstdint>
-#include <iostream>
 #include <bitset>
-#include "lib/hash-library/crc32.h"
-#include "Consts.h"
+#include "../lib/hash-library/crc32.h"
+#include "../Consts.h"
 
 namespace net
 {

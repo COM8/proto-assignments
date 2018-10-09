@@ -1,6 +1,6 @@
 #pragma once
 
-#include "net/AbstractMessage.h"
+#include "AbstractMessage.h"
 
 namespace net
 {
