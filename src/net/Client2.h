@@ -8,12 +8,12 @@
 #include <stdlib.h>
 #include <semaphore.h>
 #include <unistd.h>
-#include "net/AbstractMessage.h"
-#include "sec/DiffieHellman.h"
-#include "Logger.h"
-#include "Consts.h"
-#include "Timer.h"
-#include "TimerTickable.h"
+#include "AbstractMessage.h"
+#include "../sec/DiffieHellman.h"
+#include "../Logger.h"
+#include "../Consts.h"
+#include "../Timer.h"
+#include "../TimerTickable.h"
 
 #define UNLIMITED_PPS 0
 

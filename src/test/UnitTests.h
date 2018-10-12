@@ -1,8 +1,8 @@
 #pragma once
 
 #include <iostream>
-#include "sec/DiffieHellman.h"
-#include "net/AbstractMessage.h"
+#include "../sec/DiffieHellman.h"
+#include "../net/AbstractMessage.h"
 
 namespace test
 {
