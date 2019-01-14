@@ -1,7 +1,5 @@
 cmake_minimum_required(VERSION 3.0)
 
-set(secfiles
-    DiffieHellman.cpp
-    )
+add_library(sec STATIC)
 
-add_library(sec ${secfiles})
+target_sources(sec PRIVATE DiffieHellman)

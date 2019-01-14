@@ -1,38 +1,42 @@
 cmake_minimum_required(VERSION 3.0)
 
-include_directories(./ net/ sec/ lib/hash-library/)
+find_package(Threads REQUIRED)
 
-set(hashfiles
-    lib/hash-library/md5.cpp
-    lib/hash-library/crc32.cpp
-    )
-
-add_library(hash ${hashfiles})
-
-link_libraries(hash)
+add_library(hash STATIC)
+target_sources(hash
+    PRIVATE
+        lib/hash-library/md5.cpp
+        lib/hash-library/crc32.cpp
+)
 
 add_subdirectory(net)
 add_subdirectory(sec)
 add_subdirectory(test)
 
-link_libraries(net)
-link_libraries(sec)
-link_libraries(test)
+add_library(${PROJECT_NAME}lib STATIC)
 
+target_sources(${PROJECT_NAME}lib
+    PRIVATE
+        AbstractClient.cpp
+        ClientsToDo.cpp
+        ClientToDo.cpp
+        diffieTest.cpp
+        FileClient2.cpp
+        FileServer2.cpp
+        FileServerClient.cpp
+        FileServerUser.cpp
+        Filesystem.cpp
+        Logger.cpp
+        Timer.cpp
+        UserStore.cpp
+)
 
-set(csycfiles
-    AbstractClient.cpp
-    ClientsToDo.cpp
-    ClientToDo.cpp
-    diffieTest.cpp
-    FileClient2.cpp
-    FileServer2.cpp
-    FileServerClient.cpp
-    FileServerUser.cpp
-    Filesystem.cpp
-    Logger.cpp
-    Timer.cpp
-    UserStore.cpp
-    )
-
-add_library(csynclib ${csycfiles})
+target_link_libraries(${PROJECT_NAME}lib
+    PRIVATE
+        net
+        sec
+        test
+        hash
+        stdc++fs
+        Threads::Threads
+)
