@@ -1,0 +1,152 @@
+[
+{
+  "directory": "/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/build",
+  "command": "/usr/bin/c++   -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/sec -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/lib/hash-library  -g   -o CMakeFiles/csync.dir/src/CSync.cpp.o -c /home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/CSync.cpp",
+  "file": "/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/CSync.cpp"
+},
+{
+  "directory": "/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/build/src",
+  "command": "/usr/bin/c++  -Dhash_EXPORTS -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/sec -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/lib/hash-library -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/.  -g -fPIC   -o CMakeFiles/hash.dir/lib/hash-library/md5.cpp.o -c /home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/lib/hash-library/md5.cpp",
+  "file": "/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/lib/hash-library/md5.cpp"
+},
+{
+  "directory": "/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/build/src",
+  "command": "/usr/bin/c++  -Dhash_EXPORTS -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/sec -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/lib/hash-library -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/.  -g -fPIC   -o CMakeFiles/hash.dir/lib/hash-library/crc32.cpp.o -c /home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/lib/hash-library/crc32.cpp",
+  "file": "/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/lib/hash-library/crc32.cpp"
+},
+{
+  "directory": "/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/build/src",
+  "command": "/usr/bin/c++  -Dcsynclib_EXPORTS -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/sec -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/lib/hash-library -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/.  -g -fPIC   -o CMakeFiles/csynclib.dir/AbstractClient.cpp.o -c /home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/AbstractClient.cpp",
+  "file": "/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/AbstractClient.cpp"
+},
+{
+  "directory": "/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/build/src",
+  "command": "/usr/bin/c++  -Dcsynclib_EXPORTS -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/sec -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/lib/hash-library -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/.  -g -fPIC   -o CMakeFiles/csynclib.dir/ClientsToDo.cpp.o -c /home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/ClientsToDo.cpp",
+  "file": "/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/ClientsToDo.cpp"
+},
+{
+  "directory": "/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/build/src",
+  "command": "/usr/bin/c++  -Dcsynclib_EXPORTS -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/sec -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/lib/hash-library -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/.  -g -fPIC   -o CMakeFiles/csynclib.dir/ClientToDo.cpp.o -c /home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/ClientToDo.cpp",
+  "file": "/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/ClientToDo.cpp"
+},
+{
+  "directory": "/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/build/src",
+  "command": "/usr/bin/c++  -Dcsynclib_EXPORTS -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/sec -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/lib/hash-library -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/.  -g -fPIC   -o CMakeFiles/csynclib.dir/diffieTest.cpp.o -c /home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/diffieTest.cpp",
+  "file": "/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/diffieTest.cpp"
+},
+{
+  "directory": "/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/build/src",
+  "command": "/usr/bin/c++  -Dcsynclib_EXPORTS -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/sec -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/lib/hash-library -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/.  -g -fPIC   -o CMakeFiles/csynclib.dir/FileClient2.cpp.o -c /home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/FileClient2.cpp",
+  "file": "/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/FileClient2.cpp"
+},
+{
+  "directory": "/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/build/src",
+  "command": "/usr/bin/c++  -Dcsynclib_EXPORTS -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/sec -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/lib/hash-library -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/.  -g -fPIC   -o CMakeFiles/csynclib.dir/FileServer2.cpp.o -c /home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/FileServer2.cpp",
+  "file": "/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/FileServer2.cpp"
+},
+{
+  "directory": "/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/build/src",
+  "command": "/usr/bin/c++  -Dcsynclib_EXPORTS -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/sec -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/lib/hash-library -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/.  -g -fPIC   -o CMakeFiles/csynclib.dir/FileServerClient.cpp.o -c /home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/FileServerClient.cpp",
+  "file": "/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/FileServerClient.cpp"
+},
+{
+  "directory": "/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/build/src",
+  "command": "/usr/bin/c++  -Dcsynclib_EXPORTS -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/sec -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/lib/hash-library -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/.  -g -fPIC   -o CMakeFiles/csynclib.dir/FileServerUser.cpp.o -c /home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/FileServerUser.cpp",
+  "file": "/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/FileServerUser.cpp"
+},
+{
+  "directory": "/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/build/src",
+  "command": "/usr/bin/c++  -Dcsynclib_EXPORTS -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/sec -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/lib/hash-library -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/.  -g -fPIC   -o CMakeFiles/csynclib.dir/Filesystem.cpp.o -c /home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/Filesystem.cpp",
+  "file": "/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/Filesystem.cpp"
+},
+{
+  "directory": "/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/build/src",
+  "command": "/usr/bin/c++  -Dcsynclib_EXPORTS -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/sec -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/lib/hash-library -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/.  -g -fPIC   -o CMakeFiles/csynclib.dir/Logger.cpp.o -c /home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/Logger.cpp",
+  "file": "/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/Logger.cpp"
+},
+{
+  "directory": "/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/build/src",
+  "command": "/usr/bin/c++  -Dcsynclib_EXPORTS -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/sec -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/lib/hash-library -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/.  -g -fPIC   -o CMakeFiles/csynclib.dir/Timer.cpp.o -c /home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/Timer.cpp",
+  "file": "/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/Timer.cpp"
+},
+{
+  "directory": "/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/build/src",
+  "command": "/usr/bin/c++  -Dcsynclib_EXPORTS -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/sec -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/lib/hash-library -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/.  -g -fPIC   -o CMakeFiles/csynclib.dir/UserStore.cpp.o -c /home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/UserStore.cpp",
+  "file": "/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/UserStore.cpp"
+},
+{
+  "directory": "/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/build/src/net",
+  "command": "/usr/bin/c++  -Dnet_EXPORTS -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/sec -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/lib/hash-library -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/. -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net/.. -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net/. -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net/../sec -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net/../lib/hash-library  -g -fPIC   -o CMakeFiles/net.dir/AbstractMessage.cpp.o -c /home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net/AbstractMessage.cpp",
+  "file": "/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net/AbstractMessage.cpp"
+},
+{
+  "directory": "/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/build/src/net",
+  "command": "/usr/bin/c++  -Dnet_EXPORTS -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/sec -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/lib/hash-library -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/. -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net/.. -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net/. -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net/../sec -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net/../lib/hash-library  -g -fPIC   -o CMakeFiles/net.dir/AckMessage.cpp.o -c /home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net/AckMessage.cpp",
+  "file": "/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net/AckMessage.cpp"
+},
+{
+  "directory": "/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/build/src/net",
+  "command": "/usr/bin/c++  -Dnet_EXPORTS -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/sec -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/lib/hash-library -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/. -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net/.. -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net/. -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net/../sec -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net/../lib/hash-library  -g -fPIC   -o CMakeFiles/net.dir/AuthRequestMessage.cpp.o -c /home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net/AuthRequestMessage.cpp",
+  "file": "/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net/AuthRequestMessage.cpp"
+},
+{
+  "directory": "/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/build/src/net",
+  "command": "/usr/bin/c++  -Dnet_EXPORTS -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/sec -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/lib/hash-library -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/. -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net/.. -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net/. -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net/../sec -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net/../lib/hash-library  -g -fPIC   -o CMakeFiles/net.dir/AuthResultMessage.cpp.o -c /home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net/AuthResultMessage.cpp",
+  "file": "/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net/AuthResultMessage.cpp"
+},
+{
+  "directory": "/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/build/src/net",
+  "command": "/usr/bin/c++  -Dnet_EXPORTS -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/sec -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/lib/hash-library -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/. -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net/.. -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net/. -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net/../sec -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net/../lib/hash-library  -g -fPIC   -o CMakeFiles/net.dir/Client2.cpp.o -c /home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net/Client2.cpp",
+  "file": "/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net/Client2.cpp"
+},
+{
+  "directory": "/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/build/src/net",
+  "command": "/usr/bin/c++  -Dnet_EXPORTS -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/sec -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/lib/hash-library -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/. -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net/.. -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net/. -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net/../sec -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net/../lib/hash-library  -g -fPIC   -o CMakeFiles/net.dir/ClientHelloMessage.cpp.o -c /home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net/ClientHelloMessage.cpp",
+  "file": "/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net/ClientHelloMessage.cpp"
+},
+{
+  "directory": "/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/build/src/net",
+  "command": "/usr/bin/c++  -Dnet_EXPORTS -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/sec -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/lib/hash-library -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/. -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net/.. -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net/. -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net/../sec -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net/../lib/hash-library  -g -fPIC   -o CMakeFiles/net.dir/FileCreationMessage.cpp.o -c /home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net/FileCreationMessage.cpp",
+  "file": "/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net/FileCreationMessage.cpp"
+},
+{
+  "directory": "/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/build/src/net",
+  "command": "/usr/bin/c++  -Dnet_EXPORTS -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/sec -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/lib/hash-library -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/. -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net/.. -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net/. -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net/../sec -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net/../lib/hash-library  -g -fPIC   -o CMakeFiles/net.dir/FileStatusMessage.cpp.o -c /home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net/FileStatusMessage.cpp",
+  "file": "/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net/FileStatusMessage.cpp"
+},
+{
+  "directory": "/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/build/src/net",
+  "command": "/usr/bin/c++  -Dnet_EXPORTS -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/sec -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/lib/hash-library -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/. -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net/.. -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net/. -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net/../sec -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net/../lib/hash-library  -g -fPIC   -o CMakeFiles/net.dir/FileTransferMessage.cpp.o -c /home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net/FileTransferMessage.cpp",
+  "file": "/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net/FileTransferMessage.cpp"
+},
+{
+  "directory": "/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/build/src/net",
+  "command": "/usr/bin/c++  -Dnet_EXPORTS -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/sec -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/lib/hash-library -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/. -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net/.. -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net/. -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net/../sec -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net/../lib/hash-library  -g -fPIC   -o CMakeFiles/net.dir/PingMessage.cpp.o -c /home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net/PingMessage.cpp",
+  "file": "/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net/PingMessage.cpp"
+},
+{
+  "directory": "/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/build/src/net",
+  "command": "/usr/bin/c++  -Dnet_EXPORTS -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/sec -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/lib/hash-library -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/. -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net/.. -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net/. -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net/../sec -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net/../lib/hash-library  -g -fPIC   -o CMakeFiles/net.dir/Server2.cpp.o -c /home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net/Server2.cpp",
+  "file": "/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net/Server2.cpp"
+},
+{
+  "directory": "/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/build/src/net",
+  "command": "/usr/bin/c++  -Dnet_EXPORTS -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/sec -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/lib/hash-library -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/. -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net/.. -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net/. -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net/../sec -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net/../lib/hash-library  -g -fPIC   -o CMakeFiles/net.dir/ServerHelloMessage.cpp.o -c /home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net/ServerHelloMessage.cpp",
+  "file": "/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net/ServerHelloMessage.cpp"
+},
+{
+  "directory": "/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/build/src/net",
+  "command": "/usr/bin/c++  -Dnet_EXPORTS -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/sec -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/lib/hash-library -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/. -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net/.. -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net/. -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net/../sec -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net/../lib/hash-library  -g -fPIC   -o CMakeFiles/net.dir/TransferEndedMessage.cpp.o -c /home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net/TransferEndedMessage.cpp",
+  "file": "/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net/TransferEndedMessage.cpp"
+},
+{
+  "directory": "/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/build/src/sec",
+  "command": "/usr/bin/c++  -Dsec_EXPORTS -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/sec -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/lib/hash-library -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/.  -g -fPIC   -o CMakeFiles/sec.dir/DiffieHellman.cpp.o -c /home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/sec/DiffieHellman.cpp",
+  "file": "/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/sec/DiffieHellman.cpp"
+},
+{
+  "directory": "/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/build/src/test",
+  "command": "/usr/bin/c++  -Dtest_EXPORTS -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/sec -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/net -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/lib/hash-library -I/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/.  -g -fPIC   -o CMakeFiles/test.dir/UnitTests.cpp.o -c /home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/test/UnitTests.cpp",
+  "file": "/home/kilian/Projekte/Uni/SS18/Protocol-Design/protocol-assignment-1/src/test/UnitTests.cpp"
+}
+]

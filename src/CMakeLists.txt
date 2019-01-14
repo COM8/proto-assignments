@@ -13,9 +13,9 @@ add_subdirectory(net)
 add_subdirectory(sec)
 add_subdirectory(test)
 
-add_library(${PROJECT_NAME}lib STATIC)
+add_library(${PROJECT_NAME}static STATIC)
 
-target_sources(${PROJECT_NAME}lib
+target_sources(${PROJECT_NAME}static
     PRIVATE
         AbstractClient.cpp
         ClientsToDo.cpp
@@ -31,7 +31,7 @@ target_sources(${PROJECT_NAME}lib
         UserStore.cpp
 )
 
-target_link_libraries(${PROJECT_NAME}lib
+target_link_libraries(${PROJECT_NAME}static
     PRIVATE
         net
         sec
