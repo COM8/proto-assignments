@@ -397,3 +397,4 @@ test.*
 test2/*
 .clang_complete
 benchmark/
+compile_commands.json
