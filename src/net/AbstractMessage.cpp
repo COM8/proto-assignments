@@ -1,4 +1,4 @@
-#include "net/AbstractMessage.h"
+#include "AbstractMessage.h"
 
 using namespace net;
 using namespace std;

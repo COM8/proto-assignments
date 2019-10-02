@@ -1,4 +1,4 @@
-#include "net/ClientHelloMessage.h"
+#include "ClientHelloMessage.h"
 
 using namespace net;
 using namespace std;
