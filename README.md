@@ -9,6 +9,18 @@ It features:
 * Delta Sync [(read more...)](https://github.com/COM8/proto-assignments/wiki/Delta-Sync)
 * End-to-End encryption with a multiway Diffie-Hellman handshake [(read more...)](https://github.com/COM8/proto-assignments/wiki/Security-considerations)
 
+## Build
+To compile `csync` you need a C++17 capable compiler ([G++ >= 7](https://gcc.gnu.org/projects/cxx-status.html) , [Clang++ >= 6](https://clang.llvm.org/cxx_status.html)).
+For Buildsystems you need cmake >= 3
+
+In order to build you need to execute in the repo
+ ```
+mkdir build
+cd build
+cmake ..
+make
+```
+
 ## How to use
 ### Run the server example
 ./build/csync -s -p 12345 -cc 0<br/>
